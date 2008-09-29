@@ -36,7 +36,7 @@ public class AppTest
     }
     
     public void testQueue() {
-    	String sqlUrl = "jdbc:postgresql://localhost/test?user=beynet&password=beynet" ;
+    	String sqlUrl = "jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser" ;
     	String sqlDriverName = "org.postgresql.Driver" ;
     	
     	MessageQueue queue =null;
