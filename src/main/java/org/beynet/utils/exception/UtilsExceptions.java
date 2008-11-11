@@ -7,5 +7,8 @@ public enum UtilsExceptions {
 	Error_Xml,
 	Error_Io,
 	Error_Sql,
+	
+	Shell_Stop,
+	
 	Error_Last
 }

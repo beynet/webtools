@@ -1,0 +1,30 @@
+package org.beynet.utils.shell;
+
+import java.io.OutputStream;
+
+import org.beynet.utils.exception.UtilsException;
+
+/**
+ * a command execute by a shell must implements this interface
+ * @author beynet
+ *
+ */
+public interface ShellCommand {
+	/**
+	 * 
+	 * @return command name
+	 */
+	public 	String getName() ;
+	/**
+	 * return command description
+	 * @return
+	 */
+	public String getDescription();
+	/**
+	 * execute command - output is written to os
+	 * if an UtilsException is thrown with error = Shell_Stop - current shell is stopped
+	 * @param os
+	 * @throws UtilsException
+	 */
+	public void execute(OutputStream os) throws UtilsException ;
+}
