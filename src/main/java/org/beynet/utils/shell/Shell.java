@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 
@@ -46,29 +48,46 @@ public class Shell implements Callable<String>{
 	
 	@Override
 	public String call() throws Exception {
+		boolean timeout = false ;
 		while(!stop) {
 			String commandName =null ;
 			try {
-				os.write("> ".getBytes());
+				if (timeout==false) {
+					os.write("> ".getBytes());
+				}
+				else {
+					timeout=false;
+				}
 				commandName = br.readLine() ;
-			} catch(IOException e) {
+			}
+			catch (SocketTimeoutException e) {
+				timeout=true;
+			}
+			catch(IOException e) {
 				
 			}
+			if (Thread.currentThread().isInterrupted()) {
+				logger.debug("Thread interrupted");
+			}
 			if (commandName==null) {
-				stopShell();
+				if (!timeout || Thread.currentThread().isInterrupted()) {
+					stopShell();
+				}
 			}
-			// executing command
-			ShellCommand command = commands.get(commandName.toUpperCase());
-			if (command==null) {
-				command = commands.get("help".toUpperCase());
-			}
-			if (command!=null) {
-				try {
-					command.execute(os);
-				} catch(UtilsException e) {
-					e.printStackTrace(new PrintWriter(os));
-					if (e.getError()==UtilsExceptions.Shell_Stop) {
-						stopShell();
+			else {
+				// executing command
+				ShellCommand command = commands.get(commandName.toUpperCase());
+				if (command==null) {
+					command = commands.get("help".toUpperCase());
+				}
+				if (command!=null) {
+					try {
+						command.execute(os);
+					} catch(UtilsException e) {
+						e.printStackTrace(new PrintWriter(os));
+						if (e.getError()==UtilsExceptions.Shell_Stop) {
+							stopShell();
+						}
 					}
 				}
 			}
@@ -80,5 +99,5 @@ public class Shell implements Callable<String>{
 	private boolean stop ;
 	private BufferedReader br ;
 	private OutputStream os ;
-	
+	private static Logger logger = Logger.getLogger(Shell.class);
 }
