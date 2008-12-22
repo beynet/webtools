@@ -2,6 +2,7 @@ package org.beynet.utils.shell;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
@@ -22,5 +23,11 @@ public abstract class AbstractCommand implements ShellCommand{
 		}
 	}
 	
+	public void setCommandArgs(List<String> commandArgs) {
+		this.commandArgs= commandArgs ;
+	}
+	
 	private static Logger logger = Logger.getLogger(AbstractCommand.class);
+	
+	protected List<String> commandArgs ;
 }

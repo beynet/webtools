@@ -47,7 +47,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		queue.addConsumer(consumer);
 		return(consumer);
 	}
-	
+	@Override
 	public MessageQueueConsumer createConsumer(String consumerId,String properties) {
 		defineConsumer(consumerId);
 		MessageQueueConsumer consumer = new MessageQueueConsumerImpl(queue,this,consumerId,properties);

@@ -1,6 +1,7 @@
 package org.beynet.utils.shell;
 
 import java.io.OutputStream;
+import java.util.List;
 
 import org.beynet.utils.exception.UtilsException;
 
@@ -27,4 +28,10 @@ public interface ShellCommand {
 	 * @throws UtilsException
 	 */
 	public void execute(OutputStream os) throws UtilsException ;
+	
+	/**
+	 * set command line
+	 * @param commandArgs
+	 */
+	public void setCommandArgs(List<String> commandArgs) ;
 }
