@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,15 +85,23 @@ public class Shell implements Callable<String>{
 				}
 			}
 			else {
-				List<String> commandArgs = makeCommandArgs(commandLine);
 				if (Thread.currentThread().isInterrupted()) {
 					logger.debug("Thread interrupted");
+					stop=true;
+					break;
 				}
-				// executing command
-				ShellCommand command = commands.get(commandArgs.get(0).toUpperCase());
-				if (command==null) {
+				ShellCommand command;
+				List<String> commandArgs = makeCommandArgs(commandLine);
+				if ("".equals(commandLine) || commandArgs.size()==0) {
 					command = commands.get("help".toUpperCase());
 				}
+				else {
+					command = commands.get(commandArgs.get(0).toUpperCase());
+					if (command==null) {
+						command = commands.get("help".toUpperCase());
+					}
+				}
+				// executing command
 				if (command!=null) {
 					command.setCommandArgs(commandArgs);
 					try {
