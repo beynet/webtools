@@ -561,8 +561,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		request.append(" where ");
 		SqlField f =uniqIdField.getAnnotation(SqlField.class);
 		request.append(f.sqlFieldName());
-		request.append("=");
-		request.append(getUniqIdValue(sqlBean));
+		request.append("=?");
 		logger.debug(request);
 		return(request.toString());
 	}
@@ -608,6 +607,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				}
 			}
 		}
+		k++;
+		stmt.setObject(k, getUniqIdValue(sqlBean));
 		return(stmt);
 	}
 	
