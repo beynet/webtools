@@ -15,7 +15,7 @@ import javax.servlet.jsp.JspWriter;
  *
  */
 public class FormSelect<T> extends FormElement {
-	public FormSelect(String label,String id,String name,boolean require,HashMap<String,T> tableOptions,long size,String ... options)  throws FormException {
+	public FormSelect(String label,String id,String name,boolean require,HashMap<String,T> tableOptions,long size,String actions,String ... options)  throws FormException {
 		super(label,id,name,require,options);
 		_lstOptions=new ArrayList< FormOption<T> >();
 		_size=size;
@@ -32,10 +32,11 @@ public class FormSelect<T> extends FormElement {
 		}
 		_multiple = false ;
 	}
-	public FormSelect(String label,String id,String name,boolean require,List<T> tableOptions,long size,String ... options)  throws FormException {
+	public FormSelect(String label,String id,String name,boolean require,List<T> tableOptions,long size,String actions,String ... options)  throws FormException {
 		super(label,id,name,require,options);
 		_lstOptions=new ArrayList< FormOption<T> >();
 		_size=size;
+		_actions = actions;
 		if (!tableOptions.isEmpty()) {
 			Iterator<T> iter=tableOptions.iterator();
 			while (iter.hasNext()) {
@@ -85,10 +86,15 @@ public class FormSelect<T> extends FormElement {
 			FormOption<T> option = iter.next();
 			option.printElement(writer,_value);
 		}
+
+		if (_actions.compareTo("") != 0) {
+			writer.print(" " + _actions + " ");
+		}
+
 		writer.print("\t</select>\n");
 	}
-	private ArrayList<FormOption<T>> _lstOptions;
-	private long                  _size      ;
-	private boolean               _multiple  ;
-
+	private ArrayList<FormOption<T>>	_lstOptions;
+	private long						_size      ;
+	private boolean						_multiple  ;
+	private String						_actions   ;
 }
