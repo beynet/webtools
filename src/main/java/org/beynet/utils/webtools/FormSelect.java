@@ -17,8 +17,11 @@ import javax.servlet.jsp.JspWriter;
 public class FormSelect<T> extends FormElement {
 	public FormSelect(String label,String id,String name,boolean require,HashMap<String,T> tableOptions,long size,String actions,String ... options)  throws FormException {
 		super(label,id,name,require,options);
-		_lstOptions=new ArrayList< FormOption<T> >();
-		_size=size;
+
+		_lstOptions = new ArrayList< FormOption<T> >();
+		_size = size;
+		_actions = actions;
+
 		if (!tableOptions.isEmpty()) {
 			Iterator<String> iter=tableOptions.keySet().iterator();
 			while (iter.hasNext()) {
@@ -34,9 +37,11 @@ public class FormSelect<T> extends FormElement {
 	}
 	public FormSelect(String label,String id,String name,boolean require,List<T> tableOptions,long size,String actions,String ... options)  throws FormException {
 		super(label,id,name,require,options);
-		_lstOptions=new ArrayList< FormOption<T> >();
-		_size=size;
+
+		_lstOptions = new ArrayList< FormOption<T> >();
+		_size = size;
 		_actions = actions;
+
 		if (!tableOptions.isEmpty()) {
 			Iterator<T> iter=tableOptions.iterator();
 			while (iter.hasNext()) {
@@ -79,20 +84,24 @@ public class FormSelect<T> extends FormElement {
 		writer.print("id=\"");
 		writer.print(_id);
 		writer.print("\" ");
+
 		super.printElement(writer,tabIndex);
+
+		if (_actions.compareTo("") != 0) {
+			writer.print(" " + _actions + " ");
+		}
+
 		writer.print(">\n");
+
 		Iterator<FormOption<T>> iter = _lstOptions.iterator();
 		while( iter.hasNext()) {
 			FormOption<T> option = iter.next();
 			option.printElement(writer,_value);
 		}
 
-		if (_actions.compareTo("") != 0) {
-			writer.print(" " + _actions + " ");
-		}
-
 		writer.print("\t</select>\n");
 	}
+
 	private ArrayList<FormOption<T>>	_lstOptions;
 	private long						_size      ;
 	private boolean						_multiple  ;

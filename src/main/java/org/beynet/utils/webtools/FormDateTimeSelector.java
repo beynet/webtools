@@ -22,8 +22,13 @@ public class FormDateTimeSelector<T> extends FormElement {
 		_idChampDate = idChampDate;
 		_formatDate = formatDate;
 
-		_select = new FormSelect<T> (labelSelect, "id_select_" + idChampDate, "name_select_" + idChampDate, required, tableOptions, size, "onchange=\"changementHeure(this, idChampDate, texteChoix)\"");
-		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required);
+		_select = new FormSelect<T> (labelSelect, "id_select_" + idChampDate, "name_select_" + idChampDate, required, tableOptions, size, "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
+
+		String[] options = new String[1];
+
+		options[0] = "Calendrier";
+
+		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required, options);
 	}
 
 	public FormDateTimeSelector (String id, String name, String labelSelect, String labelBouton, String idChampDate, String formatDate, boolean required,
@@ -32,7 +37,7 @@ public class FormDateTimeSelector<T> extends FormElement {
 
 		super ("unused", id, name, required);
 
-		_select = new FormSelect<T> (labelSelect, "id_select_" + idChampDate, "name_select_" + idChampDate, required, tableOptions, size, "onchange=\"changementHeure(this, idChampDate, texteChoix)\"");
+		_select = new FormSelect<T> (labelSelect, "id_select_" + idChampDate, "name_select_" + idChampDate, required, tableOptions, size, "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
 		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required);
 	}
 
@@ -41,6 +46,7 @@ public class FormDateTimeSelector<T> extends FormElement {
 		throws IOException {
 
 		_button.printElement (writer, tabIndex);
+
 		writer.print("<script type=\"text/javascript\">");
 		writer.print("Calendar.setup(");
 		writer.print("{");
