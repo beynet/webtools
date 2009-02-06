@@ -13,8 +13,16 @@ import javax.servlet.jsp.JspWriter;
  */
 public class FormDateTimeSelector<T> extends FormElement {
 
-	public FormDateTimeSelector (String id, String name, String labelSelect, String labelBouton, String idChampDate, String formatDate, boolean required,
-									HashMap<String,T> tableOptions, long size, String texteChoix)
+	public FormDateTimeSelector (String id,
+								 String name,
+								 String labelSelect,
+								 String labelBouton,
+								 String idChampDate,
+								 String formatDate,
+								 boolean required,
+								 HashMap<String,T> tableOptions,
+								 long size,
+								 String texteChoix)
 		throws FormException {
 
 		super ("unused", id, name, required);
@@ -22,22 +30,56 @@ public class FormDateTimeSelector<T> extends FormElement {
 		_idChampDate = idChampDate;
 		_formatDate = formatDate;
 
-		_select = new FormSelect<T> (labelSelect, "id_select_" + idChampDate, "name_select_" + idChampDate, required, tableOptions, size, "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
+		String[] options = new String[3];
 
-		String[] options = new String[1];
+		options[0] = "";
+		options[1] = "";
+		options[2] = "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"";
+
+		_select = new FormSelect<T> (labelSelect,
+									 "id_select_" + idChampDate,
+									 "name_select_" + idChampDate,
+									 required,
+									 tableOptions,
+									 size,
+									 false,
+									 options);
 
 		options[0] = "Calendrier";
+		options[2] = "";
 
 		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required, options);
 	}
 
-	public FormDateTimeSelector (String id, String name, String labelSelect, String labelBouton, String idChampDate, String formatDate, boolean required,
-								 List<T> tableOptions, long size, String texteChoix)
+	public FormDateTimeSelector (String id,
+								 String name,
+								 String labelSelect,
+								 String labelBouton,
+								 String idChampDate,
+								 String formatDate,
+								 boolean required,
+								 List<T> tableOptions,
+								 long size,
+								 String texteChoix)
 		throws FormException {
 
 		super ("unused", id, name, required);
 
-		_select = new FormSelect<T> (labelSelect, "id_select_" + idChampDate, "name_select_" + idChampDate, required, tableOptions, size, "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
+		String[] options = new String[3];
+
+		options[0] = "";
+		options[1] = "";
+		options[2] = "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"";
+
+		_select = new FormSelect<T> (labelSelect,
+									 "id_select_" + idChampDate,
+									 "name_select_" + idChampDate,
+									 required,
+									 tableOptions,
+									 size,
+									 false,
+									 options);
+
 		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required);
 	}
 
