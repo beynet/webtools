@@ -37,6 +37,10 @@ public class MessageQueueConsumersBean {
 		return(consumerId);
 	}
 	
+	public void delete(Connection connection) throws SQLException {
+		requestFactory.delete(this, connection);
+	}
+	
 	public void save(Connection connection) throws SQLException {
 		requestFactory.save(this, connection);
 	}

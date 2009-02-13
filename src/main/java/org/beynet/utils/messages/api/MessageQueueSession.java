@@ -34,6 +34,11 @@ public interface MessageQueueSession {
 	 */
 	public MessageQueueConsumer createConsumer(String consumerId,String properties);
 	
+	/**
+	 * delete consumer
+	 * @param consumerId
+	 */
+	public void deleteConsumer(String consumerId);
 	
 	/**
 	 * notify current session that a new message has been added

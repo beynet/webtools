@@ -30,8 +30,24 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		b.setConsumerId(consumerId);
 		try {
 			if (b.exist((Connection)getStorageConnection())==false) {
-				closeStorageConnection();
+//				closeStorageConnection();
 				b.save((Connection)getStorageConnection());
+				commit();
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			logger.error("Could not create queue consumer");
+		}
+	}
+	
+	@Override
+	public void deleteConsumer(String consumerId) {
+		MessageQueueConsumersBean b = new MessageQueueConsumersBean();
+		b.setQueueId(queue.getQueueName());
+		b.setConsumerId(consumerId);
+		try {
+			if (b.exist((Connection)getStorageConnection())==true) {
+				b.delete((Connection)getStorageConnection());
 				commit();
 			}
 		}catch (Exception e) {
