@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,9 +16,11 @@ import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 
-
-
-
+/**
+ * used to parse a stream
+ * @author beynet
+ *
+ */
 public class XmlReader {
 	private final static Logger logger = Logger.getLogger(XmlReader.class);
 	
@@ -51,6 +54,15 @@ public class XmlReader {
 		_state         = XmlReaderState.XML_DEFINITION_BEGIN ;
 		_level         = 0                                   ;
 		_debugOutput = debug;
+		_callBacks = new ArrayList<XmlCallBack>();
+	}
+	
+	/**
+	 * add a call-back
+	 * @param callBack
+	 */
+	public void addXmlCallBack(XmlCallBack callBack) {
+		_callBacks.add(callBack);
 	}
 	
 	
@@ -220,12 +232,9 @@ public class XmlReader {
 			// for each call back
 			// calling onNewTagContent function
 			// ---------------------------------
-			/*{
-				std::vector<XmlCallBack*>::iterator iter ;
-				for (iter=_callBacks.begin();iter!=_callBacks.end();++iter) {
-					(*iter)->onNewTag(_nomBalise,tagName);
-				}
-			}*/
+			for (XmlCallBack toCall : _callBacks) {
+				toCall.onNewTag(_nomBalise,tagName);
+			}
 
 			// parsing attributs
 			if (m.group(4)!=null) {
@@ -239,10 +248,9 @@ public class XmlReader {
 				// for each call back
 				// calling onNewTagContent function
 				// ---------------------------------
-				/*std::vector<XmlCallBack*>::iterator iter ;
-				for (iter=_callBacks.begin();iter!=_callBacks.end();++iter) {
-					(*iter)->onNewTagContent(_nomBalise,tagName,attributes);
-				}*/
+				for (XmlCallBack toCall : _callBacks) {
+					toCall.onNewTagAttributs(_nomBalise,tagName,listAttributs);
+				}
 			}
 			
 			if (_currentBuffer[m.start(5)-1]!='/') {
@@ -259,12 +267,9 @@ public class XmlReader {
 				// for each call back
 				// calling onCloseTag function
 				// ---------------------------------
-				/*{
-					std::vector<XmlCallBack*>::iterator iter ;
-					for (iter=_callBacks.begin();iter!=_callBacks.end();++iter) {
-						(*iter)->onCloseTag(_nomBalise,tagName);
-					}
-				}*/
+				for (XmlCallBack toCall : _callBacks) {
+					toCall.onCloseTag(_nomBalise, tagName);
+				}
 			}
 			UPDATE_OFFSET_PARSING(m.end());
 			return;
@@ -299,12 +304,9 @@ public class XmlReader {
 			// for each call back
 			// calling onCloseTag function
 			// ---------------------------------
-			/*{
-				std::vector<XmlCallBack*>::iterator iter ;
-				for (iter=_callBacks.begin();iter!=_callBacks.end();++iter) {
-					(*iter)->onCloseTag(_nomBalise,tagName);
-				}
-			}*/
+			for (XmlCallBack toCall : _callBacks) {
+				toCall.onCloseTag(_nomBalise, tagName);
+			}
 			logger.debug("Closed Tag detected :"+tagName+" size="+_nomBalise.size());
 			// last tag found 
 			// we mark document as finished
@@ -685,5 +687,5 @@ public class XmlReader {
 	private boolean               _needMoreChar       ;
 	private boolean               _debugOutput = false;
 	private ArrayList<String>     _nomBalise          ;
-	
+	private List<XmlCallBack>     _callBacks          ;
 }
