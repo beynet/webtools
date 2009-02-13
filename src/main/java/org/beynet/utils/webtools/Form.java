@@ -156,7 +156,7 @@ public class Form {
 	     */
 	    public FormElement getElementById(String id) throws FormException {
 	      if (_mapForm.get(id)==null) {
-	    	  throw new FormException("Form Element not found");
+	    	  throw new FormException("Form Element '" + id + "' not found");
 	      }
 	      return(_mapForm.get(id));
 	    }
