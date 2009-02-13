@@ -8,6 +8,8 @@ public enum UtilsExceptions {
 	Error_Io,
 	Error_Sql,
 	
+	Error_Rss_TagEmpty,
+	
 	Shell_Stop,
 	
 	Error_Last
