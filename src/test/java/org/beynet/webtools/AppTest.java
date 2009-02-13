@@ -1,6 +1,10 @@
 package org.beynet.webtools;
 
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -12,6 +16,10 @@ import org.beynet.utils.messages.api.MessageQueueFactory;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.xml.XmlReader;
+import org.beynet.utils.xml.rss.RssFile;
+import org.beynet.utils.xml.rss.RssFileV1;
+import org.beynet.utils.xml.rss.RssItem;
+import org.beynet.utils.xml.rss.RssItemV1;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -32,7 +40,50 @@ public class AppTest
     {
         super( testName );
         BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.INFO);
+        Logger.getRootLogger().setLevel(Level.DEBUG);
+    }
+    
+    
+    RssItem makeItemV1(int offset) throws UtilsException {
+    	RssItem it1 = new RssItemV1();
+    	it1.setAuthor("Yannick Beynet");
+    	it1.setDate(new Date());
+    	it1.setTitle("Item "+offset+" Title &");
+    	assertEquals("Item "+offset+" Title &amp;", it1.getTitle());
+    	it1.setDescription("item "+offset+" description");
+    	it1.setPath("/documents/item"+offset+".xml");
+    	List<String> categs = new ArrayList<String>();
+		categs.add("SPO");
+		categs.add("GEN");
+		it1.setCategories(categs);
+    	return(it1);
+    }
+    
+    public void testRssFileV1() {
+    	
+    	
+    	String name = "/tmp/res.xml";
+    	String url = "http://localhost/RSS/XafpToHtml.php?truc=machin&path=";
+    	String url2 = "http://localhost/RSS/XafpToHtml.php?truc=machin&amp;path=";
+    	RssFile f = new RssFileV1("Description de ce feed","titre du RSS",url,10,name);
+    	// url must be encoded
+    	assertEquals(f.getUrlBase(), url2);
+    	
+    	for (int i=0;i<100;i++) {
+    		try {
+    			/*try {
+//					Thread.sleep(100);
+				} catch (InterruptedException e) {
+				}*/
+    			RssItem item = makeItemV1(i);
+    			f.addItem(item);
+    			f.write();
+    		} catch(UtilsException e) {
+    			e.printStackTrace();
+    			assertTrue(false);
+    		}
+    	}
+    	
     }
     
     public void testQueue() {
