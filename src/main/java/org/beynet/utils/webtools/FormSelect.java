@@ -15,7 +15,18 @@ import javax.servlet.jsp.JspWriter;
  *
  */
 public class FormSelect<T> extends FormElement {
-
+	/**
+	 * 
+	 * @param label
+	 * @param id
+	 * @param name
+	 * @param require
+	 * @param tableOptions
+	 * @param size : number of elements to display
+	 * @param ordered if true elements will be sorted
+	 * @param options
+	 * @throws FormException
+	 */
 	public FormSelect (String label,
 					   String id,
 					   String name,
@@ -46,7 +57,18 @@ public class FormSelect<T> extends FormElement {
 
 		_multiple = false ;
 	}
-
+	/**
+	 * construct a FormSelect with a list of objects annoted with FormSelectAnnotation
+	 * @param label
+	 * @param id
+	 * @param name
+	 * @param require
+	 * @param tableOptions
+	 * @param size
+	 * @param ordered if true elements will be sorted
+	 * @param options
+	 * @throws FormException
+	 */
 	public FormSelect (String label,
 					   String id,
 					   String name,
