@@ -59,27 +59,43 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		MessageQueueBean mqBean = new MessageQueueBean();
 		
 		Message message = null ;
+		// to be sure that we do not use old storage handle
+		// ------------------------------------------------
+		session.releaseStorageHandle();
 		while (mqBean.getMessageId().equals(0)) {
 			Integer from = 0;
 			try {
 				while (true) {
-					mqBean.load((Connection)session.getStorageConnection(),queue.getQueueName(),consumerId,from);
+					mqBean.load((Connection)session.getStorageHandle(),queue.getQueueName(),consumerId,from);
 					message = readMessageFromBean(mqBean);
 					if (message.matchFilter(properties)) {
+						logger.debug("Message match properties");
 						break;
 					}
-					from = mqBean.getMessageId();
+					else {
+						from = mqBean.getMessageId();
+						logger.debug("Message does not match properties");
+						// delete message readed from queue
+						try {
+							mqBean.delete((Connection)session.getStorageHandle());
+						}catch (SQLException e) {
+							logger.warn(e);
+						}
+					}
 				}
 				break;
 			} catch(SQLException e) {
 				mqBean.setMessageId(0);
 			}
-			session.closeStorageConnection();
+			// release storage handle - waiting for new message into queue connection to storage
+			session.releaseStorageHandle();
+			logger.debug("waiting for new message");
 			pending.P();
+			logger.debug("awake !");
 		}
 		// delete message readed from queue
 		try {
-			mqBean.delete((Connection)session.getStorageConnection());
+			mqBean.delete((Connection)session.getStorageHandle());
 		}catch (SQLException e) {
 			logger.warn(e);
 		}

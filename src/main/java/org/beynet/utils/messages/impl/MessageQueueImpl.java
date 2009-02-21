@@ -38,27 +38,6 @@ public class MessageQueueImpl implements MessageQueue {
 	
 	@Override
 	public MessageQueueSession createSession(boolean transacted) throws UtilsException {
-		/*Connection connection = null ;
-		try {
-			connection = mqConnection.getConnection();
-			if (transacted==false) {
-				connection.setAutoCommit(true); 
-			}
-			else {
-				connection.setAutoCommit(false);
-			}
-		} catch (SQLException e) {
-			throw new UtilsException(UtilsExceptions.Error_Sql,e);
-		}
-		finally {
-			if (connection!=null) {
-				try {
-					connection.close();
-				}catch(SQLException e) {
-					
-				}
-			}
-		}*/
 		return(new MessageQueueSessionImpl(this,transacted,mqConnection));
 	}
 	

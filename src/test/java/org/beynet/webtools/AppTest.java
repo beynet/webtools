@@ -156,7 +156,7 @@ public class AppTest
     			String strMessage =null;
     			try {
     				System.err.println(id+" sleeping");
-    				Thread.sleep((int)(400*Math.random()));
+    				Thread.sleep((int)(100*Math.random()));
     				System.err.println(id+" awake");
     			} catch (InterruptedException e) {
     				e.printStackTrace();
@@ -165,10 +165,13 @@ public class AppTest
     				Message message = consumer.readMessage();
     				strMessage = (String) message.getObject();
     				System.err.println(id+" Message ("+strMessage+") readed into queue");
-    				if ((i%10)==0) {
+    				if (i==10) {
     					System.err.println(id+" Message ("+strMessage+") readed rollback into queue");
     					session.rollback();
-    				} else {
+    				} 
+    				else if (i==8) {
+    					System.err.println(id+" Message ("+strMessage+") readed no commit into queue");
+    				}else {
     					session.commit();
     				}
     			}
@@ -198,11 +201,10 @@ public class AppTest
 				Thread.sleep((int)(400*Math.random()));
 			} catch (InterruptedException e1) {
 			}
-			for (int i=0; i< MAX_ITER; i++) {
+			for (int i=0; i< MAX_ITER+1; i++) {
 				try {
-					Thread.sleep((int)(100*Math.random()));
+					Thread.sleep((int)(400*Math.random()));
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				String strMessage= "This is message number "+i;
@@ -210,7 +212,11 @@ public class AppTest
 				Message message = queue.createEmptyMessage();
 //				consummer = sessionConsummer.createConsumer("url=test ,  test=machin");
 				try {
-					message.setStringProperty("url", "test");
+					if (i==11) {
+						message.setStringProperty("url", "test2");
+					}else {
+						message.setStringProperty("url", "test");
+					}
 					message.setStringProperty("test", "machin");
 				} catch (UtilsException e) {
 					e.printStackTrace();

@@ -4,7 +4,11 @@ import java.io.Serializable;
 import java.util.Map;
 
 import org.beynet.utils.exception.UtilsException;
-
+/**
+ * represent a message send into one MessageQueue
+ * @author beynet
+ *
+ */
 public interface Message extends Serializable {
 	/**
 	 * set current message object

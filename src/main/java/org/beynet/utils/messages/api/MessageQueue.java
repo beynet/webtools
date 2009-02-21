@@ -34,5 +34,9 @@ public interface MessageQueue {
 	 */
 	public void onMessage()  ;
 	
+	/**
+	 * define a new consumer for this queue
+	 * @param consumer
+	 */
 	public void addConsumer(MessageQueueConsumer consumer);
 }

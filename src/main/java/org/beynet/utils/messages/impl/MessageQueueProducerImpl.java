@@ -26,7 +26,7 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 	
 	@Override
 	public synchronized void addMessage(Message message) throws UtilsException {
-		logger.debug("adding new message");
+		logger.debug("adding new message to queue");
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(bos);
@@ -37,7 +37,7 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 		MessageQueueBean messageBean = new MessageQueueBean();
 		List<String> consumers = null ;
 		try {
-			consumers = MessageQueueConsumersBean.loadConsumersForQueue(queue.getQueueName(), (Connection)session.getStorageConnection());
+			consumers = MessageQueueConsumersBean.loadConsumersForQueue(queue.getQueueName(), (Connection)session.getStorageHandle());
 		}catch (SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
@@ -50,14 +50,14 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 			messageBean.setConsumerId(consumerId);
 			messageBean.setMessageId(0);
 			try {
-				messageBean.save((Connection)session.getStorageConnection());
+				messageBean.save((Connection)session.getStorageHandle());
 			} catch (SQLException e) {
 				throw new UtilsException(UtilsExceptions.Error_Io,e);
 			}
 		}
 		logger.debug("sending notification");
 		session.onMessage();
-		session.closeStorageConnection();
+		session.releaseStorageHandle();
 		logger.debug("end of adding new message");
 	}
 	

@@ -10,6 +10,11 @@ import org.beynet.utils.sqltools.SqlTable;
 import org.beynet.utils.sqltools.admin.RequestFactoryAdmin;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
 
+/**
+ * SqlBean associated with a MessageQueue
+ * @author beynet
+ *
+ */
 @SqlTable("MessageQueue")
 public class MessageQueueBean {
 	public MessageQueueBean() {

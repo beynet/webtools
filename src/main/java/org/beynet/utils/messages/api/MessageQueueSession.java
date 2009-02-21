@@ -2,6 +2,11 @@ package org.beynet.utils.messages.api;
 
 import org.beynet.utils.exception.UtilsException;
 
+/**
+ * represent a session between a MessageQueue and a MessageProducer or a MessageConsumer
+ * @author beynet
+ *
+ */
 public interface MessageQueueSession {
 	/**
 	 * commit pending modification to associated queue
@@ -42,6 +47,8 @@ public interface MessageQueueSession {
 	
 	/**
 	 * notify current session that a new message has been added
+	 * this method is called by a MessageQueueProducer when a new message is added to
+	 * queue
 	 */
 	public void onMessage();
 	
@@ -56,12 +63,13 @@ public interface MessageQueueSession {
 	 * @param session
 	 * @return
 	 */
-	public Object getStorageConnection() throws UtilsException ;
+	public Object getStorageHandle() throws UtilsException ;
 	
 	/**
 	 * close current connection to storage
+	 * if current Session is transacted commit or rollback methods must be called before
 	 * @throws UtilsException
 	 */
-	public void closeStorageConnection() ;
+	public void releaseStorageHandle() ;
 	
 }

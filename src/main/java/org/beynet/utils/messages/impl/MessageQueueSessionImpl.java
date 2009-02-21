@@ -1,5 +1,7 @@
 package org.beynet.utils.messages.impl;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -23,15 +25,18 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		this.connection     = null;
 	}
 	
-	
+	/**
+	 * add a consumer to database
+	 * @param consumerId
+	 */
 	protected void defineConsumer(String consumerId) {
 		MessageQueueConsumersBean b = new MessageQueueConsumersBean();
 		b.setQueueId(queue.getQueueName());
 		b.setConsumerId(consumerId);
 		try {
-			if (b.exist((Connection)getStorageConnection())==false) {
+			if (b.exist((Connection)getStorageHandle())==false) {
 //				closeStorageConnection();
-				b.save((Connection)getStorageConnection());
+				b.save((Connection)getStorageHandle());
 				commit();
 			}
 		}catch (Exception e) {
@@ -46,8 +51,8 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		b.setQueueId(queue.getQueueName());
 		b.setConsumerId(consumerId);
 		try {
-			if (b.exist((Connection)getStorageConnection())==true) {
-				b.delete((Connection)getStorageConnection());
+			if (b.exist((Connection)getStorageHandle())==true) {
+				b.delete((Connection)getStorageHandle());
 				commit();
 			}
 		}catch (Exception e) {
@@ -87,7 +92,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	}
 	
 	@Override
-	public Connection getStorageConnection() throws UtilsException {
+	public Connection getStorageHandle() throws UtilsException {
 		if (connection!=null) {
 			return(connection);
 		}
@@ -113,9 +118,16 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		}
 	}
 	@Override
-	public void closeStorageConnection() {
+	public void releaseStorageHandle() {
 		if (connection!=null) {
 			if (transacted==false || pendingMessage==0) {
+				try {
+					connection.rollback();
+				}catch(SQLException e) {
+					StringWriter w = new StringWriter();
+					e.printStackTrace(new PrintWriter(w));
+					logger.error(w.getBuffer());
+				}
 				try {
 					connection.close();
 				} catch (SQLException e) {
@@ -144,6 +156,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 
 	@Override
 	public void rollback() throws UtilsException {
+		if (transacted==false) return;
 		try {
 			connection.rollback();
 			connection.close();
