@@ -39,4 +39,10 @@ public interface MessageQueue {
 	 * @param consumer
 	 */
 	public void addConsumer(MessageQueueConsumer consumer);
+	
+	/**
+	 * return total message into queue
+	 * @return
+	 */
+	public int getPendingMessage() throws UtilsException;
 }

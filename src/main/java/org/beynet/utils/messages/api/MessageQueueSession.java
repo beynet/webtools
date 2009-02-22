@@ -8,6 +8,15 @@ import org.beynet.utils.exception.UtilsException;
  *
  */
 public interface MessageQueueSession {
+	
+	/**
+	 * change queue associated with this session
+	 * should not be use without caution
+	 * @param queue
+	 */
+	void setAssociateQueue(MessageQueue queue) ;
+	
+	
 	/**
 	 * commit pending modification to associated queue
 	 * @throws UtilsException

@@ -18,11 +18,16 @@ import org.beynet.utils.messages.api.MessageQueueSession;
 public class MessageQueueSessionImpl implements MessageQueueSession {
 
 	public MessageQueueSessionImpl(MessageQueue queue,boolean transacted,MessageQueueConnection mqConnection) {
-		this.queue          = queue      ;
+		setAssociateQueue(queue);
 		this.mqConnection   = mqConnection ;
 		this.transacted     = transacted ;
 		this.pendingMessage = 0   ;
 		this.connection     = null;
+	}
+	
+	@Override
+	public void setAssociateQueue(MessageQueue queue)  {
+		this.queue = queue;
 	}
 	
 	/**

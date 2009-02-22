@@ -34,7 +34,7 @@ public class MessageQueueFactory {
 			// first create sql table (if needed)
 			MessageQueueBean.requestFactory.createTable(connection);
 			MessageQueueConsumersBean.requestFactory.createTable(connection);
-			return(new MessageQueueImpl(queueName,dataSource));
+			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,dataSource)));
 		}
 		catch (SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
@@ -68,7 +68,7 @@ public class MessageQueueFactory {
 			// first create sql table (if needed)
 			MessageQueueBean.requestFactory.createTable(connection);
 			MessageQueueConsumersBean.requestFactory.createTable(connection);
-			return(new MessageQueueImpl(queueName,sqlDriverName,sqlUrl));
+			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,sqlDriverName,sqlUrl)));
 		}
 		catch (SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);

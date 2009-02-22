@@ -3,7 +3,10 @@ package org.beynet.utils.messages.api;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
+import org.beynet.utils.exception.UtilsException;
+import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.sqltools.RequestFactoryImpl;
 import org.beynet.utils.sqltools.SqlField;
 import org.beynet.utils.sqltools.SqlTable;
@@ -29,20 +32,20 @@ public class MessageQueueBean {
 	public void save(Connection connection) throws SQLException {
 		requestFactory.save(this, connection);
 	}
-	/**
-	 * load current queue bean
-	 * @param connection
-	 * @throws SQLException
-	 */
-	/*public void load(Connection connection,String queueName) throws SQLException {
-		StringBuffer query = new StringBuffer("select * from MessageQueue where ");
-		query.append(FIELD_QUEUEID) ;
-		query.append(" = '");
-		query.append(queueName);
-		query.append("' order by ");
-		query.append(FIELD_ID);
-		requestFactory.load(this, connection,query.toString());
-	}*/
+	
+	public static void loadList(Connection connection,String queueName,List<MessageQueueBean> result) throws UtilsException {
+		StringBuffer request = new StringBuffer("select * from MessageQueue where ");
+		request.append(FIELD_QUEUEID);
+		request.append("='");
+		request.append(queueName);
+		request.append("'");
+		try {
+			requestFactory.loadList(result, connection, request.toString());
+		}catch(SQLException e) {
+			throw new UtilsException(UtilsExceptions.Error_Sql,e);
+		}
+		
+	}
 	
 	public void load(Connection connection,String queueName,String consumerId,Integer lastId) throws SQLException {
 		StringBuffer query = new StringBuffer("select * from MessageQueue where ");

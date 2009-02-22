@@ -1,5 +1,6 @@
 package org.beynet.utils.messages.impl;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import javax.sql.DataSource;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
+import org.beynet.utils.messages.api.MessageQueueBean;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 
@@ -40,6 +42,17 @@ public class MessageQueueImpl implements MessageQueue {
 	public MessageQueueSession createSession(boolean transacted) throws UtilsException {
 		return(new MessageQueueSessionImpl(this,transacted,mqConnection));
 	}
+	@Override
+	public int getPendingMessage() throws UtilsException {
+		List<MessageQueueBean> result = new ArrayList<MessageQueueBean>();
+		MessageQueueSession session = createSession(false);
+		try {
+		MessageQueueBean.loadList((Connection)session.getStorageHandle(),getQueueName(),result);
+		} finally {
+			session.releaseStorageHandle();
+		}
+		return(result.size());
+	}
 	
 	@Override
 	public synchronized void onMessage() {
@@ -55,7 +68,8 @@ public class MessageQueueImpl implements MessageQueue {
 	}
 	
 	
-	private String                     queueName    ;
-	private List<MessageQueueConsumer> consumers    ;
-	private MessageQueueConnectionImpl mqConnection ;
+	private String                     queueName      ;
+	private List<MessageQueueConsumer> consumers      ;
+	private MessageQueueConnectionImpl mqConnection   ;
+	private int                        pendingMessage ;
 }

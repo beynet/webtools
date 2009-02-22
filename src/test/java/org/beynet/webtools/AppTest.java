@@ -127,16 +127,18 @@ public class AppTest
     	t1=new Thread(new ThreadProducer(queue,producer,sessionProducer));
     	t2=new Thread(new ThreadConsumer("cs1",sessionConsummer1,consummer1));
     	t3=new Thread(new ThreadConsumer("cs2",sessionConsummer2,consummer2));
-    	t1.start();
-    	t2.start();
-    	t3.start();
+    	
     	try {
+    		t1.start();
+        	t2.start();
+        	t3.start();
 			t1.join();
 			t2.join();
 	    	t3.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
     }
     
     private class ThreadConsumer implements Runnable {
