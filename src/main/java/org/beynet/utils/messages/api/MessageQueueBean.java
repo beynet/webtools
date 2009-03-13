@@ -2,7 +2,9 @@ package org.beynet.utils.messages.api;
 
 import java.sql.Blob;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import org.beynet.utils.exception.UtilsException;
@@ -33,18 +35,51 @@ public class MessageQueueBean {
 		requestFactory.save(this, connection);
 	}
 	
-	public static void loadList(Connection connection,String queueName,List<MessageQueueBean> result) throws UtilsException {
-		StringBuffer request = new StringBuffer("select * from MessageQueue where ");
+	/**
+	 * return pending messages into queue - a specific sql query is executed for that
+	 * @param connection
+	 * @param queueName
+	 * @return
+	 * @throws UtilsException
+	 */
+	public static Integer getPendingMessages(Connection connection,String queueName) throws UtilsException {
+		
+		StringBuffer request = new StringBuffer("select count(1)  from MessageQueue where ");
 		request.append(FIELD_QUEUEID);
 		request.append("='");
 		request.append(queueName);
 		request.append("'");
+		Statement stmt =  null;
+		ResultSet rs = null;
 		try {
-			requestFactory.loadList(result, connection, request.toString());
-		}catch(SQLException e) {
+			stmt =  connection.createStatement();
+			stmt.execute(request.toString());
+			rs = stmt.getResultSet();
+			if (rs!=null && rs.next()) {
+				return(rs.getInt(1));
+			}
+			else {
+				throw new UtilsException(UtilsExceptions.Error_Sql,"No result");
+			}
+		}
+		catch(SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
-		
+		finally {
+			if (rs!=null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					
+				}
+			}
+			if (stmt!=null) {
+				try {
+					stmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 	}
 	
 	public void load(Connection connection,String queueName,String consumerId,Integer lastId) throws SQLException {

@@ -44,14 +44,12 @@ public class MessageQueueImpl implements MessageQueue {
 	}
 	@Override
 	public int getPendingMessage() throws UtilsException {
-		List<MessageQueueBean> result = new ArrayList<MessageQueueBean>();
 		MessageQueueSession session = createSession(false);
 		try {
-		MessageQueueBean.loadList((Connection)session.getStorageHandle(),getQueueName(),result);
+			return(MessageQueueBean.getPendingMessages((Connection)session.getStorageHandle(),getQueueName()).intValue());
 		} finally {
 			session.releaseStorageHandle();
 		}
-		return(result.size());
 	}
 	
 	@Override
