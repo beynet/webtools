@@ -34,8 +34,13 @@ public class RequestFactoryAdmin<T>  implements RequestFactoryAdminMBean, Reques
 	}
 	
 	@Override
-	public int count(T sqlBean, Connection connection) throws SQLException {
-		return(factory.count(sqlBean, connection));
+	public Integer count(Connection connection) throws SQLException {
+		return(factory.count(connection));
+	}
+	
+	@Override
+	public Integer count(String request, Connection connection) throws SQLException {
+		return(factory.count(request,connection));
 	}
 	
 	@Override
@@ -50,10 +55,10 @@ public class RequestFactoryAdmin<T>  implements RequestFactoryAdminMBean, Reques
 	}
 
 	@Override
-	public void delete(T sqlBean, Connection connection, String query)
+	public void delete(Connection connection, String query)
 			throws SQLException {
 		checkSuspend();
-		factory.delete(sqlBean, connection,query);
+		factory.delete(connection,query);
 	}
 
 	@Override

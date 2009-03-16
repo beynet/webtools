@@ -23,9 +23,15 @@ public interface RequestFactory<T> {
 	
 	
 	/**
-	 * count elements into this table
+	 * count all elements into this table
 	 */
-	public int count(T sqlBean,Connection connection) throws SQLException ;
+	public Integer count(Connection connection) throws SQLException ;
+	
+	/**
+	 * count elements into this table, with given request
+	 */
+	public Integer count(String request,Connection connection) throws SQLException ;
+	
 	
 	/**
 	 * load a bean from database with request = param request
@@ -59,7 +65,7 @@ public interface RequestFactory<T> {
 	 * @param query
 	 * @throws SQLException
 	 */
-	public void delete(T sqlBean,Connection connection,String query) throws SQLException ;
+	public void delete(Connection connection,String query) throws SQLException ;
 	
 	/**
 	 * Read results of query=request - listResult must be filled

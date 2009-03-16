@@ -1,7 +1,5 @@
 package org.beynet.utils.webtools;
 
-import java.io.InputStream;
-
 import org.apache.log4j.Logger;
 
 public class FormInputFile extends FormInput {

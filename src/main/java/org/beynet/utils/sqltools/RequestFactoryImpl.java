@@ -473,7 +473,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		}
 	}
 	
-	public void delete(T sqlBean,Connection connection,String query) throws SQLException {
+	public void delete(Connection connection,String query) throws SQLException {
 		Statement stmt =  null;
 		logger.debug(query);
 		try {
@@ -700,11 +700,16 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	}
 	
 	@Override
-	public int count(T sqlBean, Connection connection) throws SQLException {
-		String request = "select count(*) from "+tableName;
+	public Integer count(Connection connection) throws SQLException {
+		String request = "select count(1) from "+tableName;
+		return(count(request,connection));
+	}
+	
+	@Override
+	public Integer count(String request, Connection connection) throws SQLException {
 		Statement stmt =  null;
 		ResultSet rs = null;
-		int res = 0;
+		Integer res = 0;
 		logger.debug(request);
 		System.out.println("ici 0");
 		try {
@@ -713,7 +718,6 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			rs = stmt.getResultSet();
 			if (rs!=null && rs.next()) {
 				res = rs.getInt(1);
-				System.out.println("ici");
 				rs.close();
 				rs=null;
 			}
