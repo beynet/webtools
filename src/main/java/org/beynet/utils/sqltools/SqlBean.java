@@ -25,7 +25,7 @@ public class SqlBean implements SqlBeanInterface {
 	@Override
 	public void load(Connection transaction,String request) throws SQLException {
 		checkAnnotation();
-		_requestFactory.delete(this,transaction,request);
+		_requestFactory.load(this,transaction,request);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class SqlBean implements SqlBeanInterface {
 				cur = f.get(this);
 				if (!accessible) f.setAccessible(false);
 				if (cur instanceof RequestFactory) {
-					_requestFactory = (RequestFactory<SqlBean>)cur ;
+					_requestFactory = (RequestFactory<SqlBeanInterface>)cur ;
 				}
 			}
 			catch(Exception e) {
@@ -62,5 +62,5 @@ public class SqlBean implements SqlBeanInterface {
 		}
 	}
 	
-	private RequestFactory<SqlBean> _requestFactory=null ;
+	private RequestFactory<SqlBeanInterface> _requestFactory=null ;
 }
