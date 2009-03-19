@@ -108,6 +108,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		}
 	}
 	
+	@Override
 	public void createTable(Connection connection) throws SQLException {
 		DatabaseMetaData dmd        = connection.getMetaData();
 		ResultSet        tables     = null ;
@@ -203,7 +204,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			load(sqlBean,connection,request);
 		}
 		else {
-			throw new SQLException("No uniq id");
+			String request = makeConsultFromAllFieldsQuery(sqlBean);
+			load(sqlBean,connection,request);
 		}
 	}
 	/**
@@ -516,6 +518,37 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		else {
 			return(update(connection,sqlBean));
 		}
+	}
+	
+	
+	private String makeConsultFromAllFieldsQuery(T sqlBean) throws SQLException {
+		StringBuffer request=new StringBuffer("select * from ");
+		request.append(tableName);
+		request.append(" where ");
+		boolean firstField=true;
+		for ( int i=0;i<fields.size();i++) {
+			Field field = fields.get(i);
+			SqlField f = field.getAnnotation(SqlField.class);
+			Method get  = getMethods.get(i);
+			if (!firstField) {
+				request.append(" and ");
+			}
+			firstField=false;
+			request.append(f.sqlFieldName());
+			request.append("=");
+			if (f.fieldType().equals(String.class)) {
+				request.append("'");
+			}
+			try {
+				request.append(get.invoke(sqlBean,(Object[])null));
+			} catch (Exception e) {
+				throw new SQLException(e);
+			}
+			if (f.fieldType().equals(String.class)) {
+				request.append("'");
+			}
+		}
+		return(request.toString());
 	}
 	
 	
