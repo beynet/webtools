@@ -9,4 +9,5 @@ public @interface SqlField {
 	String   sqlFieldName();
 	boolean  isTableUniqueId() default false;
 	String   getSequenceName() default "" ;
+	int      maxLength()       default 0 ;
 }

@@ -164,7 +164,14 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				}
 			}
 			else if (sqlField.fieldType().equals(String.class)) {
-				query.append(" text NOT NULL");
+				if (sqlField.maxLength()==0) {
+					query.append(" text NOT NULL");
+				}
+				else {
+					query.append(" varchar(");
+					query.append(sqlField.maxLength());
+					query.append(") NOT NULL");
+				}
 			}
 			else if (sqlField.fieldType().equals(Integer.class)) {
 				query.append(" integer NOT NULL");

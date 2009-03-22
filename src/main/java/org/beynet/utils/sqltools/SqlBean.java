@@ -14,6 +14,11 @@ public class SqlBean implements SqlBeanInterface {
 		checkAnnotation();
 		_requestFactory.delete(this,transaction);
 	}
+	
+	public void createTable(Connection transaction) throws SQLException {
+		checkAnnotation();
+		_requestFactory.createTable(transaction);
+	}
 
 	@Override
 	public void load(Connection transaction)

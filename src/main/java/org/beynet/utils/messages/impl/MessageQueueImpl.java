@@ -69,5 +69,4 @@ public class MessageQueueImpl implements MessageQueue {
 	private String                     queueName      ;
 	private List<MessageQueueConsumer> consumers      ;
 	private MessageQueueConnectionImpl mqConnection   ;
-	private int                        pendingMessage ;
 }
