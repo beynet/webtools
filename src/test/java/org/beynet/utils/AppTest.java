@@ -1,4 +1,4 @@
-package org.beynet.webtools;
+package org.beynet.utils;
 
 
 import java.util.ArrayList;
