@@ -28,6 +28,9 @@ public class FileChangeEvent implements Serializable,Event {
 	public File getWatchedFiled() {
 		return(watchedFile);
 	}
+	public File getAssociatedFile() {
+		return(associatedFile);
+	}
 	
 	private int  event       	;
 	private File watchedFile 	;

@@ -113,7 +113,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 			logger.debug("On event for file="+watched.getAbsolutePath()+" "+eventId+" "+watchId+" "+associatedFilePath);
 		}
 		if (associatedFilePath!=null) {
-			associatedFile = new File(associatedFilePath);
+			associatedFile = new File(watched.getAbsolutePath()+"/"+associatedFilePath);
 		}
 		pendingEvents.add(new FileChangeEvent(eventId,watched,associatedFile));
 	}
