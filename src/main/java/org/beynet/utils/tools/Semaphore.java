@@ -4,6 +4,10 @@ public class Semaphore {
 	public Semaphore(int initial) {
 		this.value = initial ;
 	}
+	/**
+	 * Acquire one resource
+	 * @throws InterruptedException
+	 */
 	public synchronized void P() throws InterruptedException {
 		while(true) {
 			if (value > 0) {
@@ -13,6 +17,9 @@ public class Semaphore {
 			wait();
 		}
 	}
+	/**
+	 * release one resource
+	 */
 	public synchronized void V() {
 		value++;
 		notify();
