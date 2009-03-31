@@ -28,7 +28,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	
 	private void init(int waitTimeout) {
 		stop=false ;
-		inotifyFd = null ;
+		inotifyFd = new Fd(natInit());
 		directoryWatched = new HashMap<Integer, File>();
 		pendingEvents= new ArrayList<FileChangeEvent>();
 		this.waitTimeout = waitTimeout;
@@ -165,7 +165,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	@Override
 	public Object call() throws Exception {
 		logger.debug("entering loop");
-		inotifyFd = new Fd(natInit());
+		
 		if (inotifyFd.getFd()==-1) {
 			throw new UtilsException(UtilsExceptions.Error_Io,"Error when initializing");
 		}
