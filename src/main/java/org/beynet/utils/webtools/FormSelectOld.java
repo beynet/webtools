@@ -16,6 +16,7 @@ public class FormSelectOld extends FormElement {
 		super(label,id,name,require,options);
 		_init(label,id,name,require,tableOptions,size,options);
 	}
+	@SuppressWarnings("unchecked")
 	private void _init(String label,String id,String name,boolean require,HashMap<String,String> tableOptions,long size,String ... options) {
 		_lstOptions=new ArrayList<FormOption>();
 		_size=size;
@@ -32,6 +33,7 @@ public class FormSelectOld extends FormElement {
 		//_lstOptions.add(new FormOption(value,content));
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void printElement(JspWriter writer,int tabIndex) throws IOException {
 		writer.print("\n\t<select ");
@@ -65,6 +67,7 @@ public class FormSelectOld extends FormElement {
 		}
 		writer.print("\t</select>\n");
 	}
+	@SuppressWarnings("unchecked")
 	private ArrayList<FormOption> _lstOptions;
 	private long                  _size      ;
 	private boolean               _multiple  ;
