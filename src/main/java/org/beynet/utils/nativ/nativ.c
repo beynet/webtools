@@ -78,7 +78,7 @@ JNIEXPORT void JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natSel
 				return;
 			}
 			
-			// allocatig buffer for event data
+			// allocating buffer for event data
 			// --------------------------------
       buffer=(unsigned char*)malloc(toRead);
       if (buffer==NULL) return;
@@ -94,8 +94,6 @@ JNIEXPORT void JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natSel
 				
 				evt=(struct inotify_event*)(buffer+readed);
 				readed+=sizeof(*evt)+evt->len;
-				
-				evt->wd;
 				/* if it is a directory event we store associated file name */
         /* -------------------------------------------------------- */
 				if (evt->len>0) {
@@ -110,7 +108,6 @@ JNIEXPORT void JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natSel
       free(buffer);
     }
     else if (retval==-1){
-      perror("into select");
       if (errno==EINTR) {
         jclass newExcCls = (*env)->FindClass(env, 
                                       "java/lang/InterruptedException");

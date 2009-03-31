@@ -13,7 +13,7 @@ public class FileChangeEvent implements Serializable,Event {
 		this.associatedFile = associated;
 	}
 	
-	
+	@Override
 	public Event clone() {
 		File w = new File(watchedFile.getAbsolutePath());
 		File a = (associatedFile!=null)?new File(associatedFile.getAbsolutePath()):null;

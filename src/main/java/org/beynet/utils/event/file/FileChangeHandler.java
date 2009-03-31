@@ -111,11 +111,11 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		File associatedFile = null ;
 		if (watched!=null) {
 			logger.debug("On event for file="+watched.getAbsolutePath()+" "+eventId+" "+watchId+" "+associatedFilePath);
+			if (associatedFilePath!=null) {
+				associatedFile = new File(watched.getAbsolutePath()+"/"+associatedFilePath);
+			}
+			pendingEvents.add(new FileChangeEvent(eventId,watched,associatedFile));
 		}
-		if (associatedFilePath!=null) {
-			associatedFile = new File(watched.getAbsolutePath()+"/"+associatedFilePath);
-		}
-		pendingEvents.add(new FileChangeEvent(eventId,watched,associatedFile));
 	}
 
 	/**
@@ -126,14 +126,17 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 */
 	public void addWatchedDirectory(String path) throws UtilsException,InterruptedException{
 		File f = new File(path);
-		if (!f.isDirectory()) {
+		/*if (!f.isDirectory()) {
 			throw new UtilsException(UtilsExceptions.Error_Param,path+" is not a directory");
-		}
+		}*/
 		filesWatchedSem.P();
 		try {
 			// Handler is stopped
 			if (stop==true) return;
 			int watchId = natAddDirectory(inotifyFd.getFd(), path);
+			if (watchId==-1) {
+				throw new UtilsException(UtilsExceptions.Error_Param,"Could not watch directory:"+path);
+			}
 			directoryWatched.put(new Integer(watchId), f);
 		} finally {
 			filesWatchedSem.V();
