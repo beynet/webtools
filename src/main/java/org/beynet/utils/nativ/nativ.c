@@ -31,9 +31,6 @@ JNIEXPORT jint JNICALL Java_org_beynet_utils_io_Fd_natClose
 JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natInit
 (JNIEnv * env, jobject obj) {
   int _inotifyFd = inotify_init();
-  if (_inotifyFd == -1 ) {
-		perror("inotify init ");
-  }
   return(_inotifyFd);
 }
 
