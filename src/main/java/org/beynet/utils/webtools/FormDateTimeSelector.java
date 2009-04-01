@@ -22,7 +22,8 @@ public class FormDateTimeSelector<T> extends FormElement {
 								 boolean required,
 								 HashMap<String,T> tableOptions,
 								 long size,
-								 String texteChoix)
+								 String texteChoix,
+								 String texteBoutonCalendrier)
 		throws FormException {
 
 		super ("unused", id, name, required);
@@ -30,11 +31,13 @@ public class FormDateTimeSelector<T> extends FormElement {
 		_idChampDate = idChampDate;
 		_formatDate = formatDate;
 
+		/*
 		String[] options = new String[3];
 
 		options[0] = "";
 		options[1] = "";
 		options[2] = "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"";
+		*/
 
 		_select = new FormSelect<T> (labelSelect,
 									 "id_select_" + idChampDate,
@@ -43,12 +46,16 @@ public class FormDateTimeSelector<T> extends FormElement {
 									 tableOptions,
 									 size,
 									 false,
-									 options);
+									 "",
+									 "",
+									 "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
 
+		/*
 		options[0] = "Calendrier";
 		options[2] = "";
+		*/
 
-		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required, options);
+		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required, texteBoutonCalendrier);
 	}
 
 	public FormDateTimeSelector (String id,
@@ -60,16 +67,19 @@ public class FormDateTimeSelector<T> extends FormElement {
 								 boolean required,
 								 List<T> tableOptions,
 								 long size,
-								 String texteChoix)
+								 String texteChoix,
+								 String texteBoutonCalendrier)
 		throws FormException {
 
 		super ("unused", id, name, required);
 
+		/*
 		String[] options = new String[3];
 
 		options[0] = "";
 		options[1] = "";
 		options[2] = "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"";
+		*/
 
 		_select = new FormSelect<T> (labelSelect,
 									 "id_select_" + idChampDate,
@@ -78,9 +88,11 @@ public class FormDateTimeSelector<T> extends FormElement {
 									 tableOptions,
 									 size,
 									 false,
-									 options);
+									 "",
+									 "",
+									 "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
 
-		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required);
+		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required, texteBoutonCalendrier);
 	}
 
 	@Override
