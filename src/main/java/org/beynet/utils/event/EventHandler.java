@@ -2,7 +2,7 @@ package org.beynet.utils.event;
 
 /**
  * An event handler is the class which handles events
- * When a new event is detected all registered eventlisteners are notified
+ * When a new event is detected all registered event listeners are notified
  * @author beynet
  *
  */
