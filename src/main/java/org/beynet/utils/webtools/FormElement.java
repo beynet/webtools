@@ -52,7 +52,7 @@ public class FormElement {
 	 */
 	public FormElement(String label,String id,String name,boolean require,Map<String,String> optionals) {
 		init(label,id,name,require);
-		
+		if (optionals==null) return;
 		if (optionals.get(OPTION_VALUE)!=null) {
 			_value = optionals.get(OPTION_VALUE) ;
 		}

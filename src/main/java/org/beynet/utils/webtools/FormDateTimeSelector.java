@@ -3,6 +3,7 @@ package org.beynet.utils.webtools;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.jsp.JspWriter;
 
@@ -31,14 +32,8 @@ public class FormDateTimeSelector<T> extends FormElement {
 		_idChampDate = idChampDate;
 		_formatDate = formatDate;
 
-		/*
-		String[] options = new String[3];
-
-		options[0] = "";
-		options[1] = "";
-		options[2] = "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"";
-		*/
-
+		Map<String,String> optionals = new HashMap<String, String>();
+		optionals.put(FormElement.OPTION_OPTIONS, "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
 		_select = new FormSelect<T> (labelSelect,
 									 "id_select_" + idChampDate,
 									 "name_select_" + idChampDate,
@@ -46,16 +41,11 @@ public class FormDateTimeSelector<T> extends FormElement {
 									 tableOptions,
 									 size,
 									 false,
-									 "",
-									 "",
-									 "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
-
-		/*
-		options[0] = "Calendrier";
-		options[2] = "";
-		*/
-
-		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required, texteBoutonCalendrier);
+									 optionals
+									 );
+		optionals.clear();
+		optionals.put(FormElement.OPTION_VALUE, texteBoutonCalendrier);
+		_button = new FormInputSubmit (labelBouton,  "id_input_" + idChampDate, "name_input_" + idChampDate, required,optionals );
 	}
 
 	public FormDateTimeSelector (String id,
