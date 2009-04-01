@@ -1,5 +1,6 @@
 package org.beynet.utils.webtools;
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.jsp.JspWriter;
 
@@ -40,7 +41,57 @@ public class FormElement {
 		}
 		return(true);
 	}
-
+	
+	/**
+	 * 
+	 * @param label
+	 * @param id
+	 * @param name
+	 * @param require
+	 * @param optionals
+	 */
+	public FormElement(String label,String id,String name,boolean require,Map<String,String> optionals) {
+		init(label,id,name,require);
+		
+		if (optionals.get(OPTION_VALUE)!=null) {
+			_value = optionals.get(OPTION_VALUE) ;
+		}
+		if (optionals.get(OPTION_CLASS)!=null) {
+			_class = optionals.get(OPTION_CLASS) ;
+		}
+		if (optionals.get(OPTION_OPTIONS)!=null) {
+			_options = optionals.get(OPTION_OPTIONS) ;
+		}
+	}
+	/**
+	 * 
+	 * @param label
+	 * @param id
+	 * @param name
+	 * @param require
+	 */
+	public FormElement(String label,String id,String name,boolean require) {
+		init(label,id,name,require);
+	}
+	
+	
+	private void init(String label,String id,String name,boolean require) {
+		_id      = id      ;
+		_name    = name    ;
+		_require = require ;
+		_label   = label   ;
+		
+		/* valeurs par defaut */
+		/* ------------------ */
+		_value = _class = _options = new String("");
+		
+		// le flag _valided vaut 0 lorsque l'on affiche le formulaire pour la premiere
+		// fois - il vaut 1 lorque l'on affiche le formulaire une deuxième fois et que
+		// le controle en question n'a pas ete remplis (et que require==TRUE)
+		//  - il vaut enfin -1 pour les controle ou l'on veut desactiver ce mecanisme
+		// ***************************************************************************
+		_valided = 0        ;
+	}
 	/**
 	 * 
 	 * @param posted
@@ -52,16 +103,10 @@ public class FormElement {
 	 * @param options 1 class css a rajouter a l'element de formulaire
 	 * @param options 2 options a rajouter au formulaire
 	 */
+	@Deprecated
 	public FormElement(String label,String id,String name,boolean require,String ...options) {
 /*$value="",$class="",$options=""*/
-		_id      = id      ;
-		_name    = name    ;
-		_require = require ;
-		_label   = label   ;
-		
-		/* valeurs par defaut */
-		/* ------------------ */
-		_value = _class = _options = new String("");
+		init(label,id,name,require);
 		
 		/* parametres optionnels */
 		for (int i=0;i<options.length;i++) {
@@ -77,12 +122,7 @@ public class FormElement {
 			}
 		}
 				
-		// le flag _valided vaut 0 lorsque l'on affiche le formulaire pour la premiere
-		// fois - il vaut 1 lorque l'on affiche le formulaire une deuxième fois et que
-		// le controle en question n'a pas ete remplis (et que require==TRUE)
-		//  - il vaut enfin -1 pour les controle ou l'on veut desactiver ce mecanisme
-		// ***************************************************************************
-		_valided = 0        ;
+		
 	}
 	
 	public String getId() {
@@ -183,5 +223,8 @@ public class FormElement {
 	String  _value    ;
 	static final String    _methodPOST = "post";
     static final String    _methodGET  = "get";
+    public static final String    OPTION_VALUE = "value" ;
+    public static final String    OPTION_CLASS = "class" ;
+    public static final String    OPTION_OPTIONS = "options" ;
     private static final Logger logger= Logger.getLogger(FormElement.class);
 }

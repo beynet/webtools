@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.jsp.JspWriter;
 
@@ -15,6 +16,14 @@ import javax.servlet.jsp.JspWriter;
  *
  */
 public class FormSelect<T> extends FormElement {
+	
+	private void init(long size,boolean ordered) {
+		_lstOptions = new ArrayList< FormOption<T> >();
+		_size = size;
+		_ordered = ordered;
+		_multiple = false ;
+	}
+	
 	/**
 	 * 
 	 * @param label
@@ -27,6 +36,7 @@ public class FormSelect<T> extends FormElement {
 	 * @param options
 	 * @throws FormException
 	 */
+	@Deprecated
 	public FormSelect (String label,
 					   String id,
 					   String name,
@@ -37,25 +47,41 @@ public class FormSelect<T> extends FormElement {
 					   String ... options)  throws FormException {
 
 		super (label, id, name, require, options);
-
-		_lstOptions = new ArrayList< FormOption<T> >();
-		_size = size;
-		_ordered = ordered;
-//		_options = actions;
+		init(size,ordered);
 
 		if (!tableOptions.isEmpty()) {
 			Iterator<String> iter=tableOptions.keySet().iterator();
 			while (iter.hasNext()) {
 				String clee = iter.next();
 				T element = tableOptions.get(clee) ;
-								
-				/*Method methods[] = element.getClass().getMethods();
-				if (element.getClass().isAnnotationPresent(annotationClass))*/
 				addOption(element,clee);
 			}
 		}
 
-		_multiple = false ;
+		
+	}
+	public FormSelect (String label,
+			String id,
+			String name,
+			boolean require,
+			HashMap<String,T> tableOptions,
+			long size,
+			boolean ordered,
+			Map<String,String> optionals)  throws FormException {
+
+		super (label, id, name, require, optionals);
+		init(size,ordered);
+
+		if (!tableOptions.isEmpty()) {
+			Iterator<String> iter=tableOptions.keySet().iterator();
+			while (iter.hasNext()) {
+				String clee = iter.next();
+				T element = tableOptions.get(clee) ;
+				addOption(element,clee);
+			}
+		}
+
+
 	}
 	/**
 	 * construct a FormSelect with a list of objects annoted with FormSelectAnnotation
@@ -69,35 +95,51 @@ public class FormSelect<T> extends FormElement {
 	 * @param options
 	 * @throws FormException
 	 */
+	@Deprecated
 	public FormSelect (String label,
-					   String id,
-					   String name,
-					   boolean require,
-					   List<T> tableOptions,
-					   long size,
-					   boolean ordered,
-					   String ... options)
+                       String id,
+                       String name,
+                       boolean require,
+                       List<T> tableOptions,
+                       long size,
+                       boolean ordered,
+                       String ... options)
 		throws FormException {
 
 		super (label, id, name, require, options);
 
-		_lstOptions = new ArrayList< FormOption<T> >();
-		_size = size;
-		_ordered = ordered;
-//		_options = actions;
+		init(size,ordered);
 
 		if (!tableOptions.isEmpty()) {
 			Iterator<T> iter=tableOptions.iterator();
 			while (iter.hasNext()) {
 				T element = iter.next() ;
-								
-				/*Method methods[] = element.getClass().getMethods();
-				if (element.getClass().isAnnotationPresent(annotationClass))*/
 				addOption(element);
 			}
 		}
-		_multiple = false ;
 	}
+	public FormSelect (String label,
+                       String id,
+                       String name,
+                       boolean require,
+                       List<T> tableOptions,
+                       long size,
+                       boolean ordered,
+                       Map<String,String> optionals) throws FormException {
+
+		super (label, id, name, require, optionals);
+
+		init(size,ordered);
+
+		if (!tableOptions.isEmpty()) {
+			Iterator<T> iter=tableOptions.iterator();
+			while (iter.hasNext()) {
+				T element = iter.next() ;
+				addOption(element);
+			}
+		}
+	}
+	
 	
 	private void addOption(T content,String ...value) throws FormException{
 		_lstOptions.add(new FormOption<T>(content,value));

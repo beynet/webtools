@@ -1,14 +1,21 @@
 package org.beynet.utils.webtools;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.jsp.JspWriter;
 
 public class FormTextArea extends FormElement {
 
-
+	@Deprecated
 	public FormTextArea(String label,String id,String name,boolean require,long cols,long rows,String ... options) {
 		super(label,id,name,require,options);
+		_cols    = cols    ;
+		_rows    = rows    ;
+		_style   = ""      ;
+	}
+	public FormTextArea(String label,String id,String name,boolean require,long cols,long rows,Map<String,String> optionals) {
+		super(label,id,name,require,optionals);
 		_cols    = cols    ;
 		_rows    = rows    ;
 		_style   = ""      ;

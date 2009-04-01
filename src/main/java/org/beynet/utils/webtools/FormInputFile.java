@@ -1,13 +1,20 @@
 package org.beynet.utils.webtools;
 
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 
 public class FormInputFile extends FormInput {
+	@Deprecated
 	public FormInputFile(String label,String id,String name,boolean require,String ...options) {
         super(label,"file",id,name,require,options);
     }
-	
-	
+	public FormInputFile(String label,String id,String name,boolean require,Map<String,String> optionals) {
+        super(label,"file",id,name,require,optionals);
+    }
+	public FormInputFile(String label,String id,String name,boolean require) {
+        super(label,"file",id,name,require);
+    }
 
 	@Override
 	public boolean check(FormRequest request, StringBuffer erreur) {

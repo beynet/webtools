@@ -3,6 +3,7 @@ package org.beynet.utils.webtools;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspWriter;
@@ -55,7 +56,9 @@ public class Form {
 		/* ie pour chaque formulaire on poste l'id du formulaire */
 		/* dans $_POST['idForm']                                 */
 		/******************************************************* */
-		FormElement elem = new FormInputHidden("","F_"+_id,ID_FORM,false,_id);
+		Map<String,String> optionals = new HashMap<String, String>();
+		optionals.put(FormElement.OPTION_VALUE, _id);
+		FormElement elem = new FormInputHidden("","F_"+_id,ID_FORM,false,optionals);
 		addFormElement(elem);
 
 		/* de plus on ajoute dans la session un jeton unique      */
@@ -64,7 +67,8 @@ public class Form {
 		/* ------------------------------------------------------ */
 		/*$md5Form = MyMd5  md5(time());*/
 		String md5Form=MyMd5.computeMd5(new String(""+new java.util.Date().getTime()));
-		addFormElement(new FormInputHidden("","jeton_"+_id,"jetonForm",false,md5Form));
+		optionals.put(FormElement.OPTION_VALUE, md5Form);
+		addFormElement(new FormInputHidden("","jeton_"+_id,"jetonForm",false,optionals));
 		/*
 		if (_request.getAttribute("FormRequestClass")==null) {
 			_formRequest = new FormRequest(_request);
