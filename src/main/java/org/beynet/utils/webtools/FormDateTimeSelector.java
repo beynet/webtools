@@ -70,7 +70,8 @@ public class FormDateTimeSelector<T> extends FormElement {
 		options[1] = "";
 		options[2] = "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"";
 		*/
-
+		Map<String,String> optionals = new HashMap<String, String>();
+		optionals.put(FormElement.OPTION_OPTIONS,"onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
 		_select = new FormSelect<T> (labelSelect,
 									 "id_select_" + idChampDate,
 									 "name_select_" + idChampDate,
@@ -78,11 +79,11 @@ public class FormDateTimeSelector<T> extends FormElement {
 									 tableOptions,
 									 size,
 									 false,
-									 "",
-									 "",
-									 "onchange=\"changementHeure(this, '" + idChampDate + "', '" + texteChoix + "')\"");
-
-		_button = new FormInput (labelBouton, "submit", "id_input_" + idChampDate, "name_input_" + idChampDate, required, texteBoutonCalendrier);
+									 optionals
+									 );
+		optionals.clear();
+		optionals.put(FormElement.OPTION_VALUE, texteBoutonCalendrier);
+		_button = new FormInputSubmit (labelBouton, "id_input_" + idChampDate, "name_input_" + idChampDate, required, optionals);
 	}
 
 	@Override
@@ -105,7 +106,7 @@ public class FormDateTimeSelector<T> extends FormElement {
 	}
 
 	private FormSelect<T>		_select;
-	private FormInput			_button;
+	private FormInputSubmit		_button;
 	private String				_idChampDate;
 	private String				_formatDate;
 }

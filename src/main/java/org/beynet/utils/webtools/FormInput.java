@@ -12,7 +12,7 @@ import javax.servlet.jsp.JspWriter;
  * @author beynet
  *
  */
-public abstract class FormInput extends FormElement {  
+public abstract class FormInput extends FormElement {
   @Deprecated
   public FormInput(String label,String type,String id,String name,boolean require,String ... options) {
 	  super(label,id,name,require,options);

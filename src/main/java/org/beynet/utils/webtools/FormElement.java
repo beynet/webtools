@@ -7,7 +7,7 @@ import javax.servlet.jsp.JspWriter;
 import org.apache.log4j.Logger;
 
 
-public class FormElement {
+public abstract class FormElement {
 
 	/** verifie si l'element de formulaire courant est valide
 	 * 
