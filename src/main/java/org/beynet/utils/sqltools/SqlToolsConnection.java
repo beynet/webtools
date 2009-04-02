@@ -27,6 +27,7 @@ public class SqlToolsConnection implements Connection ,Session{
 		this.connection = connection ;
 		this.saveStatements = new HashMap<Class<?>, PreparedStatement>();
 		this.updateStatements = new HashMap<Class<?>, PreparedStatement>();
+		this.deleteStatements = new HashMap<Class<?>, PreparedStatement>();
 	}
 	
 	@Override
@@ -312,12 +313,18 @@ public class SqlToolsConnection implements Connection ,Session{
 			PreparedStatement statement) {
 		updateStatements.put(beanClass, statement);
 	}
-
-	
+	@Override
+	public <T> PreparedStatement getDeleteBeanPreparedStatement(Class<T> beanClass) {
+		return(deleteStatements.get(beanClass));
+	}
+	@Override
+	public <T> void setDeleteBeanPreparedStatement(Class<T> beanClass,PreparedStatement statement) {
+		deleteStatements.put(beanClass, statement);
+	}
 	
 	private Connection connection;
 	private HashMap<Class<?>, PreparedStatement> saveStatements;
 	private HashMap<Class<?>, PreparedStatement> updateStatements;
-	
+	private HashMap<Class<?>, PreparedStatement> deleteStatements;
 	
 }

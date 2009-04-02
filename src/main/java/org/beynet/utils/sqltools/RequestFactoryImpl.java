@@ -419,66 +419,71 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	 */
 	public void delete(T sqlBean,Connection connection) throws SQLException {
 		checkSqlTableAnnotation(sqlBean.getClass());
+		PreparedStatement stmt = null;
+		/* if connection is a SqlTool Session */
+		if (connection instanceof Session ) {
+			 stmt = ((Session)connection).getDeleteBeanPreparedStatement(beanClass);
+			 if (stmt!=null) {
+				 logger.debug("Bean delete's prepared statement found in cache for class="+sqlBean.getClass());
+			 }
+		}
+		
+		
 		// first we check if table has one unique id
 		if (uniqIdField!=null) {
 			Integer val = getUniqIdValue(sqlBean);
-			StringBuffer query = new StringBuffer("delete from ");
-			query.append(tableName);
-			query.append(" where (");
-			query.append(uniqIdAnnot.sqlFieldName());
-			query.append("=");
-			query.append(val);
-			query.append(")");
-			
-			Statement stmt =  null;
-			logger.debug(query);
-			try {
-				stmt =  connection.createStatement();
-				stmt.execute(query.toString());
-			}
-			finally {
-				if (stmt!=null) {
-					stmt.close();
+			if (stmt==null) {
+				StringBuffer query = new StringBuffer("delete from ");
+				query.append(tableName);
+				query.append(" where (");
+				query.append(uniqIdAnnot.sqlFieldName());
+				query.append("=?)");
+
+				stmt = connection.prepareStatement(query.toString());
+				if (connection instanceof Session ) {
+					((Session)connection).setDeleteBeanPreparedStatement(beanClass, stmt);
 				}
 			}
+			stmt.setInt(1, val.intValue());
+			stmt.execute();
 		}
 		else {
-			StringBuffer query = new StringBuffer("delete from ");
-			query.append(tableName);
-			query.append(" where (");
-			boolean firstField = true ;
-			for (Field field : fields) {
-				SqlField f = field.getAnnotation(SqlField.class);
-				if (!firstField) {
-					query.append(" and ");
+			if (stmt==null) {
+				StringBuffer query = new StringBuffer("delete from ");
+				query.append(tableName);
+				query.append(" where (");
+				boolean firstField = true ;
+				for (Field field : fields) {
+					SqlField f = field.getAnnotation(SqlField.class);
+					if (!firstField) {
+						query.append(" and ");
+					}
+					query.append(f.sqlFieldName());
+					query.append("=?");
+					firstField=false;
 				}
-				query.append(f.sqlFieldName());
-				query.append("=?");
-				firstField=false;
-			}
-			query.append(")");
-			logger.debug(query);
-			PreparedStatement stmt = null ; 
-			try {
+				query.append(")");
+				logger.debug(query);
 				stmt = connection.prepareStatement(query.toString());
-				for ( int i=0;i<fields.size();i++) {
-					Method get  = getMethods.get(i);
-					try {
-						stmt.setObject(i+1, get.invoke(sqlBean,(Object[])null));
-					}
-					catch (IllegalAccessException e) {
-						throw new SQLException(e);
-					}
-					catch (IllegalArgumentException e) {
-						throw new SQLException(e);
-					} catch (InvocationTargetException e) {
-						throw new SQLException(e);
-					}
+				if (connection instanceof Session ) {
+					((Session)connection).setDeleteBeanPreparedStatement(beanClass, stmt);
 				}
-				stmt.execute();
-			} finally {
-				if (stmt != null) stmt.close();
-			}	
+			}
+			for ( int i=0;i<fields.size();i++) {
+				Method get  = getMethods.get(i);
+				try {
+					stmt.setObject(i+1, get.invoke(sqlBean,(Object[])null));
+				}
+				catch (IllegalAccessException e) {
+					throw new SQLException(e);
+				}
+				catch (IllegalArgumentException e) {
+					throw new SQLException(e);
+				} catch (InvocationTargetException e) {
+					throw new SQLException(e);
+				}
+			}
+			stmt.execute();
 		}
 	}
 	

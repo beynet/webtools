@@ -33,4 +33,19 @@ public interface Session {
 	 */
 	public <T> PreparedStatement getUpdateBeanPreparedStatement(Class<T> beanClass);
 	
+	/**
+	 * record statement used to delete bean
+	 * @param <T>
+	 * @param beanClass
+	 * @param statement
+	 */
+	public <T> void setDeleteBeanPreparedStatement(Class<T> beanClass,PreparedStatement statement);
+	
+	/**
+	 * get statement used to delete bean
+	 * @param <T>
+	 * @param beanClass
+	 * @return
+	 */
+	public <T> PreparedStatement getDeleteBeanPreparedStatement(Class<T> beanClass);
 }
