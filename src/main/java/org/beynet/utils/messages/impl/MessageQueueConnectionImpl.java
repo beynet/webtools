@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.messages.api.MessageQueueConnection;
+import org.beynet.utils.sqltools.admin.SqlToolsConnectionFactory;
 
 public class MessageQueueConnectionImpl implements MessageQueueConnection {
 	
@@ -39,7 +40,7 @@ public class MessageQueueConnectionImpl implements MessageQueueConnection {
 			}
 			connection  = DriverManager.getConnection(sqlUrl);
 		}
-		return(connection);
+		return(SqlToolsConnectionFactory.getInstance().makeNewSqlToolsConnection(connection));
 	}
 	
 	@Override

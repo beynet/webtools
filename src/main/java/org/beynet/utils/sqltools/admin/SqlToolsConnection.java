@@ -1,4 +1,4 @@
-package org.beynet.utils.sqltools;
+package org.beynet.utils.sqltools.admin;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -21,9 +21,9 @@ import java.util.Properties;
 
 import org.beynet.utils.sqltools.interfaces.Session;
 
-public class SqlToolsConnection implements Connection ,Session{
+public class SqlToolsConnection implements Connection,Session {
 
-	public SqlToolsConnection(Connection connection) {
+	protected SqlToolsConnection(Connection connection) {
 		this.connection = connection ;
 		this.saveStatements = new HashMap<Class<?>, PreparedStatement>();
 		this.updateStatements = new HashMap<Class<?>, PreparedStatement>();
@@ -38,6 +38,7 @@ public class SqlToolsConnection implements Connection ,Session{
 	@Override
 	public void close() throws SQLException {
 		connection.close();
+		SqlToolsConnectionFactory.getInstance().removeConnectionFromList(this);
 	}
 
 	@Override
