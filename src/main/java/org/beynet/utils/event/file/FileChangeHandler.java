@@ -178,7 +178,8 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 					waitForChange();
 					processEvents();
 				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
+					logger.debug("InterruptedException -> stopping");
+					stop=true;
 				}
 				if (Thread.currentThread().isInterrupted()) {
 					logger.debug("Interruption detected -> stopping");
