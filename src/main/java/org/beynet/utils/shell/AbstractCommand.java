@@ -23,6 +23,7 @@ public abstract class AbstractCommand implements ShellCommand{
 		}
 	}
 	
+	@Override
 	public void setCommandArgs(List<String> commandArgs) {
 		this.commandArgs= commandArgs ;
 	}

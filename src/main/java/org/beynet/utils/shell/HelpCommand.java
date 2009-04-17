@@ -1,5 +1,6 @@
 package org.beynet.utils.shell;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
@@ -14,7 +15,7 @@ public class HelpCommand extends AbstractCommand implements ShellCommand {
 	}
 	
 	@Override
-	public void execute(OutputStream os) throws UtilsException {
+	public void execute(BufferedReader br, OutputStream os) throws UtilsException {
 		for (String key : commands.keySet()) {
 			ShellCommand command = commands.get(key);
 			try {
@@ -38,4 +39,5 @@ public class HelpCommand extends AbstractCommand implements ShellCommand {
 		return("help");
 	}
 	private Map<String,ShellCommand> commands;
+	
 }

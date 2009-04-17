@@ -21,12 +21,12 @@ import org.beynet.utils.exception.UtilsExceptions;
  * @author beynet
  *
  */
-public class Shell implements Callable<String>{
+public class Shell  implements Callable<String> {
 	public Shell(BufferedReader br,OutputStream os) {
 		commands = new HashMap<String, ShellCommand>();
 		stop=false;
-		this.br = br ;
 		this.os=os;
+		this.br = br ;
 		addCommand(new HelpCommand(commands));
 	}
 	/**
@@ -58,6 +58,33 @@ public class Shell implements Callable<String>{
 		return(result);
 	}
 	
+	/*private String readLine() throws IOException {
+		StringBuffer buffer = readBuffer;
+		buffer.append(readBuffer);
+		readBuffer = new StringBuffer();
+		int readed =-1;
+		do {
+			readed = is.read();
+			if (readed!=-1) {
+				if (readed=='\n') {
+					break;
+				}
+				if (readed=='\r') {
+					if (is.available()>0) {
+						readed = is.read();
+						if (readed!='\n') {
+							readBuffer.append((char)readed);
+						}
+					}
+					break;
+				}
+				buffer.append((char)readed);
+			}
+		} while (readed!=-1);
+		
+		return(buffer.toString());
+	}*/
+	
 	@Override
 	public String call() throws Exception {
 		boolean timeout = false ;
@@ -70,7 +97,7 @@ public class Shell implements Callable<String>{
 				else {
 					timeout=false;
 				}
-				commandLine = br.readLine() ;
+				commandLine = br.readLine();
 			}
 			catch (SocketTimeoutException e) {
 				timeout=true;
@@ -105,7 +132,7 @@ public class Shell implements Callable<String>{
 				if (command!=null) {
 					command.setCommandArgs(commandArgs);
 					try {
-						command.execute(os);
+						command.execute(br,os);
 					} catch(UtilsException e) {
 						if (e.getError()==UtilsExceptions.Shell_Stop) {
 							stopShell();
@@ -124,8 +151,8 @@ public class Shell implements Callable<String>{
 	}
 	
 	private Map<String,ShellCommand> commands;
-	private boolean stop ;
-	private BufferedReader br ;
-	private OutputStream os ;
+	private boolean stop            ;
+	private BufferedReader br       ;
+	private OutputStream os         ;
 	private static Logger logger = Logger.getLogger(Shell.class);
 }
