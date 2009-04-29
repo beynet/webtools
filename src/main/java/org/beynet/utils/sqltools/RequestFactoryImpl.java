@@ -756,7 +756,6 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		ResultSet rs = null;
 		Integer res = 0;
 		logger.debug(request);
-		System.out.println("ici 0");
 		try {
 			stmt =  connection.createStatement();
 			stmt.execute(request);
