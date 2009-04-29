@@ -26,7 +26,12 @@ public class RssItemV1 extends RssItemCommon implements RssItem {
 		_cache = new StringBuffer();
 		
 		// adding title if not empty
-		addIfNotEmpty("title",getTitle());
+		if (getTitle()!=null) {
+			add("title",getTitle());
+		}
+		else {
+			add("title"," ");
+		}
         
         // adding description if not empty
         // -------------------------------

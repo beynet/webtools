@@ -102,15 +102,19 @@ public abstract class RssItemCommon extends RssCommon implements RssItem {
     	_cacheChannel = new StringBuffer(channel);
     }
     
+    protected void add(String tagName,String value) {
+    	_cache.append("          <");
+		_cache.append(tagName);
+		_cache.append(">");
+		_cache.append(value);
+		_cache.append("</");
+		_cache.append(tagName);
+		_cache.append(">\n");
+    }
+    
     protected void addIfNotEmpty(String tagName,String value) {
 		if (value!=null && !value.equals("")) {
-			_cache.append("          <");
-			_cache.append(tagName);
-			_cache.append(">");
-			_cache.append(value);
-			_cache.append("</");
-			_cache.append(tagName);
-			_cache.append(">\n");
+			add(tagName,value);
 		}
 	}
     
