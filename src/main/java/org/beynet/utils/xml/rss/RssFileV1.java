@@ -27,10 +27,12 @@ public class RssFileV1 extends RssFileCommon implements RssFile {
 			logger.debug("RSS file already exists");
 		}
 	}
+	
+	
 	@Override
 	public List<String>  getCurrentsItemsLink() {
 		File f = new File(getFilePath());
-		if (!f.exists()) return null;
+		if (!f.exists()) return new ArrayList<String>();
 		// local call-back
 		// ---------------
 		class RssFileV1CallBack implements XmlCallBack {

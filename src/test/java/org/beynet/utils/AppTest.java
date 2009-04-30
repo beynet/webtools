@@ -62,9 +62,9 @@ public class AppTest
     public void testRssFileV1() {
     	
     	
-    	String name = "/tmp/res.xml";
-    	String url = "http://localhost/RSS/XafpToHtml.php?truc=machin&path=";
-    	String url2 = "http://localhost/RSS/XafpToHtml.php?truc=machin&amp;path=";
+    	String name = "/home/beynet/news.xml";
+    	String url = "http://xarch.par.afp.com/XafpToHtml.php?path=";
+    	String url2 = "http://xarch.par.afp.com/XafpToHtml.php?path=";
     	RssFile f = new RssFileV1("Description de ce feed","titre du RSS",url,10,name);
     	// url must be encoded
     	assertEquals(f.getUrlBase(), url2);
