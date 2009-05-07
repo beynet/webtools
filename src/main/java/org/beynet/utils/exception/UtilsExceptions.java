@@ -7,6 +7,7 @@ public enum UtilsExceptions {
 	Error_Xml,
 	Error_Io,
 	Error_Sql,
+	Error_MbeanRegistrartion,
 	
 	Error_Rss_TagEmpty,
 	

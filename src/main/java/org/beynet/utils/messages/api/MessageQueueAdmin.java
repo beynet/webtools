@@ -1,41 +1,16 @@
 package org.beynet.utils.messages.api;
 
-import java.lang.management.ManagementFactory;
-
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
+import org.beynet.utils.admin.AdminMBean;
 import org.beynet.utils.exception.UtilsException;
 
 
-public class MessageQueueAdmin implements MessageQueueAdminMBean, MessageQueue {
+public class MessageQueueAdmin extends AdminMBean implements MessageQueueAdminMBean, MessageQueue {
 
-	public MessageQueueAdmin(MessageQueue queue) {
+	public MessageQueueAdmin(MessageQueue queue) throws UtilsException {
+		super("org.beynet.utils.messages:name="+queue.getQueueName());
 		_suspended = false ;
-		
 		_queue = queue ;
-		/**
-		 * record current MBean
-		 */
-		try {
-			MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-			
-			ObjectName obj1 ;
-			
-			// enregistrement du MBean Document
-			// ---------------------------------
-			obj1 = new ObjectName("org.beynet.utils.messages:name="+_queue.getQueueName());
-			try {
-				mbs.unregisterMBean(obj1);
-			}catch (InstanceNotFoundException e) {
-				
-			}
-			mbs.registerMBean(this, obj1);
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		
 	}
 	
 	@Override
