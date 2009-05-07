@@ -62,7 +62,7 @@ public class AppTest
     public void testRssFileV1() {
     	
     	
-    	String name = "/home/beynet/news.xml";
+    	String name = "./news.xml";
     	String url = "http://xarch.par.afp.com/XafpToHtml.php?path=";
     	String url2 = "http://xarch.par.afp.com/XafpToHtml.php?path=";
     	RssFile f = new RssFileV1("Description de ce feed","titre du RSS",url,10,name);
@@ -71,10 +71,6 @@ public class AppTest
     	
     	for (int i=0;i<100;i++) {
     		try {
-    			/*try {
-//					Thread.sleep(100);
-				} catch (InterruptedException e) {
-				}*/
     			RssItem item = makeItemV1(i);
     			f.addItem(item);
     			f.write();
