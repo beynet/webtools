@@ -85,7 +85,7 @@ public class Form {
 		) {
 			requete.getSession().setAttribute("jeton_"+_id, md5Form);
 		}
-		logger.debug("Form constructed");
+		if (logger.isDebugEnabled()) logger.debug("Form constructed");
 	}
 	
 	public HttpServletRequest getRequete() {
@@ -129,7 +129,7 @@ public class Form {
 	    	  printElementById(writer,"F_"+_id,0);
 	    	  printElementById(writer,"jeton_"+_id,0);
 	      } catch (Exception e) {
-	    	  logger.debug("Formulaire mal construit !!!\n");
+	    	  if (logger.isDebugEnabled()) logger.debug("Formulaire mal construit !!!\n");
 	      }
 	      writer.print("\n</p>\n");
 	    }

@@ -96,7 +96,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 * @throws InterruptedException
 	 */
 	protected void waitForChange() throws InterruptedException{
-		logger.debug("calling native method directoryWatched");
+		if (logger.isDebugEnabled()) logger.debug("calling native method directoryWatched");
 		filesWatchedSem.P();
 		try {
 			natSelect(inotifyFd.getFd(),waitTimeout);
@@ -110,7 +110,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		File watched = directoryWatched.get(new Integer(watchId));
 		File associatedFile = null ;
 		if (watched!=null) {
-			logger.debug("On event for file="+watched.getAbsolutePath()+" "+eventId+" "+watchId+" "+associatedFilePath);
+			if (logger.isDebugEnabled()) logger.debug("On event for file="+watched.getAbsolutePath()+" "+eventId+" "+watchId+" "+associatedFilePath);
 			if (associatedFilePath!=null) {
 				associatedFile = new File(watched.getAbsolutePath()+"/"+associatedFilePath);
 			}
@@ -167,7 +167,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 
 	@Override
 	public Object call() throws Exception {
-		logger.debug("entering loop");
+		if (logger.isDebugEnabled()) logger.debug("entering loop");
 		
 		if (inotifyFd.getFd()==-1) {
 			throw new UtilsException(UtilsExceptions.Error_Io,"Error when initializing");
@@ -178,11 +178,11 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 					waitForChange();
 					processEvents();
 				} catch (InterruptedException e) {
-					logger.debug("InterruptedException -> stopping");
+					if (logger.isDebugEnabled()) logger.debug("InterruptedException -> stopping");
 					stop=true;
 				}
 				if (Thread.currentThread().isInterrupted()) {
-					logger.debug("Interruption detected -> stopping");
+					if (logger.isDebugEnabled()) logger.debug("Interruption detected -> stopping");
 					stop=true;
 				}
 			}

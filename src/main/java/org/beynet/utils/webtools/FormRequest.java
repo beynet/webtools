@@ -36,7 +36,7 @@ public class FormRequest {
 		// Check that we have a file upload request
     	_isMultipart = FileUploadBase.isMultipartContent(_request);
     	if (_isMultipart) {
-    		logger.debug("this is a multipart form");
+    		if (logger.isDebugEnabled()) logger.debug("this is a multipart form");
     		parseRequest();
     	}
 	}
@@ -55,24 +55,24 @@ public class FormRequest {
     		
     		while (iter.hasNext()) {
     			Object elem  = iter.next();
-    			logger.debug(elem.getClass().getName());
+    			if (logger.isDebugEnabled()) logger.debug(elem.getClass().getName());
     			if (elem instanceof DefaultFileItem) {
     				DefaultFileItem f = (DefaultFileItem) elem;
     				if (f.isFormField()) {
-    					logger.debug("Field "+f.getFieldName()+" found");
+    					if (logger.isDebugEnabled()) logger.debug("Field "+f.getFieldName()+" found");
     					put(f.getFieldName(), f.getString());
     				} 
     				else {
-    					logger.debug("File "+f.getFieldName()+" found");
+    					if (logger.isDebugEnabled()) logger.debug("File "+f.getFieldName()+" found");
     					try {
     						put(f.getFieldName(),new FormPostedFile(f.getName(),f.getInputStream()));
     					}catch (IOException e) {
-    						logger.debug(e.getMessage());
+    						if (logger.isDebugEnabled()) logger.debug(e.getMessage());
 	    					e.printStackTrace();
     					}
     				}
     			} else {
-    				logger.debug("Not a good instance");
+    				if (logger.isDebugEnabled()) logger.debug("Not a good instance");
     			}
     		}
     	} catch (FileUploadException e) {

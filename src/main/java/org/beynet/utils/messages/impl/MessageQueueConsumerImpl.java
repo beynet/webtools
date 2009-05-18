@@ -34,7 +34,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 				String key,value ;
 				key   = unblank(tokeni2.nextToken()) ;
 				value = unblank(tokeni2.nextToken()) ;
-				logger.debug("Adding key='"+key+"' value='"+value+"'");
+				if (logger.isDebugEnabled()) logger.debug("Adding key='"+key+"' value='"+value+"'");
 				this.properties.put(key, value);
 			}
 		}
@@ -69,12 +69,12 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 					mqBean.load((Connection)session.getStorageHandle(),queue.getQueueName(),consumerId,from);
 					message = readMessageFromBean(mqBean);
 					if (message.matchFilter(properties)) {
-						logger.debug("Message match properties");
+						if (logger.isDebugEnabled()) logger.debug("Message match properties");
 						break;
 					}
 					else {
 						from = mqBean.getMessageId();
-						logger.debug("Message does not match properties");
+						if (logger.isDebugEnabled()) logger.debug("Message does not match properties");
 						// delete message readed from queue
 						try {
 							mqBean.delete((Connection)session.getStorageHandle());
@@ -89,9 +89,9 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 			}
 			// release storage handle - waiting for new message into queue connection to storage
 			session.releaseStorageHandle();
-			logger.debug("waiting for new message");
+			if (logger.isDebugEnabled()) logger.debug("waiting for new message");
 			pending.P();
-			logger.debug("awake !");
+			if (logger.isDebugEnabled()) logger.debug("awake !");
 		}
 		// delete message readed from queue
 		try {

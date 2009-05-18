@@ -24,7 +24,7 @@ public class RssFileV1 extends RssFileCommon implements RssFile {
 		super(description, title, urlBase, maxItems, filePath);
 		File f = new File(getFilePath());
 		if (f.exists()) {
-			logger.debug("RSS file already exists");
+			if (logger.isDebugEnabled()) logger.debug("RSS file already exists");
 		}
 	}
 	

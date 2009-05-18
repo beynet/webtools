@@ -29,7 +29,7 @@ import org.beynet.utils.sqltools.interfaces.Session;
 public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	
 	public RequestFactoryImpl(Class<T> cl) {
-		logger.debug("entering constructor for class type="+cl.toString());
+		if (logger.isDebugEnabled()) logger.debug("entering constructor for class type="+cl.toString());
 		beanClass = cl;
 		Field[] tmpFields = cl.getDeclaredFields();
 		uniqIdField = null ;
@@ -47,9 +47,9 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		// ------------------------
 		int i;
 		for (i=0;i<tmpFields.length;i++) {
-			logger.debug("field number "+i+" name="+tmpFields[i].getName());
+			if (logger.isDebugEnabled()) logger.debug("field number "+i+" name="+tmpFields[i].getName());
 			if (tmpFields[i].isAnnotationPresent(SqlField.class)) {
-				logger.debug("Adding sql field "+tmpFields[i].getName()+" class="+tmpFields[i].getType().toString()+" to list");
+				if (logger.isDebugEnabled()) logger.debug("Adding sql field "+tmpFields[i].getName()+" class="+tmpFields[i].getType().toString()+" to list");
 				fields.add(tmpFields[i]);
 				SqlField f = tmpFields[i].getAnnotation(SqlField.class);
 				
@@ -225,14 +225,14 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	public void load(T sqlBean,Connection connection,String request) throws SQLException{
 		Statement stmt =  null;
 		ResultSet rs = null;
-		logger.debug(request);
+		if (logger.isDebugEnabled()) logger.debug(request);
 		try {
 			stmt =  connection.createStatement();
 			stmt.execute(request);
 			rs = stmt.getResultSet();
 			if (rs!=null && rs.next()) {
 				readFromResultSet(sqlBean,rs);
-				logger.debug("Ok bean loaded");
+				if (logger.isDebugEnabled()) logger.debug("Ok bean loaded");
 				rs.close();
 				rs=null;
 			}
@@ -261,9 +261,9 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			Field  field = fields.get(i);
 			Method set   = setMethods.get(i);
 			
-			logger.debug("Loading current field "+field.getName());
+			if (logger.isDebugEnabled()) logger.debug("Loading current field "+field.getName());
 			SqlField f = field.getAnnotation(SqlField.class);
-			logger.debug("loading field sqlname="+f.sqlFieldName()+" var name="+field.getName());
+			if (logger.isDebugEnabled()) logger.debug("loading field sqlname="+f.sqlFieldName()+" var name="+field.getName());
 			try {
 				set.invoke(sqlBean, rs.getObject(f.sqlFieldName()));				
 			}
@@ -289,7 +289,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	public void loadList(List<T> listResult,Connection connection,String request) throws SQLException{
 		Statement stmt =  null;
 		ResultSet rs   = null;
-		logger.debug("executing request="+request);
+		if (logger.isDebugEnabled()) logger.debug("executing request="+request);
 		try {
 			stmt =  connection.createStatement();
 			stmt.execute(request);
@@ -343,14 +343,14 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			String request = "select nextval('"+uniqIdSequence+"');";
 			Statement stmt =  null;
 			ResultSet rs = null;
-			logger.debug(request );
+			if (logger.isDebugEnabled()) logger.debug(request );
 			try {
 				stmt =  connection.createStatement();
 				stmt.execute(request);
 				rs = stmt.getResultSet();
 				if (rs!=null && rs.next()) {
 					nextIdVal = rs.getInt("nextval");
-					logger.debug("Ok bean loaded");
+					if (logger.isDebugEnabled()) logger.debug("Ok bean loaded");
 					rs.close();
 					rs=null;
 				}
@@ -377,7 +377,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			// we update uniq id field
 			if (currentIdVal!=null && currentIdVal.intValue()<=0) {
 				if (uniqIdSequence!=null && uniqIdSequence.length()>0) {
-					logger.debug("New id created = "+nextIdVal+" for class "+sqlBean.getClass());
+					if (logger.isDebugEnabled()) logger.debug("New id created = "+nextIdVal+" for class "+sqlBean.getClass());
 					uniqIdSetMethod.invoke(sqlBean, nextIdVal);
 				}
 				else {
@@ -385,7 +385,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 					//ResultSet rs = stmt.getResultSet();
 					if (rs!=null && rs.next()) {
 						Integer n = new Integer(rs.getInt(1));
-						logger.debug("New id created = "+n+" for class "+sqlBean.getClass());
+						if (logger.isDebugEnabled()) logger.debug("New id created = "+n+" for class "+sqlBean.getClass());
 						uniqIdSetMethod.invoke(sqlBean, n);
 						rs.close();
 					}
@@ -424,7 +424,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		if (connection instanceof Session ) {
 			 stmt = ((Session)connection).getDeleteBeanPreparedStatement(beanClass);
 			 if (stmt!=null) {
-				 logger.debug("Bean delete's prepared statement found in cache for class="+sqlBean.getClass());
+				 if (logger.isDebugEnabled()) logger.debug("Bean delete's prepared statement found in cache for class="+sqlBean.getClass());
 			 }
 		}
 		
@@ -463,7 +463,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 					firstField=false;
 				}
 				query.append(")");
-				logger.debug(query);
+				if (logger.isDebugEnabled()) logger.debug(query);
 				stmt = connection.prepareStatement(query.toString());
 				if (connection instanceof Session ) {
 					((Session)connection).setDeleteBeanPreparedStatement(beanClass, stmt);
@@ -489,7 +489,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	
 	public void delete(Connection connection,String query) throws SQLException {
 		Statement stmt =  null;
-		logger.debug(query);
+		if (logger.isDebugEnabled()) logger.debug(query);
 		try {
 			stmt =  connection.createStatement();
 			stmt.execute(query);
@@ -517,10 +517,10 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		
 		Integer val = getUniqIdValue(sqlBean);
 		if (val==null || val.intValue()<=0) {
-			logger.debug("sqlBean is a new record");
+			if (logger.isDebugEnabled()) logger.debug("sqlBean is a new record");
 		}
 		else {
-			logger.debug("sqlBean is an update");
+			if (logger.isDebugEnabled()) logger.debug("sqlBean is an update");
 			newRecord = false ;
 		}
 		
@@ -582,7 +582,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		request.append("=");
 		request.append(val);
 		
-		logger.debug("makeConsultFromIdQuery -> "+request);
+		if (logger.isDebugEnabled()) logger.debug("makeConsultFromIdQuery -> "+request);
 		return(request.toString());
 	}
 	
@@ -607,7 +607,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		SqlField f =uniqIdField.getAnnotation(SqlField.class);
 		request.append(f.sqlFieldName());
 		request.append("=?");
-		logger.debug(request);
+		if (logger.isDebugEnabled()) logger.debug(request);
 		return(request.toString());
 	}
 	/**
@@ -623,7 +623,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		if (connection instanceof Session ) {
 			 stmt = ((Session)connection).getUpdateBeanPreparedStatement(beanClass);
 			 if (stmt!=null) {
-				 logger.debug("Bean update's prepared statement found in cache");
+				 if (logger.isDebugEnabled()) logger.debug("Bean update's prepared statement found in cache");
 			 }
 		}
 		if (stmt==null) {
@@ -685,7 +685,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		request.append(") values (");
 		request.append(fieldValues);
 		request.append(")");
-		logger.debug(request);
+		if (logger.isDebugEnabled()) logger.debug(request);
 		return(request.toString());
 	}
 	
@@ -704,7 +704,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		if (connection instanceof Session ) {
 			 stmt = ((Session)connection).getSaveBeanPreparedStatement(beanClass);
 			 if (stmt!=null) {
-				 logger.debug("Bean creation's prepared statement found in cache");
+				 if (logger.isDebugEnabled()) logger.debug("Bean creation's prepared statement found in cache");
 				 stmt.clearParameters();
 			 }
 		}
@@ -755,7 +755,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		Statement stmt =  null;
 		ResultSet rs = null;
 		Integer res = 0;
-		logger.debug(request);
+		if (logger.isDebugEnabled()) logger.debug(request);
 		try {
 			stmt =  connection.createStatement();
 			stmt.execute(request);

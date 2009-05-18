@@ -120,27 +120,27 @@ public class XmlReader {
 				}
 			}
 			if (_state == XmlReaderState.XML_BEGIN_DOCUMENT) {
-				logger.debug("State XML_BEGIN_DOCUMENT");
-				logger.debug("level ="+_level);
+				if (logger.isDebugEnabled()) logger.debug("State XML_BEGIN_DOCUMENT");
+				if (logger.isDebugEnabled()) logger.debug("level ="+_level);
 				parseBegin();
 			}
 			if (_state == XmlReaderState.XML_PARSE_TAG) {
-				logger.debug("State XML_PARSE_TAG");
-				logger.debug("level ="+_level);
+				if (logger.isDebugEnabled()) logger.debug("State XML_PARSE_TAG");
+				if (logger.isDebugEnabled()) logger.debug("level ="+_level);
 				parseTag();
 			}
 			if (_state == XmlReaderState.XML_PARSE_CONTENT) {
-				logger.debug("State XML_PARSE_CONTENT");
-				logger.debug("level ="+_level);
+				if (logger.isDebugEnabled()) logger.debug("State XML_PARSE_CONTENT");
+				if (logger.isDebugEnabled()) logger.debug("level ="+_level);
 				parseContent();
 			}
 			if (_state == XmlReaderState.XML_PARSE_CDATA) {
-				logger.debug("State XML_PARSE_CDATA");
-				logger.debug("level ="+_level);
+				if (logger.isDebugEnabled()) logger.debug("State XML_PARSE_CDATA");
+				if (logger.isDebugEnabled()) logger.debug("level ="+_level);
 				parseCData();
 			}
 			if (_state == XmlReaderState.XML_PARSE_COMMENT) {
-				logger.debug("State XML_PARSE_COMMENT level="+_level);
+				if (logger.isDebugEnabled()) logger.debug("State XML_PARSE_COMMENT level="+_level);
 				parseComment();
 			}
 		}
@@ -193,7 +193,7 @@ public class XmlReader {
 				}
 				System.out.println("");
 			}
-			logger.debug("new attribut:"+attributName+" val="+attributValue);
+			if (logger.isDebugEnabled()) logger.debug("new attribut:"+attributName+" val="+attributValue);
 			attributes.put(attributName, attributValue);
 		}
 	}
@@ -307,12 +307,12 @@ public class XmlReader {
 			for (XmlCallBack toCall : _callBacks) {
 				toCall.onCloseTag(_nomBalise, tagName);
 			}
-			logger.debug("Closed Tag detected :"+tagName+" size="+_nomBalise.size());
+			if (logger.isDebugEnabled()) logger.debug("Closed Tag detected :"+tagName+" size="+_nomBalise.size());
 			// last tag found 
 			// we mark document as finished
 			// ----------------------------
 			if (_level==0) {
-				logger.debug("Last tag detected :"+tagName);
+				if (logger.isDebugEnabled()) logger.debug("Last tag detected :"+tagName);
 				_state = XmlReaderState.XML_PARSE_END;
 			} else {
 				_state = XmlReaderState.XML_PARSE_CONTENT;
@@ -337,7 +337,7 @@ public class XmlReader {
 	
 	private void parseComment() throws UtilsException {
 		int pos ;
-		logger.debug("Parsing comment");
+		if (logger.isDebugEnabled()) logger.debug("Parsing comment");
 		do {
 			pos = findCharUTF8("-");
 
@@ -428,7 +428,7 @@ public class XmlReader {
 			}
 		} else {
 			String deb=new String(_currentBuffer,pos,MIN(10,_currentBuffer.length-pos));
-			logger.debug(" First tag found:"+deb);
+			if (logger.isDebugEnabled()) logger.debug(" First tag found:"+deb);
 			_state = XmlReaderState.XML_PARSE_TAG;
 			UPDATE_OFFSET_PARSING(pos); 
 		}
@@ -609,16 +609,16 @@ public class XmlReader {
 			return;
 		}
 
-		logger.debug(" < found");
+		if (logger.isDebugEnabled()) logger.debug(" < found");
 		pos2 = findCharUTF8(">");
 
 		// if no > found
 		// -------------
 		if (pos2==Integer.MAX_VALUE) {
-			logger.debug(" > NOT found");
+			if (logger.isDebugEnabled()) logger.debug(" > NOT found");
 			return;
 		} else {
-			logger.debug(" >  found:"+pos2);
+			if (logger.isDebugEnabled()) logger.debug(" >  found:"+pos2);
 		}
 
 		save2 = _currentBuffer[pos2+1];
@@ -635,7 +635,7 @@ public class XmlReader {
 	    Matcher m = _pHeader.matcher(comp);
 		if ( m.find()==true ) {
 			_currentBuffer[pos2+1]=save2;
-			logger.debug("Header XML readed");
+			if (logger.isDebugEnabled()) logger.debug("Header XML readed");
 
 			_state = XmlReaderState.XML_BEGIN_DOCUMENT ;
 			_encoding = m.group(4);

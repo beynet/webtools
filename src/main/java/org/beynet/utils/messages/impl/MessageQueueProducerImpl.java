@@ -26,7 +26,7 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 	
 	@Override
 	public synchronized void addMessage(Message message) throws UtilsException {
-		logger.debug("adding new message to queue");
+		if (logger.isDebugEnabled()) logger.debug("adding new message to queue");
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		try {
 			ObjectOutputStream out = new ObjectOutputStream(bos);
@@ -55,10 +55,10 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 				throw new UtilsException(UtilsExceptions.Error_Io,e);
 			}
 		}
-		logger.debug("sending notification");
+		if (logger.isDebugEnabled()) logger.debug("sending notification");
 		session.onMessage();
 		session.releaseStorageHandle();
-		logger.debug("end of adding new message");
+		if (logger.isDebugEnabled()) logger.debug("end of adding new message");
 	}
 	
 	

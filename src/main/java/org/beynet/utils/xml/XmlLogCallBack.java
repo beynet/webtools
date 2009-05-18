@@ -16,20 +16,20 @@ public class XmlLogCallBack implements XmlCallBack {
 	@Override
 	public void onCloseTag(List<String> parents, String tagName)
 			throws UtilsException {
-		logger.debug("Closing Tag : "+tagName);
+		if (logger.isDebugEnabled()) logger.debug("Closing Tag : "+tagName);
 	}
 
 	@Override
 	public void onNewTag(List<String> parents, String tagName)
 			throws UtilsException {
-		logger.debug("New Tag : "+tagName);
+		if (logger.isDebugEnabled()) logger.debug("New Tag : "+tagName);
 	}
 
 	@Override
 	public void onNewTagAttributs(List<String> parents, String tagName,
 			Map<String, String> tagValues) throws UtilsException {
 		for (String name : tagValues.keySet()) {
-			logger.debug("Tags attributs name="+name+" value="+tagValues.get(name));
+			if (logger.isDebugEnabled()) logger.debug("Tags attributs name="+name+" value="+tagValues.get(name));
 		}
 		
 	}

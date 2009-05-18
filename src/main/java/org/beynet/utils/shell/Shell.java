@@ -58,33 +58,6 @@ public class Shell  implements Callable<String> {
 		return(result);
 	}
 	
-	/*private String readLine() throws IOException {
-		StringBuffer buffer = readBuffer;
-		buffer.append(readBuffer);
-		readBuffer = new StringBuffer();
-		int readed =-1;
-		do {
-			readed = is.read();
-			if (readed!=-1) {
-				if (readed=='\n') {
-					break;
-				}
-				if (readed=='\r') {
-					if (is.available()>0) {
-						readed = is.read();
-						if (readed!='\n') {
-							readBuffer.append((char)readed);
-						}
-					}
-					break;
-				}
-				buffer.append((char)readed);
-			}
-		} while (readed!=-1);
-		
-		return(buffer.toString());
-	}*/
-	
 	@Override
 	public String call() throws Exception {
 		boolean timeout = false ;
@@ -113,7 +86,7 @@ public class Shell  implements Callable<String> {
 			}
 			else {
 				if (Thread.currentThread().isInterrupted()) {
-					logger.debug("Thread interrupted");
+					if (logger.isDebugEnabled()) logger.debug("Thread interrupted");
 					stop=true;
 					break;
 				}
