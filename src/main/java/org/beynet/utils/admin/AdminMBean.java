@@ -9,7 +9,11 @@ import javax.management.ObjectName;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 
-
+/**
+ * the aim of that class is to help creating an MBean
+ * @author beynet
+ *
+ */
 public abstract class AdminMBean {
 	protected AdminMBean(String objectName) throws UtilsException {
 		// enregistrement du mbean de gestion des clients
