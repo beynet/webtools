@@ -71,13 +71,18 @@ public abstract class RssFileCommon extends RssCommon implements RssFile {
 				throw new UtilsException(UtilsExceptions.Error_Io,"Could not delete file");
 			}
 		}
-		OutputStream os = null ;
+		FileOutputStream os = null ;
 		try {
 			os = new FileOutputStream(dest);
 		} catch (FileNotFoundException e) {
 			throw new UtilsException(UtilsExceptions.Error_Io,e);
 		}
 		_write(os);
+		try {
+			os.getFD().sync();
+		}catch(Exception e) {
+			throw new UtilsException(UtilsExceptions.Error_Io,e);
+		}
 		try {
 			os.close();
 		} catch (IOException e) {
