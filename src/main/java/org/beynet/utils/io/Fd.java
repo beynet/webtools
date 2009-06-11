@@ -11,6 +11,17 @@ public class Fd {
 	public int getFd() {
 		return(_fd);
 	}
+	
+	
+	
+	public void fsync() throws UtilsException {
+		if (_fd==-1) throw new UtilsException(UtilsExceptions.Error_Param,"Invalid file descriptor");
+		int res = natFsync(_fd);
+		if (res!=0) {
+			throw new UtilsException(UtilsExceptions.Error_Io,"fsync error");
+		}
+	}
+	
 	/**
 	 * initialise native interface
 	 * @return
@@ -23,6 +34,8 @@ public class Fd {
 	}
 	
 	private native int natClose(int fd) ;
+	
+	private native int natFsync(int fd) ;
 	
 	private int _fd ;
 	

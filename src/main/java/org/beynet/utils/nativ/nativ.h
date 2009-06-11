@@ -16,7 +16,13 @@ extern "C" {
 JNIEXPORT jint JNICALL Java_org_beynet_utils_io_Fd_natClose
   (JNIEnv *, jobject,jint);
 
-
+/*
+ * Class:     Fd
+ * Method:    natFsync
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_beynet_utils_io_Fd_natFsync
+  (JNIEnv *, jobject,jint);
 
 
 /*

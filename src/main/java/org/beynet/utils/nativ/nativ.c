@@ -44,7 +44,15 @@ JNIEXPORT jint JNICALL Java_org_beynet_utils_io_Fd_natClose
   return(close(fd));
  }
 
-
+/*
+ * Class:     Fd
+ * Method:    natFsync
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_beynet_utils_io_Fd_natFsync
+  (JNIEnv *env, jobject obj,jint fd) {
+ return(fsync(fd));
+ }
 
 JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natInit
 (JNIEnv * env, jobject obj) {
