@@ -20,4 +20,10 @@ public interface MessageQueueConsumer {
 	 * @throws UtilsException
 	 */
 	public void   onMessage() ;
+	
+	/**
+	 * return consumer id
+	 * @return
+	 */
+	public String getId();
 }

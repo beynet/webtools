@@ -121,6 +121,11 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		this.properties = new HashMap<String, String>();
 	}
 	
+	@Override
+	public String getId() {
+		return(consumerId);
+	}
+	
 	private String unblank(String input) {
 		String result =null ;
 		int    offset = 0;
@@ -141,6 +146,6 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 	private MessageQueueSession    session    ;
 	private Semaphore              pending    ;
 	private String                 consumerId ;
-	private Logger                 logger = Logger.getLogger(MessageQueueConsumer.class);
+	private Logger                 logger = Logger.getLogger(MessageQueueConsumerImpl.class);
 	private Map<String,String>     properties  ;
 }

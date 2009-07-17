@@ -62,7 +62,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 			}
 		}catch (Exception e) {
 			e.printStackTrace();
-			logger.error("Could not create queue consumer");
+			logger.error("Could not delete queue consumer");
 		}
 	}
 	
