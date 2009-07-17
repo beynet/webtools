@@ -9,6 +9,8 @@ public enum UtilsExceptions {
 	Error_Sql,
 	Error_MbeanRegistrartion,
 	
+	Error_VSMB_SystemStopped,
+	
 	Error_Rss_TagEmpty,
 	
 	Shell_Stop,

@@ -5,10 +5,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
+import org.beynet.utils.io.vsmb.impl.VSMBBean;
+import org.beynet.utils.io.vsmb.impl.VSMBMessageTest;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
@@ -20,10 +26,6 @@ import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
 import org.beynet.utils.xml.rss.RssItem;
 import org.beynet.utils.xml.rss.RssItemV1;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 /**
  * Unit test for simple App.
@@ -245,6 +247,47 @@ public class AppTest
 		MessageQueue         queue    ;
 	}
     
+    
+    
+    public void testVSMB() {
+    	String sqlUrl = "jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser" ;
+    	String sqlDriverName = "org.postgresql.Driver" ;
+    	
+    	
+    	VSMBBean bTest = new VSMBBean();
+        bTest.setPort(8091);
+        bTest.setMaxClientByThread(10);
+        bTest.setServiceAdress("*");
+        bTest.setDebugDataBaseClassName(sqlDriverName);
+        bTest.setDebugDataBaseUrl(sqlUrl);
+    	bTest.setQueueName("VSMBTest");
+    	Thread t = new Thread(bTest);
+    	t.start();
+    	
+    	
+    	try {
+    		Thread.sleep(10*1000);
+    	} catch (InterruptedException e) {
+    		assertTrue(false);
+		}
+    	for (int i=0;i<10;i++) {
+    		VSMBMessageTest test = new VSMBMessageTest("essai de message "+i+"\r\n");
+    		try {
+    			bTest.addMessage(test);
+    		} catch (UtilsException e) {
+    			e.printStackTrace();
+    			assertTrue(false);
+    		}
+    	}
+    	t.interrupt();
+    	
+    	while (t.isAlive()) {
+    		try {
+    			t.join();
+    		} catch (InterruptedException e) {
+    		}
+    	}
+    }
     
 
     /**
