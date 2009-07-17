@@ -1,12 +1,12 @@
-package org.beynet.utils.io.vsmb.impl;
+package org.beynet.utils.io.vsmb.impl.tcp;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
+import org.beynet.utils.io.vsmb.VSMBClient;
 import org.beynet.utils.io.vsmb.VSMBClientManager;
 import org.beynet.utils.io.vsmb.VSMBMessage;
 import org.beynet.utils.messages.api.Message;
@@ -19,11 +19,11 @@ import org.beynet.utils.messages.api.MessageQueueSession;
  * @author beynet
  *
  */
-public class VSMBClientManagerImpl implements VSMBClientManager{
+public class VSMBClientManagerTcp implements VSMBClientManager{
 	
-	public VSMBClientManagerImpl(MessageQueue queue,int id) throws UtilsException{
-		clients = new ArrayList<Socket>();
-		toRemove = new ArrayList<Socket>();
+	public VSMBClientManagerTcp(MessageQueue queue,int id) throws UtilsException{
+		clients = new ArrayList<VSMBClientTcp>();
+		toRemove = new ArrayList<VSMBClientTcp>();
 		stop=false;
 		this.queue = queue ;
 		session = queue.createSession(true);
@@ -37,12 +37,12 @@ public class VSMBClientManagerImpl implements VSMBClientManager{
 		Object tmp = qMessage.getObject();
 		if (tmp instanceof VSMBMessage) {
 			VSMBMessage message = (VSMBMessage)tmp ;
-			for (Socket client : clients) {
+			for (VSMBClientTcp client : clients) {
 				try {
-					message.sendToStream(client.getOutputStream());
+					message.send(client);
 				}
-				catch(IOException e) {
-					logger.error("Error sending message to client:"+client.getInetAddress().toString());
+				catch(UtilsException e) {
+					logger.error("Error sending message to client:"+client.getSocket().getInetAddress().toString());
 					toRemove.add(client);
 				}
 			}
@@ -52,7 +52,7 @@ public class VSMBClientManagerImpl implements VSMBClientManager{
 		} catch (UtilsException e) {
 			logger.error("could not commit message",e);
 		}
-		for (Socket client : toRemove) {
+		for (VSMBClientTcp client : toRemove) {
 			removeClient(client);
 		}
 		toRemove.clear();
@@ -92,18 +92,18 @@ public class VSMBClientManagerImpl implements VSMBClientManager{
 	}
 	
 	protected void removeClients() {
-		for (Socket client : clients) {
+		for (VSMBClientTcp client : clients) {
 			toRemove.add(client);
 		}
-		for (Socket client : toRemove) {
+		for (VSMBClientTcp client : toRemove) {
 			removeClient(client);
 		}
 		toRemove.clear();
 		clients.clear();
 	}
-	protected void removeClient(Socket client) {
+	protected void removeClient(VSMBClientTcp client) {
 		try {
-			client.close();
+			client.getSocket().close();
 		} catch (IOException e) {
 			logger.error("could not close socket",e);
 		}
@@ -111,8 +111,14 @@ public class VSMBClientManagerImpl implements VSMBClientManager{
 	}
 
 	@Override
-	public void addClient(Socket s) {
-		clients.add(s);
+	public void addClient(VSMBClient c) {
+		if (c instanceof VSMBClientTcp) {
+			VSMBClientTcp client = (VSMBClientTcp) c;
+			clients.add(client);
+		}
+		else {
+			logger.error("Could not add client - not a tcp client");
+		}
 	}
 
 	@Override
@@ -120,12 +126,12 @@ public class VSMBClientManagerImpl implements VSMBClientManager{
 		return(clients.size());
 	}
 
-	protected List<Socket> clients   ;
-	protected List<Socket> toRemove  ;
+	protected List<VSMBClientTcp> clients   ;
+	protected List<VSMBClientTcp> toRemove  ;
 	protected boolean      stop      ;
 	protected MessageQueue queue ;
 	protected MessageQueueSession session ;
 	protected MessageQueueConsumer consumer;
 	
-	private static Logger logger = Logger.getLogger(VSMBClientManagerImpl.class);
+	private static Logger logger = Logger.getLogger(VSMBClientManagerTcp.class);
 }

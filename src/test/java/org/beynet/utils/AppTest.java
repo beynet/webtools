@@ -13,8 +13,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
-import org.beynet.utils.io.vsmb.impl.VSMBBean;
-import org.beynet.utils.io.vsmb.impl.VSMBMessageTest;
+import org.beynet.utils.io.vsmb.impl.tcp.VSMBMessageTcpTest;
+import org.beynet.utils.io.vsmb.impl.tcp.VSMBServerTcpBean;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
@@ -254,7 +254,7 @@ public class AppTest
     	String sqlDriverName = "org.postgresql.Driver" ;
     	
     	
-    	VSMBBean bTest = new VSMBBean();
+    	VSMBServerTcpBean bTest = new VSMBServerTcpBean();
         bTest.setPort(8091);
         bTest.setMaxClientByThread(10);
         bTest.setServiceAdress("*");
@@ -271,7 +271,7 @@ public class AppTest
     		assertTrue(false);
 		}
     	for (int i=0;i<10;i++) {
-    		VSMBMessageTest test = new VSMBMessageTest("essai de message "+i+"\r\n");
+    		VSMBMessageTcpTest test = new VSMBMessageTcpTest("essai de message "+i+"\r\n");
     		try {
     			bTest.addMessage(test);
     		} catch (UtilsException e) {

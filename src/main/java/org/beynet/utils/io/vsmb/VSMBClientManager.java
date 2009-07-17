@@ -1,6 +1,5 @@
 package org.beynet.utils.io.vsmb;
 
-import java.net.Socket;
 
 /**
  * a client manager handle a pool of client
@@ -16,9 +15,9 @@ public interface VSMBClientManager extends Runnable {
 	int getTotalManagedClients() ;
 	
 	/**
-	 * add a new client to current client manager
+	 * give a new client to current client manager
 	 * @param s
 	 */
-	void addClient(Socket s) ;
+	void addClient(VSMBClient s) ;
 
 }

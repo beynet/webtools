@@ -1,4 +1,4 @@
-package org.beynet.utils.io.vsmb.impl;
+package org.beynet.utils.io.vsmb.impl.tcp;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -28,15 +28,17 @@ import org.beynet.utils.messages.api.MessageQueueSession;
 
 
 /**
- * Configuration Bean - every instance of this class handle a VSMB system
+ * Implements a VSMBServer which listen on a tcp port and send message received to connected clients
+ * on this port
+ * This class is also a Bean - should be configured by a beanfactory
  * every connection at port=this.port on address=this.address will be given to
- * an instance of VSMBClientManager
+ * an instance of VSMBClientManagerSocket
  * @author beynet
  *
  */
-public class VSMBBean implements VSMBServer {
+public class VSMBServerTcpBean implements VSMBServer {
 	
-	public VSMBBean() {
+	public VSMBServerTcpBean() {
 		maxClientByThread = 10 ;
 		maxThread = 10         ;
 		queueName = null ;
@@ -277,7 +279,7 @@ public class VSMBBean implements VSMBServer {
 		boolean given = false ;
 		for (VSMBClientManager manager : managers) {
 			if (manager.getTotalManagedClients()<maxClientByThread) {
-				manager.addClient(client);
+				manager.addClient(new VSMBClientTcp(client));
 				given = true ;
 			}
 		}
@@ -296,12 +298,12 @@ public class VSMBBean implements VSMBServer {
 	 * @param client
 	 */
 	protected void addManager(Socket client) throws UtilsException{
-		VSMBClientManager manager = new VSMBClientManagerImpl(queue,managers.size()) ;
+		VSMBClientManager manager = new VSMBClientManagerTcp(queue,managers.size()) ;
 		managers.add(manager);
 		Thread t = new Thread(manager) ;
 		managersThread.add(t);
 		t.start();
-		manager.addClient(client);
+		manager.addClient(new VSMBClientTcp(client));
 	}
 
 
@@ -320,5 +322,5 @@ public class VSMBBean implements VSMBServer {
 	protected MessageQueueSession session = null ;
 	protected MessageQueueProducer producer = null ;
 	
-	private static Logger logger = Logger.getLogger(VSMBBean.class);
+	private static Logger logger = Logger.getLogger(VSMBServerTcpBean.class);
 }
