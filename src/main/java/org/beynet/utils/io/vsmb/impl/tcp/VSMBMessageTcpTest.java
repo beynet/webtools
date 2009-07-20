@@ -1,7 +1,6 @@
 package org.beynet.utils.io.vsmb.impl.tcp;
 
 import java.io.IOException;
-import java.io.Serializable;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
@@ -9,7 +8,7 @@ import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.io.vsmb.VSMBClient;
 import org.beynet.utils.io.vsmb.VSMBMessage;
 
-public class VSMBMessageTcpTest implements VSMBMessage, Serializable {
+public class VSMBMessageTcpTest implements VSMBMessage {
 	/**
 	 * 
 	 */
