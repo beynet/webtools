@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
-import org.beynet.utils.messages.api.MessageQueueBean;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 

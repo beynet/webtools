@@ -14,7 +14,6 @@ import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.io.CustomObjectInputStream;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
-import org.beynet.utils.messages.api.MessageQueueBean;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.tools.Semaphore;

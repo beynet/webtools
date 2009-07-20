@@ -1,4 +1,4 @@
-package org.beynet.utils.messages.api;
+package org.beynet.utils.messages.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,6 +21,10 @@ public class MessageQueueConsumersBean {
 	
 	public MessageQueueConsumersBean() {
 		queueId = consumerId = null ;
+	}
+	
+	public static void createTable(Connection connection) throws SQLException {
+		requestFactory.createTable(connection);
 	}
 	
 	public void setQueueId(String queueId) {

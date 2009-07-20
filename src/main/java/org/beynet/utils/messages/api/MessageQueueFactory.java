@@ -8,6 +8,8 @@ import javax.sql.DataSource;
 
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
+import org.beynet.utils.messages.impl.MessageQueueBean;
+import org.beynet.utils.messages.impl.MessageQueueConsumersBean;
 import org.beynet.utils.messages.impl.MessageQueueImpl;
 
 
@@ -32,8 +34,8 @@ public class MessageQueueFactory {
 			connection = dataSource.getConnection();
 			connection.setAutoCommit(true);
 			// first create sql table (if needed)
-			MessageQueueBean.requestFactory.createTable(connection);
-			MessageQueueConsumersBean.requestFactory.createTable(connection);
+			MessageQueueBean.createTable(connection);
+			MessageQueueConsumersBean.createTable(connection);
 			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,dataSource)));
 		}
 		catch (SQLException e) {
@@ -66,8 +68,8 @@ public class MessageQueueFactory {
 			connection  = DriverManager.getConnection(sqlUrl);
 			connection.setAutoCommit(true);
 			// first create sql table (if needed)
-			MessageQueueBean.requestFactory.createTable(connection);
-			MessageQueueConsumersBean.requestFactory.createTable(connection);
+			MessageQueueBean.createTable(connection);
+			MessageQueueConsumersBean.createTable(connection);
 			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,sqlDriverName,sqlUrl)));
 		}
 		catch (SQLException e) {

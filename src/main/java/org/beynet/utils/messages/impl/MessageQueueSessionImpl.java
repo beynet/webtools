@@ -11,7 +11,6 @@ import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConnection;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
-import org.beynet.utils.messages.api.MessageQueueConsumersBean;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 

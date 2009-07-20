@@ -1,4 +1,4 @@
-package org.beynet.utils.messages.api;
+package org.beynet.utils.messages.impl;
 
 import java.sql.Blob;
 import java.sql.Connection;
@@ -22,6 +22,10 @@ public class MessageQueueBean {
 	public MessageQueueBean() {
 		this.messageId = 0 ;
 		this.message = null ;
+	}
+	
+	public static void createTable(Connection connection) throws SQLException {
+		requestFactory.createTable(connection);
 	}
 	/**
 	 * save current queuebean
