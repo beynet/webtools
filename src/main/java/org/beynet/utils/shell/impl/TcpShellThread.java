@@ -25,11 +25,12 @@ import org.beynet.utils.shell.ShellCommandResult;
 
 /**
  * user should extend this class to create a shell
+ * shell will be running inside a new thread - a tcp server socket is created
  * @author beynet
  *
  */
-public class ShellThread  implements Shell,Callable<String> {
-	public ShellThread(BufferedReader br,OutputStream os) {
+public class TcpShellThread  implements Shell,Callable<String> {
+	public TcpShellThread(BufferedReader br,OutputStream os) {
 		commands = new HashMap<String, ShellCommand>();
 		stop=false;
 		this.os=os;
@@ -181,5 +182,5 @@ public class ShellThread  implements Shell,Callable<String> {
 	ShellCommandResult         pendingResult ;
 	Future<ShellCommandResult> commandFuture ;
 	
-	private static Logger logger = Logger.getLogger(ShellThread.class);
+	private static Logger logger = Logger.getLogger(TcpShellThread.class);
 }
