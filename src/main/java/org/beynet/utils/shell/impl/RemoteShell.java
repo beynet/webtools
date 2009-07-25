@@ -50,7 +50,7 @@ public class RemoteShell implements Shell {
 	@Override
 	public ShellCommandResult execute(String commandLine)
 			throws RemoteException {
-		executor = Executors.newFixedThreadPool(1);
+		ExecutorService executor = Executors.newFixedThreadPool(1);
 		ShellCommand command;
 		List<String> commandArgs = parseCommandLine(commandLine);
 		if ("".equals(commandLine) || commandArgs.size()==0) {
@@ -62,14 +62,12 @@ public class RemoteShell implements Shell {
 				command = commands.get("help".toUpperCase());
 			}
 		}
-		pendingResult = (ShellCommandResult)UnicastRemoteObject.exportObject(new ShellCommandResultImpl(),rmiPort);
+		ShellCommandResult pendingResult = (ShellCommandResult)UnicastRemoteObject.exportObject(new ShellCommandResultImpl(),rmiPort);
 		executor.submit(new ShellTask(command,commandArgs,pendingResult));
 		executor.shutdown();
 		return(pendingResult);
 	}
 
-	private ExecutorService    executor      ;
-	private ShellCommandResult pendingResult ;
 	private int                rmiPort          ;
 	
 	private Map<String,ShellCommand> commands;
