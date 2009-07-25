@@ -1,12 +1,8 @@
 package org.beynet.utils.shell;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
+import java.rmi.RemoteException;
 
 import org.apache.log4j.Logger;
-import org.beynet.utils.exception.UtilsException;
-import org.beynet.utils.exception.UtilsExceptions;
 
 /**
  * command helper - user's command should extend this class 
@@ -14,21 +10,16 @@ import org.beynet.utils.exception.UtilsExceptions;
  *
  */
 public abstract class AbstractCommand implements ShellCommand{
-	protected void sendString(OutputStream os,String s) throws UtilsException {
+	protected void sendResult(StringBuffer buffer,ShellCommandResult result)  {
 		try {
-			os.write(s.getBytes());
-		} catch (IOException e) {
-			logger.error(e);
-			throw new UtilsException(UtilsExceptions.Error_Io,e);
+			result.addOutput(buffer);
+			buffer.delete(0, buffer.length());
+		} catch (RemoteException e) {
+			logger.error("failed to send commnd result");
 		}
 	}
 	
-	@Override
-	public void setCommandArgs(List<String> commandArgs) {
-		this.commandArgs= commandArgs ;
-	}
 	
 	private static Logger logger = Logger.getLogger(AbstractCommand.class);
 	
-	protected List<String> commandArgs ;
 }

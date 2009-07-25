@@ -1,13 +1,11 @@
 package org.beynet.utils.shell;
 
-import java.io.BufferedReader;
-import java.io.OutputStream;
 import java.util.List;
 
 import org.beynet.utils.exception.UtilsException;
 
 /**
- * a command execute by a shell must implements this interface
+ * a command executed by a shell must implements this interface
  * @author beynet
  *
  */
@@ -23,16 +21,12 @@ public interface ShellCommand {
 	 */
 	public String getDescription();
 	/**
-	 * execute command - output is written to os
-	 * if an UtilsException is thrown with error = Shell_Stop - current shell is stopped
+	 * execute command - output is written into result
+	 * if an UtilsException is thrown with error = Shell_Stop - underlying shell should
+	 * call it's stop method
 	 * @param os
 	 * @throws UtilsException
 	 */
-	public void execute(BufferedReader br,OutputStream os) throws UtilsException ;
+	public void execute(List<String> arguments,ShellCommandResult result) throws UtilsException ;
 	
-	/**
-	 * set command line
-	 * @param commandArgs
-	 */
-	public void setCommandArgs(List<String> commandArgs) ;
 }

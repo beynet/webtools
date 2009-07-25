@@ -1,6 +1,8 @@
 package org.beynet.utils;
 
 
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -21,6 +23,8 @@ import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueFactory;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
+import org.beynet.utils.shell.ShellCommandResult;
+import org.beynet.utils.shell.impl.ShellCommandResultImpl;
 import org.beynet.utils.xml.XmlReader;
 import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
@@ -298,6 +302,88 @@ public class AppTest
         return new TestSuite( AppTest.class );
     }
 
+    
+    private  class ThreadAdd extends Thread {
+    	public ThreadAdd(ShellCommandResult s) {
+    		result=s;
+    	}
+		public void run() {
+			StringBuffer buffer = new StringBuffer();
+			for (int i=0;i<10;i++) {
+				buffer.append("message number ");
+				buffer.append(i);
+				buffer.append("\r\n");
+				try {
+					sleep((long) (Math.random()*500));
+				} catch (InterruptedException e) {
+				}
+				try {
+					result.addOutput(buffer);
+					buffer.delete(0, buffer.length());
+				}
+				catch(RemoteException e) {
+					e.printStackTrace();
+					assertTrue(false);
+				}
+			}
+			try {
+				result.setStopped();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+				assertTrue(false);
+			}
+		}
+		ShellCommandResult result;
+	};
+	private class ThreadGet extends Thread {
+		public ThreadGet(ShellCommandResult s) {
+    		result=s;
+    	}
+		public void run() {
+			for (int i=0;i<10;i++) {
+				try {
+					try {
+						sleep((long) (Math.random()*1000));
+					} catch (InterruptedException e) {
+					}
+					try {
+						StringBuffer buffer = result.getPendingOutput();
+						if (buffer!=null) System.out.println("message readed="+buffer.toString());
+					} catch(RemoteException e) {
+						e.printStackTrace();
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		}
+		ShellCommandResult result;
+	};
+    
+    public void testShellCommandResult() {
+    	ShellCommandResult res = null ;
+    	try {
+    		res = (ShellCommandResult)UnicastRemoteObject.exportObject(new ShellCommandResultImpl(),0);
+    	}
+    	catch(RemoteException e) {
+    		e.printStackTrace();
+    		assertTrue(false);
+    	}
+    	Thread t1 , t2 ;
+    	t1 = new ThreadAdd(res);
+    	t2 = new ThreadGet(res);
+    	t2.start();
+    	t1.start();
+    	try {
+			t2.join();
+			t1.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    }
+    
     /**
      * Rigourous Test :-)
      */
