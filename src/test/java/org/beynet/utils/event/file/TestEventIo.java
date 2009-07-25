@@ -74,18 +74,6 @@ public class TestEventIo extends TestCase {
 			Thread.sleep(15*1000);
 		} catch (InterruptedException e) {
 		}
-		/*Message message = null;
-		do {
-			try {
-				message=consumer.readMessage();
-				FileChangeEvent event = (FileChangeEvent)message.getObject();
-				logger.debug("event readed:"+event.getEvent());
-			} catch (Exception e) {
-				e.printStackTrace();
-				assertTrue(false);
-			}
-		}
-		while (message!=null);*/
 	}
 
 	private Logger logger=Logger.getLogger(TestEventIo.class);
