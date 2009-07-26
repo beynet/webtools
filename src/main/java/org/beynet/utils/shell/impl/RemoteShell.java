@@ -28,7 +28,7 @@ public class RemoteShell implements Shell {
 	 * @param command
 	 * @throws RemoteException
 	 */
-	public void addCommand(ShellCommand command) throws RemoteException {
+	public void addCommand(ShellCommand command) {
 		commands.put(command.getName().toUpperCase(), command);
 	}
 
