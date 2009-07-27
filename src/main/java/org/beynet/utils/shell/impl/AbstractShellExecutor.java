@@ -2,7 +2,10 @@ package org.beynet.utils.shell.impl;
 
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -13,7 +16,19 @@ import org.beynet.utils.shell.ShellSession;
 
 public abstract class AbstractShellExecutor implements ShellExecutor {
 	public AbstractShellExecutor(int rmiPort) {
+		commands = new ArrayList<ShellCommand>();
+		toRemove = new ArrayList<RemoteShell>();
+		shells = new ArrayList<RemoteShell>();
 		this.rmiPort = rmiPort;
+		try {
+			logger.info("Creating rmi rgistry at port "+rmiPort);
+			registry = LocateRegistry.createRegistry(rmiPort);
+			ShellExecutor _executorStub =(ShellExecutor)UnicastRemoteObject.exportObject(this,rmiPort);
+			registry.rebind("ShellExecutor", _executorStub);
+			System.out.println("Shell executor bound");
+		}catch(RemoteException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	private void removeDeadShells() {
@@ -45,6 +60,16 @@ public abstract class AbstractShellExecutor implements ShellExecutor {
 			}
 		}
 		removeDeadShells();
+		try {
+			registry.unbind("ShellExecutor");
+			UnicastRemoteObject.unexportObject(this,true);
+			if (logger.isDebugEnabled()) logger.debug("unexport shellexecutor ok");
+			
+			UnicastRemoteObject.unexportObject(registry,true);
+			if (logger.isDebugEnabled()) logger.debug("unexport registry ok");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 	/**
 	 * user should implement this method to fill session 
@@ -71,8 +96,9 @@ public abstract class AbstractShellExecutor implements ShellExecutor {
 	protected int rmiPort ;
 	
 	protected List<ShellCommand> commands ;
-	protected List<RemoteShell>        shells   ;
-	protected List<RemoteShell>        toRemove ;
+	protected List<RemoteShell>  shells   ;
+	protected List<RemoteShell>  toRemove ;
+	protected Registry           registry ;
 	
 	private static Logger logger = Logger.getLogger(AbstractShellExecutor.class);
 	public final static String SESSION_NAME = "session";
