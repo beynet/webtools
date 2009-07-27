@@ -32,7 +32,10 @@ public class RemoteShell implements Shell {
 	}
 
 
-	
+	/**
+	 * wait to end of current running command
+	 * @throws RemoteException
+	 */
 	private void waitForCommandEnd() throws RemoteException {
 		if (pendingResult!=null ) {
 			try {
