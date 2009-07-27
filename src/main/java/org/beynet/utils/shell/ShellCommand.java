@@ -27,6 +27,6 @@ public interface ShellCommand {
 	 * @param os
 	 * @throws UtilsException
 	 */
-	public void execute(List<String> arguments,ShellCommandResult result) throws UtilsException ;
+	public void execute(List<String> arguments,ShellSession session,ShellCommandResult result) throws UtilsException ;
 	
 }

@@ -64,6 +64,16 @@ public class TcpShellThread  implements Shell,Callable<String> {
 		return(result);
 	}
 	
+	@Override
+	public boolean isStopped() throws RemoteException {
+		return(stop);
+	}
+
+
+	@Override
+	public void stop() throws RemoteException {
+		stop = true ;
+	}
 	
 	@Override
 	public ShellCommandResult execute(String commandLine) throws RemoteException {
@@ -79,7 +89,7 @@ public class TcpShellThread  implements Shell,Callable<String> {
 			}
 		}
 		pendingResult = new ShellCommandResultImpl();
-		commandFuture = executor.submit(new ShellTask(command,commandArgs,pendingResult));
+		commandFuture = executor.submit(new ShellTask(this,command,null,commandArgs,pendingResult));
 		return(pendingResult);
 	}
 

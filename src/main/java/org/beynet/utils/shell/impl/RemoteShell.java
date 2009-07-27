@@ -13,15 +13,46 @@ import java.util.concurrent.Executors;
 import org.beynet.utils.shell.Shell;
 import org.beynet.utils.shell.ShellCommand;
 import org.beynet.utils.shell.ShellCommandResult;
+import org.beynet.utils.shell.ShellSession;
 
 public class RemoteShell implements Shell {
-	public RemoteShell(int rmiPort) {
+	public RemoteShell(ShellSession session,int rmiPort) {
 		commands = new HashMap<String, ShellCommand>();
 		ShellCommand command = new HelpCommand(commands);
 		commands.put(command.getName().toUpperCase(), command);
 		this.rmiPort = rmiPort ;
+		this.session = session;
+		this.stopped = false;
 	}
 	
+
+	@Override
+	public boolean isStopped()  {
+		return(stopped);
+	}
+
+
+	
+	private void waitForCommandEnd() throws RemoteException {
+		if (pendingResult!=null ) {
+			try {
+				while(pendingResult.isStopped()==false) {
+					pendingResult.wait();
+				}
+				UnicastRemoteObject.unexportObject(pendingResult, true);
+			}catch(InterruptedException e) {
+				throw new RemoteException("error wait",e);
+			}
+			pendingResult = null ;
+		}
+	}
+	
+	@Override
+	public void stop()  throws RemoteException {
+		stopped = true ;
+		waitForCommandEnd();
+	}
+
 
 	/**
 	 * add command to shell
@@ -50,6 +81,8 @@ public class RemoteShell implements Shell {
 	@Override
 	public ShellCommandResult execute(String commandLine)
 			throws RemoteException {
+		if (isStopped()) return(null);
+		waitForCommandEnd();
 		ExecutorService executor = Executors.newFixedThreadPool(1);
 		ShellCommand command;
 		List<String> commandArgs = parseCommandLine(commandLine);
@@ -62,13 +95,19 @@ public class RemoteShell implements Shell {
 				command = commands.get("help".toUpperCase());
 			}
 		}
-		ShellCommandResult pendingResult = (ShellCommandResult)UnicastRemoteObject.exportObject(new ShellCommandResultImpl(),rmiPort);
-		executor.submit(new ShellTask(command,commandArgs,pendingResult));
+		pendingResult = new ShellCommandResultImpl();
+		pendingResultStub = (ShellCommandResult)UnicastRemoteObject.exportObject(pendingResult,rmiPort);
+		executor.submit(new ShellTask(this,command,session,commandArgs,pendingResultStub));
 		executor.shutdown();
-		return(pendingResult);
+		return(pendingResultStub);
 	}
+	
 
-	private int                rmiPort          ;
+	private int                rmiPort ;
+	private ShellSession       session ;
+	private ShellCommandResult pendingResult =null;
+	private ShellCommandResult pendingResultStub ;
+	private boolean            stopped  ;
 	
 	private Map<String,ShellCommand> commands;
 	/**

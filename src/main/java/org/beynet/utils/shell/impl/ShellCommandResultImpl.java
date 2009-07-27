@@ -23,13 +23,13 @@ public class ShellCommandResultImpl implements ShellCommandResult{
 	@Override
 	public synchronized void addOutput(StringBuffer result)  {
 		pending.append(result);
-		notify();
+		notifyAll();
 	}
 	
 	@Override
 	public synchronized void setStopped() {
 		stopped=true;
-		notify();
+		notifyAll();
 	}
 	
 	@Override

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.beynet.utils.shell.AbstractCommand;
 import org.beynet.utils.shell.ShellCommand;
 import org.beynet.utils.shell.ShellCommandResult;
+import org.beynet.utils.shell.ShellSession;
 
 public class HelpCommand extends AbstractCommand implements ShellCommand {
 
@@ -14,7 +15,7 @@ public class HelpCommand extends AbstractCommand implements ShellCommand {
 	}
 	
 	@Override
-	public void execute(List<String> arguments,ShellCommandResult result) {
+	public void execute(List<String> arguments,ShellSession session,ShellCommandResult result) {
 		StringBuffer toSend = new StringBuffer();
 		for (String key : commands.keySet()) {
 			ShellCommand command = commands.get(key);
