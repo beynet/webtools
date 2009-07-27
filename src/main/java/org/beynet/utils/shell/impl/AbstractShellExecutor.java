@@ -46,7 +46,11 @@ public abstract class AbstractShellExecutor implements ShellExecutor {
 		}
 		removeDeadShells();
 	}
-	
+	/**
+	 * user should implement this method to fill session 
+	 * @param session
+	 * @param shell
+	 */
 	protected abstract void setShellContext(ShellSession session,RemoteShell shell) ;
 	
 	@Override
