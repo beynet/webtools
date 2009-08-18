@@ -68,7 +68,7 @@ public class ShellCommandResultImpl implements ShellCommandResult{
 		e.printStackTrace(new PrintWriter(wr));
 		stack = wr.getBuffer();
 		if ( (e instanceof UtilsException) &&
-			 (((UtilsException)e).getError()!=UtilsExceptions.Shell_Stop) )  {
+			 (((UtilsException)e).getError()==UtilsExceptions.Shell_Stop) )  {
 			resultException = e;
 		}
 		else {
