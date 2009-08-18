@@ -34,5 +34,5 @@ public interface ShellCommandResult extends Remote {
 	/**
 	 * mark underlying command as stopped
 	 */
-	public Exception getResultException() throws RemoteException ;
+	public StringBuffer getResultException() throws RemoteException ;
 }

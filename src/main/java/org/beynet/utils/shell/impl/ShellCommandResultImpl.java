@@ -1,5 +1,7 @@
 package org.beynet.utils.shell.impl;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.rmi.RemoteException;
 
 import org.beynet.utils.shell.ShellCommandResult;
@@ -60,13 +62,15 @@ public class ShellCommandResultImpl implements ShellCommandResult{
 	 * mark underlying command as stopped
 	 */
 	public void setResultException(Exception e) throws RemoteException {
-		resultException = e;
+		StringWriter wr = new StringWriter();
+		e.printStackTrace(new PrintWriter(wr));
+		resultException = wr.getBuffer();
 	}
 	
 	/**
 	 * mark underlying command as stopped
 	 */
-	public Exception getResultException() throws RemoteException {
+	public StringBuffer getResultException() throws RemoteException {
 		return(resultException);
 	}
 	
@@ -74,7 +78,7 @@ public class ShellCommandResultImpl implements ShellCommandResult{
 	 * 
 	 */
 	private static final long serialVersionUID = -7879580349241967199L;
-	private Exception resultException;
+	private StringBuffer resultException;
 	private StringBuffer pending ;
 	private boolean      stopped ;
 }
