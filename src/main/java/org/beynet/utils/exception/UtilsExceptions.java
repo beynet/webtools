@@ -13,6 +13,7 @@ public enum UtilsExceptions {
 	
 	Error_Rss_TagEmpty,
 	
+	Shell_Error,
 	Shell_Stop,
 	
 	Error_Last

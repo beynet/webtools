@@ -32,7 +32,14 @@ public interface ShellCommandResult extends Remote {
 	public void setResultException(Exception e) throws RemoteException ;
 	
 	/**
-	 * mark underlying command as stopped
+	 * return exception
 	 */
-	public StringBuffer getResultException() throws RemoteException ;
+	public Exception getResultException() throws RemoteException ;
+	
+	/**
+	 * return last exception stack trace
+	 * @return
+	 * @throws RemoteException
+	 */
+	public StringBuffer getResultExceptionStackTrace() throws RemoteException ;
 }
