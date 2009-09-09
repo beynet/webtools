@@ -45,7 +45,7 @@ public class MessageQueueImpl implements MessageQueue {
 	public int getPendingMessage() throws UtilsException {
 		MessageQueueSession session = createSession(false);
 		try {
-			return(MessageQueueBean.getPendingMessages((Connection)session.getStorageHandle(),getQueueName()).intValue());
+			return(new MessageQueueBean().getPendingMessages((Connection)session.getStorageHandle(),getQueueName()).intValue());
 		} finally {
 			session.releaseStorageHandle();
 		}

@@ -7,10 +7,13 @@ import java.sql.SQLException;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.sqltools.RequestFactoryImpl;
+import org.beynet.utils.sqltools.SqlBean;
 import org.beynet.utils.sqltools.SqlField;
 import org.beynet.utils.sqltools.SqlTable;
 import org.beynet.utils.sqltools.admin.RequestFactoryAdmin;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * SqlBean associated with a MessageQueue
@@ -18,23 +21,12 @@ import org.beynet.utils.sqltools.interfaces.RequestFactory;
  *
  */
 @SqlTable("MessageQueue")
-public class MessageQueueBean {
+public class MessageQueueBean extends SqlBean {
 	public MessageQueueBean() {
 		this.messageId = 0 ;
 		this.message = null ;
 	}
 	
-	public static void createTable(Connection connection) throws SQLException {
-		requestFactory.createTable(connection);
-	}
-	/**
-	 * save current queuebean
-	 * @param connection
-	 * @throws SQLException
-	 */
-	public void save(Connection connection) throws SQLException {
-		requestFactory.save(this, connection);
-	}
 	
 	/**
 	 * return pending messages into queue - a specific sql query is executed for that
@@ -43,7 +35,7 @@ public class MessageQueueBean {
 	 * @return
 	 * @throws UtilsException
 	 */
-	public static Integer getPendingMessages(Connection connection,String queueName) throws UtilsException {
+	public Integer getPendingMessages(Connection connection,String queueName) throws UtilsException {
 		
 		StringBuffer request = new StringBuffer("select count(1)  from MessageQueue where ");
 		request.append(FIELD_QUEUEID);
@@ -73,7 +65,11 @@ public class MessageQueueBean {
 		query.append(" order by ");
 		query.append(FIELD_ID);
 		query.append(" limit 1");
-		requestFactory.load(this, connection,query.toString());
+		load(connection,query.toString());
+	}
+	@Override
+	public void load(Connection l) {
+		throw new NotImplementedException();
 	}
 	/**
 	 * delete current bean

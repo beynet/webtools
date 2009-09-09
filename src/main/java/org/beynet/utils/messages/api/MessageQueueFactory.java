@@ -34,8 +34,8 @@ public class MessageQueueFactory {
 			connection = dataSource.getConnection();
 			connection.setAutoCommit(true);
 			// first create sql table (if needed)
-			MessageQueueBean.createTable(connection);
-			MessageQueueConsumersBean.createTable(connection);
+			new MessageQueueBean().createTable(connection);
+			new MessageQueueConsumersBean().createTable(connection);
 			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,dataSource)));
 		}
 		catch (SQLException e) {
@@ -68,8 +68,8 @@ public class MessageQueueFactory {
 			connection  = DriverManager.getConnection(sqlUrl);
 			connection.setAutoCommit(true);
 			// first create sql table (if needed)
-			MessageQueueBean.createTable(connection);
-			MessageQueueConsumersBean.createTable(connection);
+			new MessageQueueBean().createTable(connection);
+			new MessageQueueConsumersBean().createTable(connection);
 			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,sqlDriverName,sqlUrl)));
 		}
 		catch (SQLException e) {

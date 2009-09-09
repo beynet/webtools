@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.beynet.utils.sqltools.RequestFactoryImpl;
+import org.beynet.utils.sqltools.SqlBean;
 import org.beynet.utils.sqltools.SqlField;
 import org.beynet.utils.sqltools.SqlTable;
 import org.beynet.utils.sqltools.admin.RequestFactoryAdmin;
@@ -17,14 +18,10 @@ import org.beynet.utils.sqltools.interfaces.RequestFactory;
  *
  */
 @SqlTable("MessageQueueConsumers")
-public class MessageQueueConsumersBean {
+public class MessageQueueConsumersBean extends SqlBean {
 	
 	public MessageQueueConsumersBean() {
 		queueId = consumerId = null ;
-	}
-	
-	public static void createTable(Connection connection) throws SQLException {
-		requestFactory.createTable(connection);
 	}
 	
 	public void setQueueId(String queueId) {
@@ -41,13 +38,6 @@ public class MessageQueueConsumersBean {
 		return(consumerId);
 	}
 	
-	public void delete(Connection connection) throws SQLException {
-		requestFactory.delete(this, connection);
-	}
-	
-	public void save(Connection connection) throws SQLException {
-		requestFactory.save(this, connection);
-	}
 	/**
 	 * return consumers associated with a queueId
 	 * @param queueId
