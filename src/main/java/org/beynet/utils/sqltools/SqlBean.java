@@ -6,7 +6,19 @@ import java.sql.SQLException;
 
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
 import org.beynet.utils.sqltools.interfaces.SqlBeanInterface;
-
+/**
+ * To extend this class, user must declare a static field of type RequestFactory
+ * example : 
+ * class T extends SqlBean {
+ * ....
+ * private static RequestFactory<T> rq = new RequestFactoryImpl<T>(T.class	);
+ * 
+ * using a static is a better approach for performance reasons (underlying class introspection
+ * will just be done one time)
+ * }
+ * @author beynet
+ *
+ */
 public class SqlBean implements SqlBeanInterface {
 
 	@Override
