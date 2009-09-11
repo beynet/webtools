@@ -11,6 +11,8 @@ public enum UtilsExceptions {
 	
 	Error_VSMB_SystemStopped,
 	
+	Error_Transaction_Consistency,
+	
 	Error_Rss_TagEmpty,
 	
 	Shell_Error,

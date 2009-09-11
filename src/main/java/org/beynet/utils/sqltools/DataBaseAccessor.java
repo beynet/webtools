@@ -46,7 +46,11 @@ public class DataBaseAccessor {
 	public String getDebugDataBaseClass() {
 		return(debugDataBaseClass);
 	}
-	
+	/**
+	 * return a connection to associated dataBase
+	 * @return
+	 * @throws SQLException
+	 */
 	public synchronized Connection getConnection() throws SQLException {
 		Connection result;
 		if (dataSource!=null) {

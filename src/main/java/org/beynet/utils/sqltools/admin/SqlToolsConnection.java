@@ -19,9 +19,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.beynet.utils.sqltools.interfaces.Session;
+import org.beynet.utils.sqltools.interfaces.RequestFactorySession;
 
-public class SqlToolsConnection implements Connection,Session {
+public class SqlToolsConnection implements Connection,RequestFactorySession {
 
 	protected SqlToolsConnection(Connection connection) {
 		this.connection = connection ;

@@ -7,7 +7,7 @@ import java.sql.PreparedStatement;
  * @author beynet
  *
  */
-public interface Session {
+public interface RequestFactorySession {
 	/**
 	 * Record a prepared statement into session associated with bean class
 	 * @param beanClass

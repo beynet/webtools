@@ -24,11 +24,13 @@ public class SqlBean implements SqlBeanInterface {
 	@Override
 	public void delete(Connection transaction) throws SQLException {
 		checkAnnotation();
+		if (transaction==null) throw new SQLException("null connection");
 		_requestFactory.delete(this,transaction);
 	}
 	
 	public void createTable(Connection transaction) throws SQLException {
 		checkAnnotation();
+		if (transaction==null) throw new SQLException("null connection");
 		_requestFactory.createTable(transaction);
 	}
 
@@ -36,18 +38,21 @@ public class SqlBean implements SqlBeanInterface {
 	public void load(Connection transaction)
 			throws SQLException {
 		checkAnnotation();
+		if (transaction==null) throw new SQLException("null connection");
 		_requestFactory.load(this, transaction);
 	}
 	
 	@Override
 	public void load(Connection transaction,String request) throws SQLException {
 		checkAnnotation();
+		if (transaction==null) throw new SQLException("null connection");
 		_requestFactory.load(this,transaction,request);
 	}
 
 	@Override
 	public void save(Connection transaction) throws SQLException {
 		checkAnnotation();
+		if (transaction==null) throw new SQLException("null connection");
 		_requestFactory.save(this,transaction);
 	}
 

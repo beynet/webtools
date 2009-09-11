@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
-import org.beynet.utils.sqltools.interfaces.Session;
+import org.beynet.utils.sqltools.interfaces.RequestFactorySession;
 
 /**
  * the aim of that class is to generate sql request
@@ -405,7 +405,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			throw new SQLException(e);
 		}
 		finally {
-			if (stmt!=null && !(connection instanceof Session)) {
+			if (stmt!=null && !(connection instanceof RequestFactorySession)) {
 				stmt.close();
 			}
 		}
@@ -421,8 +421,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		checkSqlTableAnnotation(sqlBean.getClass());
 		PreparedStatement stmt = null;
 		/* if connection is a SqlTool Session */
-		if (connection instanceof Session ) {
-			 stmt = ((Session)connection).getDeleteBeanPreparedStatement(beanClass);
+		if (connection instanceof RequestFactorySession ) {
+			 stmt = ((RequestFactorySession)connection).getDeleteBeanPreparedStatement(beanClass);
 			 if (stmt!=null) {
 				 if (logger.isDebugEnabled()) logger.debug("Bean delete's prepared statement found in cache for class="+sqlBean.getClass());
 			 }
@@ -440,8 +440,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				query.append("=?)");
 
 				stmt = connection.prepareStatement(query.toString());
-				if (connection instanceof Session ) {
-					((Session)connection).setDeleteBeanPreparedStatement(beanClass, stmt);
+				if (connection instanceof RequestFactorySession ) {
+					((RequestFactorySession)connection).setDeleteBeanPreparedStatement(beanClass, stmt);
 				}
 			}
 			stmt.setInt(1, val.intValue());
@@ -465,8 +465,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				query.append(")");
 				if (logger.isDebugEnabled()) logger.debug(query);
 				stmt = connection.prepareStatement(query.toString());
-				if (connection instanceof Session ) {
-					((Session)connection).setDeleteBeanPreparedStatement(beanClass, stmt);
+				if (connection instanceof RequestFactorySession ) {
+					((RequestFactorySession)connection).setDeleteBeanPreparedStatement(beanClass, stmt);
 				}
 			}
 			for ( int i=0;i<fields.size();i++) {
@@ -620,8 +620,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	private PreparedStatement update(Connection connection,T sqlBean) throws SQLException {
 		PreparedStatement stmt = null;
 		/* if connection is a SqlTool Session */
-		if (connection instanceof Session ) {
-			 stmt = ((Session)connection).getUpdateBeanPreparedStatement(beanClass);
+		if (connection instanceof RequestFactorySession ) {
+			 stmt = ((RequestFactorySession)connection).getUpdateBeanPreparedStatement(beanClass);
 			 if (stmt!=null) {
 				 if (logger.isDebugEnabled()) logger.debug("Bean update's prepared statement found in cache");
 			 }
@@ -629,8 +629,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		if (stmt==null) {
 			String query = makeUpdateQueryString(sqlBean);
 			stmt = connection.prepareStatement(query);
-			if (connection instanceof Session ) {
-				((Session)connection).setUpdateBeanPreparedStatement(beanClass, stmt);
+			if (connection instanceof RequestFactorySession ) {
+				((RequestFactorySession)connection).setUpdateBeanPreparedStatement(beanClass, stmt);
 			}
 		}
 		int k=0;
@@ -701,8 +701,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		
 		String request ;
 		/* if connection is a SqlTool Session */
-		if (connection instanceof Session ) {
-			 stmt = ((Session)connection).getSaveBeanPreparedStatement(beanClass);
+		if (connection instanceof RequestFactorySession ) {
+			 stmt = ((RequestFactorySession)connection).getSaveBeanPreparedStatement(beanClass);
 			 if (stmt!=null) {
 				 if (logger.isDebugEnabled()) logger.debug("Bean creation's prepared statement found in cache");
 				 stmt.clearParameters();
@@ -711,8 +711,8 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		if (stmt==null) {
 			request = makeCreateQueryString(sqlBean);
 			stmt = connection.prepareStatement(request);
-			if (connection instanceof Session ) {
-				((Session)connection).setSaveBeanPreparedStatement(beanClass, stmt);
+			if (connection instanceof RequestFactorySession ) {
+				((RequestFactorySession)connection).setSaveBeanPreparedStatement(beanClass, stmt);
 			}
 		}
 		int k=0;
