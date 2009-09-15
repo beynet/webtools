@@ -226,6 +226,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		Statement stmt =  null;
 		ResultSet rs = null;
 		if (logger.isDebugEnabled()) logger.debug(request);
+		if (connection==null) throw new SQLException("connection null");
 		try {
 			stmt =  connection.createStatement();
 			stmt.execute(request);
@@ -290,6 +291,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		Statement stmt =  null;
 		ResultSet rs   = null;
 		if (logger.isDebugEnabled()) logger.debug("executing request="+request);
+		if (connection==null) throw new SQLException("no connection");
 		try {
 			stmt =  connection.createStatement();
 			stmt.execute(request);

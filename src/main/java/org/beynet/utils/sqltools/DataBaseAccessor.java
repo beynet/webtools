@@ -51,7 +51,7 @@ public class DataBaseAccessor {
 	 * @return
 	 * @throws SQLException
 	 */
-	public synchronized Connection getConnection() throws SQLException {
+	public Connection getConnection() throws SQLException {
 		Connection result;
 		if (dataSource!=null) {
 			/* creation de l'objet connection */

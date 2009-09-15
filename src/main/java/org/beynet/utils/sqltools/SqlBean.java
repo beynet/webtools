@@ -1,11 +1,11 @@
 package org.beynet.utils.sqltools;
 
 import java.lang.reflect.Field;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
 import org.beynet.utils.sqltools.interfaces.SqlBeanInterface;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 /**
  * To extend this class, user must declare a static field of type RequestFactory
  * example : 
@@ -22,38 +22,47 @@ import org.beynet.utils.sqltools.interfaces.SqlBeanInterface;
 public class SqlBean implements SqlBeanInterface {
 
 	@Override
-	public void delete(Connection transaction) throws SQLException {
+	public void delete(SqlSession session) throws SQLException {
 		checkAnnotation();
-		if (transaction==null) throw new SQLException("null connection");
-		_requestFactory.delete(this,transaction);
+		if (session==null || session.getCurrentConnection()==null) throw new SQLException(NO_CONNECTION);
+		_requestFactory.delete(this,session.getCurrentConnection());
 	}
 	
-	public void createTable(Connection transaction) throws SQLException {
+	@Override
+	public void createTable(SqlSession session) throws SQLException {
 		checkAnnotation();
-		if (transaction==null) throw new SQLException("null connection");
-		_requestFactory.createTable(transaction);
+		if (session==null || session.getCurrentConnection()==null) throw new SQLException(NO_CONNECTION);
+		_requestFactory.createTable(session.getCurrentConnection());
+	}
+	
+	@Override
+	public Integer count(SqlSession session,String request) throws SQLException {
+		if (session==null || session.getCurrentConnection()==null) {
+			throw new SQLException(NO_CONNECTION);
+		}
+		return(_requestFactory.count(request.toString(), session.getCurrentConnection()));
 	}
 
 	@Override
-	public void load(Connection transaction)
+	public void load(SqlSession session)
 			throws SQLException {
 		checkAnnotation();
-		if (transaction==null) throw new SQLException("null connection");
-		_requestFactory.load(this, transaction);
+		if (session==null || session.getCurrentConnection()==null) throw new SQLException(NO_CONNECTION);
+		_requestFactory.load(this, session.getCurrentConnection());
 	}
 	
 	@Override
-	public void load(Connection transaction,String request) throws SQLException {
+	public void load(SqlSession session,String request) throws SQLException {
 		checkAnnotation();
-		if (transaction==null) throw new SQLException("null connection");
-		_requestFactory.load(this,transaction,request);
+		if (session==null || session.getCurrentConnection()==null) throw new SQLException("null connection");
+		_requestFactory.load(this,session.getCurrentConnection(),request);
 	}
 
 	@Override
-	public void save(Connection transaction) throws SQLException {
+	public void save(SqlSession session) throws SQLException {
 		checkAnnotation();
-		if (transaction==null) throw new SQLException("null connection");
-		_requestFactory.save(this,transaction);
+		if (session==null || session.getCurrentConnection()==null) throw new SQLException("null connection");
+		_requestFactory.save(this,session.getCurrentConnection());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,4 +94,5 @@ public class SqlBean implements SqlBeanInterface {
 	}
 	
 	private RequestFactory<SqlBeanInterface> _requestFactory=null ;
+	protected static final String  NO_CONNECTION = "null connection" ;
 }
