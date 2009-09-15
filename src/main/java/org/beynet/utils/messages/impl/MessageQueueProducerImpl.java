@@ -3,7 +3,6 @@ package org.beynet.utils.messages.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -14,6 +13,7 @@ import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 
 public class MessageQueueProducerImpl implements MessageQueueProducer {
 	
@@ -35,7 +35,7 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 		MessageQueueBean messageBean = new MessageQueueBean();
 		List<String> consumers = null ;
 		try {
-			consumers = MessageQueueConsumersBean.loadConsumersForQueue(queue.getQueueName(), (Connection)session.getStorageHandle());
+			consumers = MessageQueueConsumersBean.loadConsumersForQueue(queue.getQueueName(), (SqlSession)session.getStorageHandle());
 		}catch (SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
@@ -48,7 +48,7 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 			messageBean.setConsumerId(consumerId);
 			messageBean.setMessageId(0);
 			try {
-				messageBean.save((Connection)session.getStorageHandle());
+				messageBean.save((SqlSession)session.getStorageHandle());
 			} catch (SQLException e) {
 				throw new UtilsException(UtilsExceptions.Error_Io,e);
 			}

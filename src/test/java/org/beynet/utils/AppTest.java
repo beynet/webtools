@@ -48,6 +48,7 @@ public class AppTest
         super( testName );
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.DEBUG);
+        accessorBaseTest = new DataBaseAccessor("org.postgresql.Driver","jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser");
     }
     
     
@@ -96,9 +97,6 @@ public class AppTest
     }
     
     public void testQueue() {
-    	String sqlUrl = "jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser" ;
-    	String sqlDriverName = "org.postgresql.Driver" ;
-    	
     	MessageQueue queue =null;
     	MessageQueueSession  sessionProducer =null; 
     	MessageQueueProducer producer =null ;
@@ -111,7 +109,7 @@ public class AppTest
     	
     	
     	try {
-    		queue = MessageQueueFactory.makeQueue("test", sqlDriverName,sqlUrl);
+    		queue = MessageQueueFactory.makeQueue("test", accessorBaseTest);
     	}
     	catch (Exception e ) {
     		e.printStackTrace();
@@ -181,7 +179,7 @@ public class AppTest
     					session.rollback();
     				} 
     				else if (i==8) {
-    					System.err.println(id+" Message ("+strMessage+") readed no commit into queue");
+    					System.err.println(id+" Message ("+strMessage+") readed without commiting into queue");
     				}else {
     					session.commit();
     				}
@@ -426,6 +424,6 @@ public class AppTest
     	}
     	assertEquals(result, true);
     }
-    
+    private DataBaseAccessor accessorBaseTest ;
     private final static int MAX_ITER = 15 ;
 }

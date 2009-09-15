@@ -2,7 +2,6 @@ package org.beynet.utils.messages.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +15,7 @@ import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueSession;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 import org.beynet.utils.tools.Semaphore;
 
 public class MessageQueueConsumerImpl implements MessageQueueConsumer {
@@ -58,14 +58,15 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		MessageQueueBean mqBean = new MessageQueueBean();
 		
 		Message message = null ;
-		// to be sure that we do not use old storage handle
-		// ------------------------------------------------
-		session.releaseStorageHandle();
+		//Could not call readMessage two times during a same transaction - closing session");
+		if (session.getStorageHandle()!=null) {
+			session.releaseStorageHandle();
+		}
 		while (mqBean.getMessageId().equals(0)) {
 			Integer from = 0;
 			try {
 				while (true) {
-					mqBean.load((Connection)session.getStorageHandle(),queue.getQueueName(),consumerId,from);
+					mqBean.load((SqlSession)session.getStorageHandle(),queue.getQueueName(),consumerId,from);
 					message = readMessageFromBean(mqBean);
 					if (message.matchFilter(properties)) {
 						if (logger.isDebugEnabled()) logger.debug("Message match properties");
@@ -76,7 +77,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 						if (logger.isDebugEnabled()) logger.debug("Message does not match properties");
 						// delete message readed from queue
 						try {
-							mqBean.delete((Connection)session.getStorageHandle());
+							mqBean.delete((SqlSession)session.getStorageHandle());
 						}catch (SQLException e) {
 							logger.warn(e);
 						}
@@ -94,7 +95,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		}
 		// delete message readed from queue
 		try {
-			mqBean.delete((Connection)session.getStorageHandle());
+			mqBean.delete((SqlSession)session.getStorageHandle());
 		}catch (SQLException e) {
 			logger.warn(e);
 		}

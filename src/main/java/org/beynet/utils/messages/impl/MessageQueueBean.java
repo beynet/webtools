@@ -1,7 +1,6 @@
 package org.beynet.utils.messages.impl;
 
 import java.sql.Blob;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.beynet.utils.exception.UtilsException;
@@ -12,6 +11,7 @@ import org.beynet.utils.sqltools.SqlField;
 import org.beynet.utils.sqltools.SqlTable;
 import org.beynet.utils.sqltools.admin.RequestFactoryAdmin;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -35,21 +35,20 @@ public class MessageQueueBean extends SqlBean {
 	 * @return
 	 * @throws UtilsException
 	 */
-	public Integer getPendingMessages(Connection connection,String queueName) throws UtilsException {
-		
+	public Integer getPendingMessages(SqlSession session,String queueName) throws UtilsException {
 		StringBuffer request = new StringBuffer("select count(1)  from MessageQueue where ");
 		request.append(FIELD_QUEUEID);
 		request.append("='");
 		request.append(queueName);
 		request.append("'");
 		try {
-			return(requestFactory.count(request.toString(), connection));
+			return(count(session,request.toString()));
 		}catch(SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
 	}
 	
-	public void load(Connection connection,String queueName,String consumerId,Integer lastId) throws SQLException {
+	public void load(SqlSession session,String queueName,String consumerId,Integer lastId) throws SQLException {
 		StringBuffer query = new StringBuffer("select * from MessageQueue where ");
 		query.append(FIELD_CONSUMERID);
 		query.append(" = '");
@@ -65,18 +64,11 @@ public class MessageQueueBean extends SqlBean {
 		query.append(" order by ");
 		query.append(FIELD_ID);
 		query.append(" limit 1");
-		load(connection,query.toString());
+		super.load(session,query.toString());
 	}
 	@Override
-	public void load(Connection l) {
+	public void load(SqlSession l) {
 		throw new NotImplementedException();
-	}
-	/**
-	 * delete current bean
-	 * @param connection
-	 */
-	public void delete(Connection connection) throws SQLException {
-		requestFactory.delete(this, connection);
 	}
 	
 	public Integer getMessageId() {

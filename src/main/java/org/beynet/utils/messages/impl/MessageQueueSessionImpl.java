@@ -1,18 +1,13 @@
 package org.beynet.utils.messages.impl;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
-import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConnection;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 
 public class MessageQueueSessionImpl implements MessageQueueSession {
 
@@ -21,7 +16,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		this.mqConnection   = mqConnection ;
 		this.transacted     = transacted ;
 		this.pendingMessage = 0   ;
-		this.connection     = null;
+		this.session     = null;
 	}
 	
 	@Override
@@ -37,15 +32,19 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		MessageQueueConsumersBean b = new MessageQueueConsumersBean();
 		b.setQueueId(queue.getQueueName());
 		b.setConsumerId(consumerId);
+		
 		try {
-			if (b.exist((Connection)getStorageHandle())==false) {
-//				closeStorageConnection();
-				b.save((Connection)getStorageHandle());
+			if (b.exist((SqlSession)getStorageHandle())==false) {
+				b.save((SqlSession)getStorageHandle());
 				commit();
 			}
-		}catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Could not create queue consumer");
+		}
+		finally {
+			releaseStorageHandle();
 		}
 	}
 	
@@ -55,8 +54,8 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		b.setQueueId(queue.getQueueName());
 		b.setConsumerId(consumerId);
 		try {
-			if (b.exist((Connection)getStorageHandle())==true) {
-				b.delete((Connection)getStorageHandle());
+			if (b.exist((SqlSession)getStorageHandle())==true) {
+				b.delete((SqlSession)getStorageHandle());
 				commit();
 			}
 		}catch (Exception e) {
@@ -96,48 +95,30 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	}
 	
 	@Override
-	public Connection getStorageHandle() throws UtilsException {
-		if (connection!=null) {
-			return(connection);
+	public SqlSession getStorageHandle() throws UtilsException {
+		if (session!=null) {
+			return(session);
 		}
 		else {
-			connection = (Connection)mqConnection.getStorageConnection();
+			session = (SqlSession)mqConnection.getStorageConnection();
 			try {
-				if (transacted==true) {
-					connection.setAutoCommit(false);
-				}
-				else {
-					connection.setAutoCommit(true);
-				}
-			} catch (SQLException e) {
-				try {
-					connection.close();
-				}catch (SQLException e2) {
-					
-				}
-				connection=null;
-				throw new UtilsException(UtilsExceptions.Error_Sql,e);
+				session.connectToDataBase(transacted);
+			} catch (UtilsException e) {
+				session=null;
+				throw e;
 			}
-			return(connection);
+			return(session);
 		}
 	}
 	@Override
 	public void releaseStorageHandle() {
-		if (connection!=null) {
+		if (session!=null) {
 			if (transacted==false || pendingMessage==0) {
 				try {
-					connection.rollback();
-				}catch(SQLException e) {
-					StringWriter w = new StringWriter();
-					e.printStackTrace(new PrintWriter(w));
-					logger.error(w.getBuffer());
+					session.closeConnection();
+				} catch (UtilsException e) {
 				}
-				try {
-					connection.close();
-				} catch (SQLException e) {
-
-				}
-				connection = null ;
+				session = null ;
 			}
 		}
 	}
@@ -145,13 +126,9 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	@Override
 	public void commit() throws UtilsException {
 		if (transacted==false) return;
-		try {
-			connection.commit();
-			connection.close();
-			connection = null ;
-		} catch (SQLException e) {
-			throw new UtilsException(UtilsExceptions.Error_Sql,e);
-		}
+		session.commit();
+		session.closeConnection();
+		session = null ;
 		for (int j=0;j<pendingMessage;j++) {
 			queue.onMessage();
 		}
@@ -161,13 +138,9 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	@Override
 	public void rollback() throws UtilsException {
 		if (transacted==false) return;
-		try {
-			connection.rollback();
-			connection.close();
-			connection = null ;
-		} catch (SQLException e) {
-			throw new UtilsException(UtilsExceptions.Error_Sql,e);
-		}
+		session.rollback();
+		session.closeConnection();
+		session = null ;
 		pendingMessage = 0;
 	}
 
@@ -175,7 +148,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	private MessageQueueConnection mqConnection   ;
 	private boolean                transacted     ;
 	private int                    pendingMessage ;
-	private Connection             connection     ;
+	private SqlSession             session     ;
 	
 	private final Logger logger = Logger.getLogger(MessageQueueSession.class);
 }

@@ -9,8 +9,10 @@ import org.beynet.utils.exception.UtilsException;
  *
  */
 public interface MessageQueueConnection {
+	
 	/**
 	 * return a connection object to physical storage
+	 * @param transacted
 	 * @return
 	 * @throws UtilsException
 	 */

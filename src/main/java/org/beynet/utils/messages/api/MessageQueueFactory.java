@@ -1,7 +1,5 @@
 package org.beynet.utils.messages.api;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -11,6 +9,9 @@ import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.messages.impl.MessageQueueBean;
 import org.beynet.utils.messages.impl.MessageQueueConsumersBean;
 import org.beynet.utils.messages.impl.MessageQueueImpl;
+import org.beynet.utils.sqltools.DataBaseAccessor;
+import org.beynet.utils.sqltools.SqlSessionImpl;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 
 
 /**
@@ -21,6 +22,34 @@ import org.beynet.utils.messages.impl.MessageQueueImpl;
 public class MessageQueueFactory {
 	
 	/**
+	 * Construct a new MessageQueue with a DataBaseAccessor
+	 * @param queueName
+	 * @param accessor
+	 * @return
+	 * @throws UtilsException
+	 */
+	public static MessageQueue makeQueue(String queueName,DataBaseAccessor accessor) throws UtilsException {
+		SqlSession session = new SqlSessionImpl(accessor);
+		try {
+			session.connectToDataBase(false);
+			// first create sql table (if needed)
+			new MessageQueueBean().createTable(session);
+			new MessageQueueConsumersBean().createTable(session);
+			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,accessor)));
+		}
+		catch (SQLException e) {
+			throw new UtilsException(UtilsExceptions.Error_Sql,e);
+		}
+		finally {
+			try {
+				if (session.getCurrentConnection()!=null) session.closeConnection();
+			} catch (UtilsException e) {
+				
+			}
+		}
+	}
+	
+	/**
 	 * Construct a new MessageQueue with a data source
 	 * @param queueName
 	 * @param dataSource to access database
@@ -28,26 +57,9 @@ public class MessageQueueFactory {
 	 * @return
 	 * @throws SQLException
 	 */
+	@Deprecated
 	public static MessageQueue makeQueue(String queueName,DataSource dataSource) throws UtilsException {
-		Connection connection = null ;
-		try {
-			connection = dataSource.getConnection();
-			connection.setAutoCommit(true);
-			// first create sql table (if needed)
-			new MessageQueueBean().createTable(connection);
-			new MessageQueueConsumersBean().createTable(connection);
-			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,dataSource)));
-		}
-		catch (SQLException e) {
-			throw new UtilsException(UtilsExceptions.Error_Sql,e);
-		}
-		finally {
-			try {
-				if (connection!=null) connection.close();
-			} catch (SQLException e) {
-				
-			}
-		}
+		return(MessageQueueFactory.makeQueue(queueName, new DataBaseAccessor(dataSource)));
 	}
 	/**
 	 * Construct a new MessageQueue from sqldrivername and sql database url
@@ -57,30 +69,8 @@ public class MessageQueueFactory {
 	 * @return
 	 * @throws UtilsException
 	 */
+	@Deprecated
 	public static MessageQueue makeQueue(String queueName,String sqlDriverName,String sqlUrl) throws UtilsException {
-		Connection connection = null ;
-		try {
-			try {
-				Class.forName(sqlDriverName).newInstance();
-			} catch (Exception e) {
-				throw new SQLException(e);
-			}
-			connection  = DriverManager.getConnection(sqlUrl);
-			connection.setAutoCommit(true);
-			// first create sql table (if needed)
-			new MessageQueueBean().createTable(connection);
-			new MessageQueueConsumersBean().createTable(connection);
-			return(new MessageQueueAdmin(new MessageQueueImpl(queueName,sqlDriverName,sqlUrl)));
-		}
-		catch (SQLException e) {
-			throw new UtilsException(UtilsExceptions.Error_Sql,e);
-		}
-		finally {
-			try {
-				if (connection!=null) connection.close();
-			} catch (SQLException e) {
-				
-			}
-		}
+		return(MessageQueueFactory.makeQueue(queueName, new DataBaseAccessor(sqlDriverName,sqlUrl)));
 	}
 }

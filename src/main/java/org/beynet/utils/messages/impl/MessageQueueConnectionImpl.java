@@ -1,7 +1,5 @@
 package org.beynet.utils.messages.impl;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -9,50 +7,42 @@ import javax.sql.DataSource;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.messages.api.MessageQueueConnection;
-import org.beynet.utils.sqltools.admin.SqlToolsConnectionFactory;
+import org.beynet.utils.sqltools.DataBaseAccessor;
+import org.beynet.utils.sqltools.SqlSessionImpl;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 
 public class MessageQueueConnectionImpl implements MessageQueueConnection {
 	
-	public MessageQueueConnectionImpl(DataSource dataSource) {
-		this.dataSource = dataSource;
-		this.sqlDriverName = this.sqlUrl     = "";
+	public MessageQueueConnectionImpl(DataBaseAccessor accessor) {
+		this.accessor = accessor;
 	}
+	
+	@Deprecated
+	public MessageQueueConnectionImpl(DataSource dataSource) {
+		accessor = new DataBaseAccessor(dataSource);
+	}
+	@Deprecated
 	public MessageQueueConnectionImpl(String sqlDriverName,String sqlUrl) {
-		this.sqlDriverName = sqlDriverName ;
-		this.sqlUrl        = sqlUrl        ;  
-		this.dataSource    = null          ;
+		accessor = new DataBaseAccessor(sqlDriverName,sqlUrl);
 	}
 	/**
-	 * return an sql connection
+	 * return an sql session
 	 * @return
 	 * @throws SQLException
 	 */
-	protected Connection getConnection() throws SQLException {
-		Connection connection = null ;
-		if (dataSource!=null) {
-			connection = dataSource.getConnection();
-		}
-		else {
-			try {
-				Class.forName(sqlDriverName).newInstance();
-			} catch (Exception e) {
-				throw new SQLException(e);
-			}
-			connection  = DriverManager.getConnection(sqlUrl);
-		}
-		return(SqlToolsConnectionFactory.getInstance().makeNewSqlToolsConnection(connection));
+	protected SqlSession getSession() throws SQLException {
+		SqlSession sqlSession = new SqlSessionImpl(accessor);
+		return(sqlSession);
 	}
 	
 	@Override
 	public Object getStorageConnection() throws UtilsException  {
 		try {
-			return(getConnection());
+			return(getSession());
 		}catch (SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
 	}
 	
-	private DataSource                 dataSource   ;
-	private String                     sqlUrl       ;
-	private String                     sqlDriverName ;	
+	private DataBaseAccessor           accessor      ;
 }

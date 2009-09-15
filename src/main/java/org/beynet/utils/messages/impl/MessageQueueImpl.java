@@ -1,6 +1,5 @@
 package org.beynet.utils.messages.impl;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,20 +10,25 @@ import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueSession;
+import org.beynet.utils.sqltools.DataBaseAccessor;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 
 
 public class MessageQueueImpl implements MessageQueue {
-
-	public MessageQueueImpl(String queueName,DataSource dataSource) {
-		this.mqConnection = new MessageQueueConnectionImpl(dataSource);
+	
+	public MessageQueueImpl(String queueName,DataBaseAccessor accessor) {
+		this.mqConnection = new MessageQueueConnectionImpl(accessor);
 		this.queueName    = queueName ;
 		this.consumers    = new ArrayList<MessageQueueConsumer> ();
 	}
+	@Deprecated
+	public MessageQueueImpl(String queueName,DataSource dataSource) {
+		this(queueName,new DataBaseAccessor(dataSource));
+	}
 	
+	@Deprecated
 	public MessageQueueImpl(String queueName,String sqlDriverName,String sqlUrl) {
-		this.queueName     = queueName ;
-		this.mqConnection  = new MessageQueueConnectionImpl(sqlDriverName,sqlUrl);
-		this.consumers     = new ArrayList<MessageQueueConsumer> ();
+		this(queueName,new DataBaseAccessor(sqlDriverName,sqlUrl));
 	}
 
 	@Override
@@ -45,7 +49,7 @@ public class MessageQueueImpl implements MessageQueue {
 	public int getPendingMessage() throws UtilsException {
 		MessageQueueSession session = createSession(false);
 		try {
-			return(new MessageQueueBean().getPendingMessages((Connection)session.getStorageHandle(),getQueueName()).intValue());
+			return(new MessageQueueBean().getPendingMessages((SqlSession)session.getStorageHandle(),getQueueName()).intValue());
 		} finally {
 			session.releaseStorageHandle();
 		}

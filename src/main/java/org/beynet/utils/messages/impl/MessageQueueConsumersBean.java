@@ -1,6 +1,5 @@
 package org.beynet.utils.messages.impl;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +10,7 @@ import org.beynet.utils.sqltools.SqlField;
 import org.beynet.utils.sqltools.SqlTable;
 import org.beynet.utils.sqltools.admin.RequestFactoryAdmin;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
+import org.beynet.utils.sqltools.interfaces.SqlSession;
 
 /**
  * sql bean to access message queue consumers list 
@@ -45,7 +45,7 @@ public class MessageQueueConsumersBean extends SqlBean {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static List<String> loadConsumersForQueue(String queueId,Connection connection) throws SQLException {
+	public static List<String> loadConsumersForQueue(String queueId,SqlSession session) throws SQLException {
 		List<String> consumers = new ArrayList<String>();
 		List<MessageQueueConsumersBean> lst = new ArrayList<MessageQueueConsumersBean>();
 		StringBuffer request = new StringBuffer("select * from MessageQueueConsumers where ");
@@ -53,7 +53,8 @@ public class MessageQueueConsumersBean extends SqlBean {
 		request.append("='");
 		request.append(queueId);
 		request.append("'");
-		requestFactory.loadList(lst, connection, request.toString());
+		if (session==null || session.getCurrentConnection()==null) throw new SQLException(NO_CONNECTION);
+		requestFactory.loadList(lst, session.getCurrentConnection(), request.toString());
 		for (MessageQueueConsumersBean b : lst) {
 			consumers.add(b.getConsumerId());
 		}
@@ -64,7 +65,7 @@ public class MessageQueueConsumersBean extends SqlBean {
 	 * @param connection
 	 * @return
 	 */
-	public boolean exist(Connection connection) {
+	public boolean exist(SqlSession session) {
 		StringBuffer request = new StringBuffer("select * from MessageQueueConsumers where ");
 		request.append(FIELD_QUEUEID);
 		request.append("='");
@@ -75,7 +76,7 @@ public class MessageQueueConsumersBean extends SqlBean {
 		request.append(consumerId);
 		request.append("'");
 		try {
-			requestFactory.load(this, connection,request.toString());
+			load(session, request.toString());
 		} catch (SQLException e) {
 			return(false);
 		}
