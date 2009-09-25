@@ -101,6 +101,9 @@ public class AppTest
     	MessageQueueSession  sessionProducer =null; 
     	MessageQueueProducer producer =null ;
     	
+    	MessageQueueSession  sessionProducer2 =null; 
+    	MessageQueueProducer producer2 =null ;
+    	
     	MessageQueueSession  sessionConsummer1 =null; 
     	MessageQueueConsumer consummer1  =null;
     	
@@ -120,6 +123,9 @@ public class AppTest
     		sessionProducer = queue.createSession(true) ;
     		producer = sessionProducer.createProducer();
     		
+    		sessionProducer2 = queue.createSession(true) ;
+    		producer2 = sessionProducer2.createProducer();
+    		
     		sessionConsummer1 = queue.createSession(true) ;
     		consummer1 = sessionConsummer1.createConsumer("cs1","url=test ,  test=machin");
     		
@@ -130,12 +136,14 @@ public class AppTest
     		e.printStackTrace();
     		assertTrue(false);
     	}
-    	Thread t1,t2,t3;
-    	t1=new Thread(new ThreadProducer(queue,producer,sessionProducer));
+    	Thread t0,t1,t2,t3;
+    	t0=new Thread(new ThreadProducer(queue,producer,sessionProducer));
+    	t1=new Thread(new ThreadProducer(queue,producer2,sessionProducer2));
     	t2=new Thread(new ThreadConsumer("cs1",sessionConsummer1,consummer1));
     	t3=new Thread(new ThreadConsumer("cs2",sessionConsummer2,consummer2));
     	
     	try {
+    		t0.start();
     		t1.start();
         	t2.start();
         	t3.start();
@@ -161,10 +169,11 @@ public class AppTest
 				Thread.sleep((int)(400*Math.random()));
 			} catch (InterruptedException e1) {
 			}
-    		for (int i=0; i< MAX_ITER ; i++) {
+			int totalReaded = 0 ;
+    		for (int i=0; i< (MAX_ITER*2 -2) ; i++) {
     			String strMessage =null;
     			try {
-    				System.err.println(id+" sleeping");
+    				System.err.println("------------"+id+" sleeping - iteration "+i+"total readed="+totalReaded);
     				Thread.sleep((int)(100*Math.random()));
     				System.err.println(id+" awake");
     			} catch (InterruptedException e) {
@@ -181,6 +190,7 @@ public class AppTest
     				else if (i==8) {
     					System.err.println(id+" Message ("+strMessage+") readed without commiting into queue");
     				}else {
+    					totalReaded++;
     					session.commit();
     				}
     			}
