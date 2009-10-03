@@ -258,8 +258,10 @@ public class Form {
 	    	return(res);
 	    }
 	    
-	    // return true if current form has been validated
-	    // ----------------------------------------------
+	    /**
+	     * return true if current form has been validated
+	     * @return
+	     */
 	    public boolean isFormPosted() {
 	    	/*Object jetonForm = _formRequest.getParameter("jetonForm") ;
 	    	String jeton     = (String)_request.getSession().getAttribute("jeton_"+_id) ;
@@ -280,6 +282,9 @@ public class Form {
 	    	return(false);
 	    }
 
+	    /**
+	     * sync session with current form - to be called before displaying form twice
+	     */
 	    public void syncSession() {
 	    	try {
 	    	  FormElement champ = getElementById("jeton_"+_id) ;
