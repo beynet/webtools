@@ -8,6 +8,7 @@ import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.messages.api.MessageQueueConnection;
 import org.beynet.utils.sqltools.DataBaseAccessor;
+import org.beynet.utils.sqltools.DataBaseAccessorImpl;
 import org.beynet.utils.sqltools.SqlSessionImpl;
 import org.beynet.utils.sqltools.interfaces.SqlSession;
 
@@ -19,11 +20,14 @@ public class MessageQueueConnectionImpl implements MessageQueueConnection {
 	
 	@Deprecated
 	public MessageQueueConnectionImpl(DataSource dataSource) {
-		accessor = new DataBaseAccessor(dataSource);
+		accessor = new DataBaseAccessorImpl();
+		accessor.setDataSource(dataSource);
 	}
 	@Deprecated
 	public MessageQueueConnectionImpl(String sqlDriverName,String sqlUrl) {
-		accessor = new DataBaseAccessor(sqlDriverName,sqlUrl);
+		accessor = new DataBaseAccessorImpl();
+		accessor.setDebugDataBaseClass(sqlDriverName);
+		accessor.setDataBaseDebugUrl(sqlUrl);
 	}
 	/**
 	 * return an sql session

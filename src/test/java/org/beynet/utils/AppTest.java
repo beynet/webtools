@@ -26,6 +26,7 @@ import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.impl.ShellCommandResultImpl;
 import org.beynet.utils.sqltools.DataBaseAccessor;
+import org.beynet.utils.sqltools.DataBaseAccessorImpl;
 import org.beynet.utils.xml.XmlReader;
 import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
@@ -48,7 +49,9 @@ public class AppTest
         super( testName );
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.DEBUG);
-        accessorBaseTest = new DataBaseAccessor("org.postgresql.Driver","jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser");
+        accessorBaseTest = new DataBaseAccessorImpl();
+        accessorBaseTest.setDebugDataBaseClass("org.postgresql.Driver");
+        accessorBaseTest.setDataBaseDebugUrl("jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser");
     }
     
     
@@ -87,12 +90,6 @@ public class AppTest
     			assertTrue(false);
     		}
     	}
-    	
-    }
-    
-    public void testTransaction() {
-    	DataBaseAccessor accessorBaseTest = new DataBaseAccessor("org.postgresql.Driver","jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser");
-    	
     	
     }
     

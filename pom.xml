@@ -58,20 +58,20 @@
         </configuration>
       </plugin>
       
+      
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
             <id>attach-sources</id>
-            <phase>package</phase>
+            <phase>verify</phase>
             <goals>
-              <goal>jar-no-fork</goal>
+              <goal>jar</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
-      
       
      </plugins>
    </build>

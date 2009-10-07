@@ -10,6 +10,7 @@ import org.beynet.utils.messages.impl.MessageQueueBean;
 import org.beynet.utils.messages.impl.MessageQueueConsumersBean;
 import org.beynet.utils.messages.impl.MessageQueueImpl;
 import org.beynet.utils.sqltools.DataBaseAccessor;
+import org.beynet.utils.sqltools.DataBaseAccessorImpl;
 import org.beynet.utils.sqltools.SqlSessionImpl;
 import org.beynet.utils.sqltools.interfaces.SqlSession;
 
@@ -59,7 +60,9 @@ public class MessageQueueFactory {
 	 */
 	@Deprecated
 	public static MessageQueue makeQueue(String queueName,DataSource dataSource) throws UtilsException {
-		return(MessageQueueFactory.makeQueue(queueName, new DataBaseAccessor(dataSource)));
+		DataBaseAccessor bean = new DataBaseAccessorImpl();
+		bean.setDataSource(dataSource);
+		return(MessageQueueFactory.makeQueue(queueName, bean));
 	}
 	/**
 	 * Construct a new MessageQueue from sqldrivername and sql database url
@@ -71,6 +74,9 @@ public class MessageQueueFactory {
 	 */
 	@Deprecated
 	public static MessageQueue makeQueue(String queueName,String sqlDriverName,String sqlUrl) throws UtilsException {
-		return(MessageQueueFactory.makeQueue(queueName, new DataBaseAccessor(sqlDriverName,sqlUrl)));
+		DataBaseAccessor bean = new DataBaseAccessorImpl();
+		bean.setDebugDataBaseClass(sqlDriverName);
+		bean.setDataBaseDebugUrl(sqlUrl);
+		return(MessageQueueFactory.makeQueue(queueName, bean));
 	}
 }

@@ -11,24 +11,33 @@ import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.sqltools.DataBaseAccessor;
+import org.beynet.utils.sqltools.DataBaseAccessorImpl;
 import org.beynet.utils.sqltools.interfaces.SqlSession;
 
 
 public class MessageQueueImpl implements MessageQueue {
 	
-	public MessageQueueImpl(String queueName,DataBaseAccessor accessor) {
+	private void init(String queueName,DataBaseAccessor accessor) {
 		this.mqConnection = new MessageQueueConnectionImpl(accessor);
 		this.queueName    = queueName ;
 		this.consumers    = new ArrayList<MessageQueueConsumer> ();
 	}
+	public MessageQueueImpl(String queueName,DataBaseAccessor accessor) {
+		init(queueName,accessor);
+	}
 	@Deprecated
 	public MessageQueueImpl(String queueName,DataSource dataSource) {
-		this(queueName,new DataBaseAccessor(dataSource));
+		DataBaseAccessor bean = new DataBaseAccessorImpl();
+		bean.setDataSource(dataSource);
+		init(queueName,bean);
 	}
 	
 	@Deprecated
 	public MessageQueueImpl(String queueName,String sqlDriverName,String sqlUrl) {
-		this(queueName,new DataBaseAccessor(sqlDriverName,sqlUrl));
+		DataBaseAccessor bean = new DataBaseAccessorImpl();
+		bean.setDataBaseDebugUrl(sqlUrl);
+		bean.setDebugDataBaseClass(sqlDriverName);
+		init(queueName,bean);
 	}
 
 	@Override
