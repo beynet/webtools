@@ -18,6 +18,8 @@ public class RequestManagerImpl implements RequestManager {
 		_requestFactories = new HashMap<Class, RequestFactory>();
 		accessor=null;
 	}
+	
+	
 
 	/**
 	 * return requestfactory associated with obj
@@ -52,6 +54,28 @@ public class RequestManagerImpl implements RequestManager {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> Integer count(Class<T> cl,String request) throws UtilsException {
+		RequestFactory<T> requestFactorie =(RequestFactory<T>)getAssociatedFactory(cl);
+		try {
+			return(requestFactorie.count(request, accessor.getConnection()));
+		} catch(SQLException e) {
+			throw new UtilsException(UtilsExceptions.Error_Sql,e);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> Integer count(Class<T> cl) throws UtilsException {
+		RequestFactory<T> requestFactorie =(RequestFactory<T>)getAssociatedFactory(cl);
+		try {
+			return(requestFactorie.count(accessor.getConnection()));
+		} catch(SQLException e) {
+			throw new UtilsException(UtilsExceptions.Error_Sql,e);
+		}
+	}
+	
 	/**
 	 * persist obj
 	 */
@@ -73,6 +97,16 @@ public class RequestManagerImpl implements RequestManager {
 		try {
 			requestFactorie.load(obj,  accessor.getConnection(),request);
 		}catch(SQLException e) {
+			throw new UtilsException(UtilsExceptions.Error_Sql,e);
+		}
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> void createTable(Class<T> cl) throws UtilsException  {
+		RequestFactory<T> requestFactorie =(RequestFactory<T>)getAssociatedFactory(cl);
+		try {
+			requestFactorie.createTable(accessor.getConnection());
+		} catch (SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
 	}
@@ -108,6 +142,8 @@ public class RequestManagerImpl implements RequestManager {
 	}
 	
 	private DataBaseAccessor accessor ;
+	@SuppressWarnings("unused")
+	private String accessorName;
 	
 	@SuppressWarnings("unchecked")
 	private Map<Class, RequestFactory> _requestFactories ;

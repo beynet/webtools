@@ -2,7 +2,6 @@ package org.beynet.utils.messages.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -14,18 +13,18 @@ import org.beynet.utils.io.CustomObjectInputStream;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
-import org.beynet.utils.messages.api.MessageQueueSession;
-import org.beynet.utils.sqltools.interfaces.SqlSession;
+import org.beynet.utils.sqltools.Transaction;
+import org.beynet.utils.sqltools.interfaces.RequestManager;
 import org.beynet.utils.tools.Semaphore;
 
 public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 	
-	public MessageQueueConsumerImpl(MessageQueue queue,MessageQueueSession session,String consumerId) {
-		init(queue,session,consumerId);
+	public MessageQueueConsumerImpl(RequestManager manager,MessageQueue queue,String consumerId) {
+		init(manager,queue,consumerId);
 	}
 	
-	public MessageQueueConsumerImpl(MessageQueue queue,MessageQueueSession session,String consumerId,String properties) {
-		init(queue,session,consumerId);
+	public MessageQueueConsumerImpl(RequestManager manager,MessageQueue queue,String consumerId,String properties) {
+		init(manager,queue,consumerId);
 		StringTokenizer tokeni = new StringTokenizer(properties,",");
 		while (tokeni.hasMoreTokens()) {
 			StringTokenizer tokeni2 = new StringTokenizer(tokeni.nextToken(),"=");
@@ -53,20 +52,38 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		}
 	}
 	
+	private MessageQueueBean loadBean(Integer from) throws UtilsException {
+		MessageQueueBean result = new MessageQueueBean();
+		StringBuffer query = new StringBuffer("select * from MessageQueue where ");
+		query.append(MessageQueueBean.FIELD_CONSUMERID);
+		query.append(" = '");
+		query.append(consumerId);
+		query.append("' and ");
+		query.append(MessageQueueBean.FIELD_QUEUEID) ;
+		query.append(" = '");
+		query.append(queue.getQueueName());
+		query.append("' and ");
+		query.append(MessageQueueBean.FIELD_ID);
+		query.append(">");
+		query.append(from);
+		query.append(" order by ");
+		query.append(MessageQueueBean.FIELD_ID);
+		query.append(" limit 1");
+		manager.load(result,query.toString());
+		return(result);
+	}
+	
 	@Override
+	@Transaction
 	public Message readMessage() throws UtilsException,InterruptedException {
-		MessageQueueBean mqBean = new MessageQueueBean();
+		MessageQueueBean mqBean =new MessageQueueBean();
 		
 		Message message = null ;
-		//Could not call readMessage two times during a same transaction - closing session");
-		if (session.getStorageHandle()!=null) {
-			session.releaseStorageHandle();
-		}
 		while (mqBean.getMessageId().equals(0)) {
 			Integer from = 0;
 			try {
 				while (true) {
-					mqBean.load((SqlSession)session.getStorageHandle(),queue.getQueueName(),consumerId,from);
+					mqBean = loadBean(from);
 					message = readMessageFromBean(mqBean);
 					if (message.matchFilter(properties)) {
 						if (logger.isDebugEnabled()) logger.debug("Message match properties");
@@ -75,30 +92,21 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 					else {
 						from = mqBean.getMessageId();
 						if (logger.isDebugEnabled()) logger.debug("Message does not match properties");
-						// delete message readed from queue
-						try {
-							mqBean.delete((SqlSession)session.getStorageHandle());
-						}catch (SQLException e) {
-							logger.warn(e);
-						}
+						manager.delete(mqBean);
 					}
 				}
-				break;
-			} catch(SQLException e) {
-				mqBean.setMessageId(0);
+			} catch(UtilsException e) {
+
 			}
-			// release storage handle - waiting for new message into queue connection to storage
-			session.releaseStorageHandle();
+			if (!mqBean.getMessageId().equals(0)) {
+				break;
+			}
 			if (logger.isDebugEnabled()) logger.debug("waiting for new message");
 			pending.P();
 			if (logger.isDebugEnabled()) logger.debug("awake !");
 		}
 		// delete message readed from queue
-		try {
-			mqBean.delete((SqlSession)session.getStorageHandle());
-		}catch (SQLException e) {
-			logger.warn(e);
-		}
+		manager.delete(mqBean);
 		return(message);
 	}
 	
@@ -113,9 +121,9 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 	 * @param session
 	 * @param connection
 	 */
-	private void init(MessageQueue queue,MessageQueueSession session,String consumerId) {
+	private void init(RequestManager manager,MessageQueue queue,String consumerId) {
+		this.manager = manager ;
 		this.queue = queue;
-		this.session = session ;
 		this.consumerId = consumerId ;
 		pending = new Semaphore(0);
 		this.properties = new HashMap<String, String>();
@@ -143,7 +151,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 	}
 	
 	private MessageQueue           queue      ;
-	private MessageQueueSession    session    ;
+	private RequestManager         manager    ;
 	private Semaphore              pending    ;
 	private String                 consumerId ;
 	private Logger                 logger = Logger.getLogger(MessageQueueConsumerImpl.class);

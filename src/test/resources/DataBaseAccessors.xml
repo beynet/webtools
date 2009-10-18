@@ -1,0 +1,3 @@
+<databaseaccessors>
+ <databaseaccessor name="datatest" datasource="xarch/jdbc/ds" url="jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser"  class="org.postgresql.Driver"/>
+</databaseaccessors>

@@ -29,6 +29,14 @@ public interface RequestManager {
 	 */
 	public <T> void load(T obj) throws UtilsException    ;
 	
+	/**
+	 * create the table
+	 * @param <T>
+	 * @param cl
+	 * @throws UtilsException
+	 */
+	public <T> void createTable(Class<T> cl) throws UtilsException ;
+	
 	public <T> void load(T obj,String request) throws UtilsException    ;
 	
 	/**
@@ -40,4 +48,22 @@ public interface RequestManager {
 	 * @throws UtilsException
 	 */
 	public <T> List<T> loadList(Class<T> cl,String request) throws UtilsException;
+	
+	/**
+	 * count all elements of T
+	 * @param <T>
+	 * @param cl
+	 * @return
+	 * @throws UtilsException
+	 */
+	public <T> Integer count(Class<T> cl) throws UtilsException ;
+	
+	/**
+	 * count elements matching query
+	 * @param <T>
+	 * @param cl
+	 * @return
+	 * @throws UtilsException
+	 */
+	public <T> Integer count(Class<T> cl,String request) throws UtilsException ;
 }

@@ -54,6 +54,13 @@ public class MessageQueueAdmin extends AdminMBean implements MessageQueueAdminMB
 		waitWhileSuspended();
 		_queue.addConsumer(consumer);
 	}
+	
+
+	@Override
+	public void removeConsumer(MessageQueueConsumer consumer) {
+		waitWhileSuspended();
+		_queue.removeConsumer(consumer);
+	}
 
 	@Override
 	public Message createEmptyMessage() {
@@ -62,11 +69,9 @@ public class MessageQueueAdmin extends AdminMBean implements MessageQueueAdminMB
 	}
 
 	@Override
-	public MessageQueueSession createSession(boolean transacted)
-			throws UtilsException {
+	public MessageQueueSession createSession(boolean transacted) {
 		waitWhileSuspended();
 		MessageQueueSession session = _queue.createSession(transacted) ;
-		session.setAssociateQueue(this);
 		return(session);
 	}
 

@@ -47,11 +47,8 @@ public class VSMBClientManagerTcp implements VSMBClientManager{
 				}
 			}
 		}
-		try {
-			session.commit();
-		} catch (UtilsException e) {
-			logger.error("could not commit message",e);
-		}
+		session.commit();
+		
 		for (VSMBClientTcp client : toRemove) {
 			removeClient(client);
 		}

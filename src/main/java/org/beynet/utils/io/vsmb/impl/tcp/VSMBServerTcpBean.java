@@ -9,10 +9,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.Vector;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
@@ -22,9 +19,9 @@ import org.beynet.utils.io.vsmb.VSMBMessage;
 import org.beynet.utils.io.vsmb.VSMBServer;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
-import org.beynet.utils.messages.api.MessageQueueFactory;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
+import org.beynet.utils.sqltools.DataBaseAccessor;
 
 
 /**
@@ -46,26 +43,8 @@ public class VSMBServerTcpBean implements VSMBServer {
 		port=-1;
 		managers=new Vector<VSMBClientManager>();
 		managersThread=new Vector<Thread>();
-		dataSourceName = null;
-		debugDataBaseUrl = null ;
-		debugDataBaseClassName = null ;
 	}
 	
-	
-	
-	public String getDebugDataBaseClassName() {
-		return debugDataBaseClassName;
-	}
-	public void setDebugDataBaseClassName(String debugDataBaseClassName) {
-		this.debugDataBaseClassName = debugDataBaseClassName;
-	}
-
-	public String getDebugDataBaseUrl() {
-		return debugDataBaseUrl;
-	}
-	public void setDebugDataBaseUrl(String debugDataBaseUrl) {
-		this.debugDataBaseUrl = debugDataBaseUrl;
-	}
 
 	public int getPort() {
 		return(port);
@@ -74,13 +53,6 @@ public class VSMBServerTcpBean implements VSMBServer {
 		this.port=port;
 	}
 	
-	public String getDataSourceName() {
-		return(dataSourceName);
-	}
-	
-	public void setDataSourceName(String dataSourceName) {
-		this.dataSourceName=dataSourceName;
-	}
 	/**
 	 * set current VSMB System queue name
 	 * @param queueName
@@ -143,17 +115,19 @@ public class VSMBServerTcpBean implements VSMBServer {
 	/**
 	 * construct queue associated with VSMB service
 	 */
-	protected void makeQueue() throws NamingException,UtilsException {
-		if (queueName==null) throw new UtilsException(UtilsExceptions.Error_Param,"No queue name defined");
+	protected void makeQueue(DataBaseAccessor accessor) throws NamingException,UtilsException {
+		throw new UtilsException(UtilsExceptions.Error_Param,"to be implemented");
+		/*	if (queueName==null) throw new UtilsException(UtilsExceptions.Error_Param,"No queue name defined");
 		Context  envCtx  = null ;
+		queue = MessageQueueFactory.makeQueue(queueName, accessor);
 		if (debugDataBaseClassName==null || debugDataBaseUrl==null) {
 			Context initCtx = new InitialContext();
 			envCtx = (Context) initCtx.lookup("java:comp/env");
 			DataSource dataSource = (DataSource)envCtx.lookup(dataSourceName);
-			queue = MessageQueueFactory.makeQueue(queueName, dataSource);
+			
 		}
 		else {
-			queue = MessageQueueFactory.makeQueue(queueName, debugDataBaseClassName,debugDataBaseUrl);
+			queue = MessageQueueFactory.makeQueue(queueName, accessor);
 		}
 		try {
 			session=queue.createSession(true);
@@ -162,7 +136,7 @@ public class VSMBServerTcpBean implements VSMBServer {
 			stop = true ;
 			return;
 		}
-		producer = session.createProducer();
+		producer = session.createProducer();*/
 	}
 	
 	@Override
@@ -182,7 +156,7 @@ public class VSMBServerTcpBean implements VSMBServer {
 		ServerSocket server     = null ;
 		
 		try {
-			makeQueue();
+			makeQueue(null);
 		}
 		catch(Exception e) {
 			logger.error("Error consturcting queue",e);
@@ -312,9 +286,6 @@ public class VSMBServerTcpBean implements VSMBServer {
 	protected int     port              ;
 	protected String  queueName         ;
 	protected String  serviceAdress     ;
-	protected String  dataSourceName    ;
-	protected String  debugDataBaseClassName;
-	protected String  debugDataBaseUrl ;
 	protected boolean stop              ;
 	protected Vector<VSMBClientManager> managers;
 	protected Vector<Thread> managersThread;

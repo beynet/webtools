@@ -46,19 +46,19 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler{
     		Session current = SessionFactory.instance().getCurrentSession();
     		boolean creator = (current==null)?true:false;
     		if (current==null) {
-    			if (logger.isDebugEnabled()) logger.debug("Create new session");
+    			if (logger.isDebugEnabled()) logger.debug("Create new session : for method "+m2.getName()+" "+obj.getClass().getName());
     			current=SessionFactory.instance().createSession();
     		}
     		try {
     			result = m.invoke(obj, args);
     			if (creator==true && transaction!=null) {
-    				if (logger.isDebugEnabled()) logger.debug("commit session");
+    				if (logger.isDebugEnabled()) logger.debug("commit session "+m2.getName()+" "+obj.getClass().getName());
     				current.commit();
     			}
     		}
     		catch(RuntimeException e) {
     			if (creator==true && transaction!=null) {
-    				if (logger.isDebugEnabled()) logger.debug("rollback session");
+    				if (logger.isDebugEnabled()) logger.debug("rollback session "+m2.getName()+" "+obj.getClass().getName());
     				current.rollback();
     			}
     			throw e;

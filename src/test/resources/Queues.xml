@@ -1,0 +1,3 @@
+<queues>
+ <queue name="queuetest" manager="managertest" datasource="datatest"/>
+</queues>

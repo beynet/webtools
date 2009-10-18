@@ -2,13 +2,10 @@ package org.beynet.utils.messages.impl;
 
 import java.sql.SQLException;
 
-import javax.sql.DataSource;
-
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.messages.api.MessageQueueConnection;
 import org.beynet.utils.sqltools.DataBaseAccessor;
-import org.beynet.utils.sqltools.DataBaseAccessorImpl;
 import org.beynet.utils.sqltools.SqlSessionImpl;
 import org.beynet.utils.sqltools.interfaces.SqlSession;
 
@@ -18,17 +15,6 @@ public class MessageQueueConnectionImpl implements MessageQueueConnection {
 		this.accessor = accessor;
 	}
 	
-	@Deprecated
-	public MessageQueueConnectionImpl(DataSource dataSource) {
-		accessor = new DataBaseAccessorImpl();
-		accessor.setDataSource(dataSource);
-	}
-	@Deprecated
-	public MessageQueueConnectionImpl(String sqlDriverName,String sqlUrl) {
-		accessor = new DataBaseAccessorImpl();
-		accessor.setDebugDataBaseClass(sqlDriverName);
-		accessor.setDataBaseDebugUrl(sqlUrl);
-	}
 	/**
 	 * return an sql session
 	 * @return
@@ -42,8 +28,8 @@ public class MessageQueueConnectionImpl implements MessageQueueConnection {
 	@Override
 	public Object getStorageConnection() throws UtilsException  {
 		try {
-			return(getSession());
-		}catch (SQLException e) {
+			return(accessor.getConnection());
+		} catch (SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
 	}

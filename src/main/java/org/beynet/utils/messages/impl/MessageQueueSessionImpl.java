@@ -2,26 +2,36 @@ package org.beynet.utils.messages.impl;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
+import org.beynet.utils.framework.Constructor;
+import org.beynet.utils.framework.UtilsClassUJBProxy;
 import org.beynet.utils.messages.api.MessageQueue;
-import org.beynet.utils.messages.api.MessageQueueConnection;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
-import org.beynet.utils.sqltools.interfaces.SqlSession;
+import org.beynet.utils.sqltools.Transaction;
+import org.beynet.utils.sqltools.interfaces.RequestManager;
 
 public class MessageQueueSessionImpl implements MessageQueueSession {
-
-	public MessageQueueSessionImpl(MessageQueue queue,boolean transacted,MessageQueueConnection mqConnection) {
-		setAssociateQueue(queue);
-		this.mqConnection   = mqConnection ;
-		this.transacted     = transacted ;
-		this.pendingMessage = 0   ;
-		this.session     = null;
+    
+	public MessageQueueSessionImpl(RequestManager manager,Constructor root,String queueName,boolean transacted) {
+		this.queue = (MessageQueue)root.getService(queueName);
+		this.manager = manager ;
+		this.transacted=transacted;
 	}
 	
-	@Override
-	public void setAssociateQueue(MessageQueue queue)  {
-		this.queue = queue;
+	protected MessageQueueConsumersBean loadConsumer(String consumerId) throws UtilsException {
+		MessageQueueConsumersBean consumer = new MessageQueueConsumersBean();
+		StringBuffer request = new StringBuffer("select * from MessageQueueConsumers where ");
+		request.append(MessageQueueConsumersBean.FIELD_QUEUEID);
+		request.append("='");
+		request.append(queue.getQueueName());
+		request.append("' and ");
+		request.append(MessageQueueConsumersBean.FILED_CONSUMERID);
+		request.append("='");
+		request.append(consumerId);
+		request.append("'");
+		manager.load(consumer,request.toString());
+		return(consumer);
 	}
 	
 	/**
@@ -29,59 +39,61 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	 * @param consumerId
 	 */
 	protected void defineConsumer(String consumerId) {
-		MessageQueueConsumersBean b = new MessageQueueConsumersBean();
-		b.setQueueId(queue.getQueueName());
-		b.setConsumerId(consumerId);
-		
+		MessageQueueConsumersBean b ;
 		try {
-			if (b.exist((SqlSession)getStorageHandle())==false) {
-				b.save((SqlSession)getStorageHandle());
-				commit();
+			b=loadConsumer(consumerId);
+		}
+		catch(UtilsException e) {
+			b=new MessageQueueConsumersBean();
+			b.setQueueId(queue.getQueueName());
+			b.setConsumerId(consumerId);
+			try {
+				manager.persist(b);
+			} catch (UtilsException e1) {
+				throw new RuntimeException(e1);
 			}
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Could not create queue consumer");
-		}
-		finally {
-			releaseStorageHandle();
 		}
 	}
 	
 	@Override
+	@Transaction
 	public void deleteConsumer(String consumerId) {
-		MessageQueueConsumersBean b = new MessageQueueConsumersBean();
-		b.setQueueId(queue.getQueueName());
-		b.setConsumerId(consumerId);
+		MessageQueueConsumersBean b ;
 		try {
-			if (b.exist((SqlSession)getStorageHandle())==true) {
-				b.delete((SqlSession)getStorageHandle());
-				commit();
-			}
-		}catch (Exception e) {
-			e.printStackTrace();
-			logger.error("Could not delete queue consumer");
+			b=loadConsumer(consumerId);
+		}
+		catch(UtilsException e) {
+			logger.warn("consumer "+consumerId+" does not exist");
+			return;
+		}
+		try {
+			manager.delete(b);
+		} catch (UtilsException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
 	@Override
+	@Transaction
 	public MessageQueueConsumer createConsumer(String consumerId) {
 		defineConsumer(consumerId);
-		MessageQueueConsumer consumer = new MessageQueueConsumerImpl(queue,this,consumerId);
-		queue.addConsumer(consumer);
-		return(consumer);
+		createdConsumer= (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(manager,queue,consumerId));
+		queue.addConsumer(createdConsumer);
+		return(createdConsumer);
 	}
 	@Override
+	@Transaction
 	public MessageQueueConsumer createConsumer(String consumerId,String properties) {
 		defineConsumer(consumerId);
-		MessageQueueConsumer consumer = new MessageQueueConsumerImpl(queue,this,consumerId,properties);
-		queue.addConsumer(consumer);
-		return(consumer);
+		createdConsumer = (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(manager,queue,consumerId,properties));
+		queue.addConsumer(createdConsumer);
+		return(createdConsumer);
 	}
 
 	@Override
 	public MessageQueueProducer createProducer() {
-		return(new MessageQueueProducerImpl(queue,this));
+		createdProducer = (MessageQueueProducer)UtilsClassUJBProxy.newInstance(new MessageQueueProducerImpl(manager,queue,this));
+		return(createdProducer);
 	}
 	
 	
@@ -95,60 +107,33 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	}
 	
 	@Override
-	public SqlSession getStorageHandle() throws UtilsException {
-		if (session!=null) {
-			return(session);
-		}
-		else {
-			session = (SqlSession)mqConnection.getStorageConnection();
-			try {
-				session.connectToDataBase(transacted);
-			} catch (UtilsException e) {
-				session=null;
-				throw e;
-			}
-			return(session);
-		}
-	}
-	@Override
-	public void releaseStorageHandle() {
-		if (session!=null) {
-			if (transacted==false || pendingMessage==0) {
-				try {
-					session.closeConnection();
-				} catch (UtilsException e) {
-				}
-				session = null ;
-			}
-		}
-	}
-	
-	@Override
-	public void commit() throws UtilsException {
+	public void commit() {
 		if (transacted==false) return;
-		session.commit();
-		session.closeConnection();
-		session = null ;
 		for (int j=0;j<pendingMessage;j++) {
 			queue.onMessage();
 		}
 		pendingMessage = 0;
 	}
+	
+	@Override
+	public void close() {
+		if (createdConsumer!=null) {
+			queue.removeConsumer(createdConsumer);
+		}
+	}
 
 	@Override
-	public void rollback() throws UtilsException {
+	public void rollback()  {
 		if (transacted==false) return;
-		session.rollback();
-		session.closeConnection();
-		session = null ;
 		pendingMessage = 0;
 	}
 
-	private MessageQueue           queue          ;
-	private MessageQueueConnection mqConnection   ;
-	private boolean                transacted     ;
-	private int                    pendingMessage ;
-	private SqlSession             session     ;
+	private MessageQueue               queue          ;
+	private boolean                    transacted     ;
+	private int                        pendingMessage ;
+	private RequestManager             manager        ;
+	private MessageQueueConsumer       createdConsumer;
+	private MessageQueueProducer       createdProducer;
 	
 	private final Logger logger = Logger.getLogger(MessageQueueSession.class);
 }

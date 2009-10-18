@@ -79,6 +79,7 @@ public class DataBaseAccessorImpl implements DataBaseAccessor  {
 	
 	private Connection initConnection() throws SQLException {
 		Connection result;
+		System.err.println("create new connection !!!!!!!!!!!!!!");
 		if (dataSource!=null) {
 			/* creation de l'objet connection */
 			/* ------------------------------ */
@@ -106,6 +107,7 @@ public class DataBaseAccessorImpl implements DataBaseAccessor  {
 				throw new SQLException("No DataSource found");
 			}
 		}
+		result.setAutoCommit(false);
 		return(SqlToolsConnectionFactory.getInstance().makeNewSqlToolsConnection(result));
 	}
 
@@ -115,7 +117,7 @@ public class DataBaseAccessorImpl implements DataBaseAccessor  {
 	public Connection getConnection() throws SQLException {
 		Session session = SessionFactory.instance().getCurrentSession();
 		if (session==null) return(initConnection());
-		Connection connection = session.getRegistered(this);
+		Connection connection = session.getRegisteredConnection(this);
 		if (connection!=null) {
 			return(connection);
 		}

@@ -17,11 +17,11 @@ public interface MessageQueue {
 	/**
 	 *
 	 * create a Session transacted or not
+	 * !! Attention !! these session must be created by the thread that will use this session
 	 * @param transacted
 	 * @return
-	 * @throws UtilsException
 	 */
-	public MessageQueueSession createSession(boolean transacted) throws UtilsException;
+	public MessageQueueSession createSession(boolean transacted);
 	
 	/**
 	 * return an empty message
@@ -39,6 +39,12 @@ public interface MessageQueue {
 	 * @param consumer
 	 */
 	public void addConsumer(MessageQueueConsumer consumer);
+	
+	/**
+	 * remove a consumer for this queue
+	 * @param consumer
+	 */
+	public void removeConsumer(MessageQueueConsumer consumer) ;
 	
 	/**
 	 * return total message into queue

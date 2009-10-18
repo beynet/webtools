@@ -3,7 +3,7 @@ package org.beynet.utils.messages.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -13,13 +13,29 @@ import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
-import org.beynet.utils.sqltools.interfaces.SqlSession;
+import org.beynet.utils.sqltools.interfaces.RequestManager;
 
 public class MessageQueueProducerImpl implements MessageQueueProducer {
 	
-	public MessageQueueProducerImpl(MessageQueue queue,MessageQueueSession session) {
+	public MessageQueueProducerImpl(RequestManager manager,MessageQueue queue,MessageQueueSession session) {
 		this.queue = queue;
 		this.session = session ;
+		this.manager=manager;
+	}
+	
+	
+	private void loadConsumersList(List<String> consumers) throws UtilsException {
+		List<MessageQueueConsumersBean> lst = null ;
+		StringBuffer request = new StringBuffer("select * from MessageQueueConsumers where ");
+		request.append(MessageQueueConsumersBean.FIELD_QUEUEID);
+		request.append("='");
+		request.append(queue.getQueueName());
+		request.append("'");
+		
+		lst =manager.loadList(MessageQueueConsumersBean.class, request.toString());
+		for (MessageQueueConsumersBean b : lst) {
+			consumers.add(b.getConsumerId());
+		}
 	}
 	
 	@Override
@@ -33,12 +49,8 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 			throw new UtilsException(UtilsExceptions.Error_Io,e);
 		}
 		MessageQueueBean messageBean = new MessageQueueBean();
-		List<String> consumers = null ;
-		try {
-			consumers = MessageQueueConsumersBean.loadConsumersForQueue(queue.getQueueName(), (SqlSession)session.getStorageHandle());
-		}catch (SQLException e) {
-			throw new UtilsException(UtilsExceptions.Error_Sql,e);
-		}
+		List<String> consumers = new ArrayList<String>();
+		loadConsumersList(consumers);
 		messageBean.setMessage(bos.toByteArray());
 		messageBean.setQueueName(queue.getQueueName());
 		
@@ -47,21 +59,17 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 		for (String consumerId : consumers) {
 			messageBean.setConsumerId(consumerId);
 			messageBean.setMessageId(0);
-			try {
-				messageBean.save((SqlSession)session.getStorageHandle());
-			} catch (SQLException e) {
-				throw new UtilsException(UtilsExceptions.Error_Io,e);
-			}
+			manager.persist(messageBean);
 		}
 		if (logger.isDebugEnabled()) logger.debug("sending notification");
 		session.onMessage();
-		session.releaseStorageHandle();
 		if (logger.isDebugEnabled()) logger.debug("end of adding new message");
 	}
 	
 	
 	private MessageQueue        queue   ;
 	private MessageQueueSession session ;
+	private RequestManager      manager ;
 	private static Logger logger = Logger.getLogger(MessageQueueProducerImpl.class);
 	
 }
