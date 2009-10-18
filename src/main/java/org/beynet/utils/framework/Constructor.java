@@ -7,8 +7,17 @@ package org.beynet.utils.framework;
  */
 public interface Constructor {
 
+	/**
+	 * return an instance of UJB called name
+	 * @param name
+	 * @return
+	 */
 	public abstract Object getService(String name);
 
+	/**
+	 * configure e - ie inject all ujb inside
+	 * @param e
+	 */
 	public abstract void configure(Object e);
 
 }

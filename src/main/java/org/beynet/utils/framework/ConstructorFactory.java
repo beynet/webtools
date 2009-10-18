@@ -3,14 +3,23 @@ package org.beynet.utils.framework;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * constructor framework instances
+ * @author beynet
+ *
+ */
 public class ConstructorFactory {
 	
-	public synchronized static Constructor instance(String contextPath) {
-		Constructor instance = instances.get(contextPath) ;
+	/**
+	 * return framework instance associated with workingDirectory
+	 * @param workingDirectory
+	 * @return
+	 */
+	public synchronized static Constructor instance(String workingDirectory) {
+		Constructor instance = instances.get(workingDirectory) ;
 		if (instance==null) {
-			instance = new ConstructorImpl(contextPath);
-			instances.put(contextPath, instance);
+			instance = new ConstructorImpl(workingDirectory);
+			instances.put(workingDirectory, instance);
 		}
 		return(instance);
 	}

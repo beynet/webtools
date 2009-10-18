@@ -27,13 +27,15 @@ public class ConstructorImpl implements Constructor {
 	
 	
 	
-	/* (non-Javadoc)
-	 * @see org.beynet.utils.framework.impl.Constructor#getService(java.lang.String)
-	 */
+	@Override
 	public Object getService(String name) {
 		return(ujbList.get(name));
 	}
 	
+	/**
+	 * default constructor
+	 * @param contextPath
+	 */
 	public ConstructorImpl(String contextPath) {
 		ujbList = new HashMap<String, Object>();
 		originalList = new HashMap<String, Object>();
@@ -55,7 +57,11 @@ public class ConstructorImpl implements Constructor {
 		}
 		init(contextPath);
 	}
-	
+	/**
+	 * construct a class name from it's filename
+	 * @param current
+	 * @return
+	 */
 	private String getClassNameFromFile(File current) {
 		String classesPattern = "classes/" ;
 		String path = current.getPath();
@@ -65,7 +71,12 @@ public class ConstructorImpl implements Constructor {
 		className=className.replaceAll("\\.class", "");
 		return(className);
 	}
-	
+	/**
+	 * create an UJB called name
+	 * @param classFound
+	 * @param name
+	 * @return
+	 */
 	private Object createUJB(Class<?> classFound,String name) {
 		try {
 			Object u = classFound.newInstance();
@@ -84,7 +95,10 @@ public class ConstructorImpl implements Constructor {
 			throw new UtilsRuntimeException(UtilsExceptions.Error_Param,"Class instanciation "+classFound.getName(),e);
 		}
 	}
-	
+	/**
+	 * create an UJB from a class
+	 * @param classFound
+	 */
 	private void createUJB(Class<?> classFound) {
 		UJB ujbAnnotation = classFound.getAnnotation(UJB.class);
 		createUJB(classFound,ujbAnnotation.name());
@@ -170,8 +184,12 @@ public class ConstructorImpl implements Constructor {
 			createUJB(classFound);
 		}
 	}
-	
+	/**
+	 * check if current is a class or a config file
+	 * @param current
+	 */
 	private void processFile(File current) {
+		
 		if (current.getName().endsWith(".class")) {
 			String className = getClassNameFromFile(current);
 			try {
@@ -183,24 +201,40 @@ public class ConstructorImpl implements Constructor {
 			}
 		}
 		else if (current.getName().equals("RequestsManagers.xml")) {
+			/*
+			 * this is a manager config file
+			 */
 			loadManagersUJB(current);
 		}
 		else if (current.getName().equals("DataBaseAccessors.xml")) {
+			/*
+			 * this is a definition of database
+			 */
 			loadDataBaseAccessors(current);
 		}
 		else if (current.getName().equals("Queues.xml")) {
+			/*
+			 * this is a queue definition file
+			 */
 			loadQueues(current);
 		}
 	}
 	
 	
-	protected void constructQueue(String name, String dataSourceName,String managerName) {
+	/**
+	 * construct a MessageQueue associated with a DataBaseAccessor accessorName and
+	 * with a RequestManager called managerName
+	 * @param name
+	 * @param accessorName
+	 * @param managerName
+	 */
+	protected void constructQueue(String name, String accessorName,String managerName) {
 		MessageQueueImpl result = (MessageQueueImpl)createUJB(MessageQueueImpl.class, name);
 		//injecting database accessor
 		try {
 			Field f = result.getClass().getDeclaredField("accessorName");
 			f.setAccessible(true);
-			f.set(result, dataSourceName);
+			f.set(result, accessorName);
 			f.setAccessible(false);
 			
 			
@@ -220,6 +254,14 @@ public class ConstructorImpl implements Constructor {
 		}
 	}
 	
+	/**
+	 * construct queues define into xml file current
+	 * exemple :
+	 * <queues>
+           <queue name="queuetest" manager="managertest" datasource="datatest"/>
+       </queues>
+	 * @param current
+	 */
 	private void loadQueues(File current) {
 		class QueuesCallBackImpl implements XmlCallBack {
 
@@ -242,10 +284,8 @@ public class ConstructorImpl implements Constructor {
 			public void onNewTagAttributs(List<String> parents, String tagName,
 					Map<String, String> tagValues) throws UtilsException {
 				if ("queue".equals(tagName)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("creating new Queue name="+tagValues.get("name"));
-						constructQueue(tagValues.get("name"),tagValues.get("datasource"),tagValues.get("manager"));
-					}
+					if (logger.isDebugEnabled()) logger.debug("creating new Queue name="+tagValues.get("name"));
+					constructQueue(tagValues.get("name"),tagValues.get("datasource"),tagValues.get("manager"));
 				}
 			}
 		};
@@ -298,7 +338,15 @@ public class ConstructorImpl implements Constructor {
 	
 	
 	
-	
+	/**
+	 * construct database accessors defined into xml file current
+	 * should be constructed from a datasource or from a default classname combined with an url
+	 * example :
+	 * <databaseaccessors>
+         <databaseaccessor name="datatest" datasource="xarch/jdbc/ds" url="jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser"  class="org.postgresql.Driver"/>
+       </databaseaccessors>
+	 * @param current
+	 */
 	private void loadDataBaseAccessors(File current) {
 		class DataBaseAccessorCallBackImpl implements XmlCallBack {
 
@@ -321,10 +369,8 @@ public class ConstructorImpl implements Constructor {
 			public void onNewTagAttributs(List<String> parents, String tagName,
 					Map<String, String> tagValues) throws UtilsException {
 				if ("databaseaccessor".equals(tagName)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("creating new DataBaseAccessor name="+tagValues.get("name"));
-						constructDataBaseAccessor(tagValues.get("name"),tagValues.get("datasource"),tagValues.get("url"),tagValues.get("class"));
-					}
+					if (logger.isDebugEnabled()) logger.debug("creating new DataBaseAccessor name="+tagValues.get("name"));
+					constructDataBaseAccessor(tagValues.get("name"),tagValues.get("datasource"),tagValues.get("url"),tagValues.get("class"));
 				}
 			}
 		};
@@ -345,7 +391,14 @@ public class ConstructorImpl implements Constructor {
     	}
 	}
 	
-	
+	/**
+	 * construct QueryManager (s) defined into xmlfile current
+	 * example :
+	 * <managers>
+          <manager name="managertest" datasource="datatest"/>
+       </managers>
+	 * @param current
+	 */
 	private void loadManagersUJB(File current) {
 		class ManagerCallBackImpl implements XmlCallBack {
 
@@ -368,10 +421,8 @@ public class ConstructorImpl implements Constructor {
 			public void onNewTagAttributs(List<String> parents, String tagName,
 					Map<String, String> tagValues) throws UtilsException {
 				if ("manager".equals(tagName)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("creating new manager name="+tagValues.get("name")+" datasource jni name="+tagValues.get("datasource"));
-						constructManagerUJB(tagValues.get("name"),tagValues.get("datasource"));
-					}
+					if (logger.isDebugEnabled()) logger.debug("creating new manager name="+tagValues.get("name")+" datasource jni name="+tagValues.get("datasource"));
+					constructManagerUJB(tagValues.get("name"),tagValues.get("datasource"));
 				}
 			}
 		};
@@ -392,6 +443,10 @@ public class ConstructorImpl implements Constructor {
     	}
 	}
 	
+	/**
+	 * search for UJB
+	 * @param dir
+	 */
 	private void processDir(File dir) {
 		File[] files = dir.listFiles();
 		for (File current : files) {
@@ -404,9 +459,19 @@ public class ConstructorImpl implements Constructor {
 		}
 	}
 	
-	private void init(String contextPath) {
-		File first = new File(contextPath);
+	/**
+	 * browse workingDir and search for UJB
+	 * @param workingDir
+	 */
+	private void init(String workingDir) {
+		File first = new File(workingDir);
+		/*
+		 * search for ujb
+		 */
 		processDir(first);
+		/*
+		 * post configure all instances
+		 */
 		for (String key : originalList.keySet()) {
 			configure(originalList.get(key));
 		}
