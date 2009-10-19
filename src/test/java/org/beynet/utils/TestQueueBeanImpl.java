@@ -13,14 +13,6 @@ import org.beynet.utils.sqltools.Transaction;
 
 @UJB(name="testqueuebean")
 public class TestQueueBeanImpl implements TestQueueBean {
-
-	@Override
-	@Transaction
-	public void defineConsumer(String consumerId) {
-		logger.debug("reading message "+consumerId);
-		MessageQueueSession session = queue.createSession(true);
-		MessageQueueConsumer consumer = session.createConsumer(consumerId);	
-	}
 	
 	@Override
 	@Transaction

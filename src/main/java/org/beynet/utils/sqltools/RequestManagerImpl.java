@@ -124,20 +124,22 @@ public class RequestManagerImpl implements RequestManager {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
 	}
-	
-	/**
-	 * 
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> List<T> loadList(Class<T> cl,String request) throws UtilsException {
-		ArrayList<T> result = new ArrayList<T>();
+	public <T> void loadList(Class<T> cl,String request,List<T> result) throws UtilsException {
 		RequestFactory<T> requestFactorie =(RequestFactory<T>)getAssociatedFactory(cl);
+		if (result==null) throw new UtilsException(UtilsExceptions.Error_Param,"List param is null");
 		try {
 			requestFactorie.loadList(result, accessor.getConnection(), request);
 		} catch (SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
 		}
+	}
+	
+	@Override
+	public <T> List<T> loadList(Class<T> cl,String request) throws UtilsException {
+		ArrayList<T> result = new ArrayList<T>();
+		loadList(cl, request,result);
 		return(result);
 	}
 	

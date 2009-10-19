@@ -74,7 +74,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	}
 	
 	@Override
-	@Transaction
+	@Transaction(create=true)
 	public MessageQueueConsumer createConsumer(String consumerId) {
 		defineConsumer(consumerId);
 		createdConsumer= (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(manager,queue,consumerId));

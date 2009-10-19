@@ -23,12 +23,21 @@ public class SessionFactory {
 		return(connectionList.get(Thread.currentThread()));
 	}
 	
+	/**
+	 * replace current session with given param
+	 * @param session
+	 */
+	protected synchronized void replaceCurrentSession(Session session) {
+		connectionList.put(Thread.currentThread(), session);
+	}
+	
 	public synchronized Session createSession() {
 		if (logger.isDebugEnabled()) logger.debug("Creating new session");
 		Session ret = new SessionImpl();
 		connectionList.put(Thread.currentThread(), ret);
 		return(ret);
 	}
+	
 	public synchronized void removeSession() {
 		if (logger.isDebugEnabled()) logger.debug("Delete old session");
 		connectionList.remove(Thread.currentThread());

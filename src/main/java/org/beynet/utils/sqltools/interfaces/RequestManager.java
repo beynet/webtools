@@ -41,6 +41,7 @@ public interface RequestManager {
 	
 	/**
 	 * load a list of T with request
+	 * return the result
 	 * @param <T>
 	 * @param cl
 	 * @param request
@@ -48,6 +49,16 @@ public interface RequestManager {
 	 * @throws UtilsException
 	 */
 	public <T> List<T> loadList(Class<T> cl,String request) throws UtilsException;
+	
+	/**
+	 * load a list of T with request - result is a parameter
+	 * @param <T>
+	 * @param cl
+	 * @param request
+	 * @param result
+	 * @throws UtilsException
+	 */
+	public <T> void loadList(Class<T> cl,String request,List<T> result) throws UtilsException;
 	
 	/**
 	 * count all elements of T

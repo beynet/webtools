@@ -18,15 +18,12 @@ import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.ConstructorFactory;
 import org.beynet.utils.framework.SessionFactory;
 import org.beynet.utils.framework.UJB;
-import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.impl.ShellCommandResultImpl;
-import org.beynet.utils.sqltools.DataBaseAccessor;
-import org.beynet.utils.sqltools.interfaces.RequestManager;
 import org.beynet.utils.xml.XmlReader;
 import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
@@ -95,16 +92,15 @@ public class AppTest
     	
     	Thread t0,t1,t2,t3;
     	t0=new Thread(new ThreadProducer(queue));
-//    	t1=new Thread(new ThreadProducer(queue));
+    	t1=new Thread(new ThreadProducer(queue));
     	t2= new Thread(new ThreadConsumer(queue,"cs1","url=test ,  test=machin"));
     	t3= new Thread(new ThreadConsumer(queue,"cs2","url=test ,  test=machin"));
     	try {
-//    		t2.start();
+    		t2.start();
         	t3.start();
         	t0.start();
-        	t2.start();
-//    		t1.start();
-//			t1.join();
+    		t1.start();
+			t1.join();
 			t2.join();
 	    	t3.join();
 	    	t0.join();
@@ -120,7 +116,6 @@ public class AppTest
     		this.queue= queue ;
     		this.properties = properties;
     		this.id = id ;
-    		testQueue.defineConsumer(id);
     	}
     	@Override
     	public void run() {
@@ -133,9 +128,11 @@ public class AppTest
     			} catch (InterruptedException e1) {
     			}
     			int totalReaded = 0 ;
-    			for (int i=0; i< MAX_ITER ; i++) {
-
-    				String strMessage =null;
+    			/**
+    			 * each producer will send MAX_ITER -1 messages
+    			 * but we will skipp two messages
+    			 */
+    			for (int i=0; i< MAX_ITER*2 ; i++) {
     				try {
     					System.err.println("------------"+id+" sleeping - iteration "+i+"total readed="+totalReaded);
     					Thread.sleep((int)(100*Math.random()));
@@ -143,7 +140,7 @@ public class AppTest
     				} catch (InterruptedException e) {
     					e.printStackTrace();
     				}
-    				boolean commit = (i==8)?false:true;
+    				boolean commit = (i==8 || i==16)?false:true;
     				if (commit==false) {
     					logger.debug("false !!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     				}
@@ -371,11 +368,6 @@ public class AppTest
     	}
     	assertEquals(result, true);
     }
-    @UJB(name="datatest")
-    private DataBaseAccessor accessor ;
-    
-    @UJB(name="managertest")
-    private RequestManager manager;
     
     @UJB(name="queuetest")
     private MessageQueue queue;

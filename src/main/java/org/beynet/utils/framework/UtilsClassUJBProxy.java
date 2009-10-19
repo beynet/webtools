@@ -6,20 +6,39 @@ import java.lang.reflect.Method;
 import org.apache.log4j.Logger;
 import org.beynet.utils.sqltools.Transaction;
 
+/**
+ * construct a proxy in front of an UJB
+ * @author beynet
+ *
+ */
+/**
+ * @author beynet
+ *
+ */
 public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler{
 	private Object obj;
 
+	/**
+	 * return proxy instance
+	 * @param obj
+	 * @return
+	 */
     public static Object newInstance(Object obj) {
-	return java.lang.reflect.Proxy.newProxyInstance(
-	    obj.getClass().getClassLoader(),
-	    obj.getClass().getInterfaces(),
-	    new UtilsClassUJBProxy(obj));
+    	return java.lang.reflect.Proxy.newProxyInstance(
+    			obj.getClass().getClassLoader(),
+    			obj.getClass().getInterfaces(),
+    			new UtilsClassUJBProxy(obj));
     }
 
+    /**
+     * construct class for ujb=obj
+     * @param obj
+     */
     private UtilsClassUJBProxy(Object obj) {
     	this.obj = obj;
     }
 
+    @Override
     public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
     	Object result;
     	Method m2=null;
@@ -43,31 +62,44 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler{
     			}
     		}
     		Transaction transaction = m2.getAnnotation(Transaction.class);
-    		Session current = SessionFactory.instance().getCurrentSession();
-    		boolean creator = (current==null)?true:false;
-    		if (current==null) {
-    			if (logger.isDebugEnabled()) logger.debug("Create new session : for method "+m2.getName()+" "+obj.getClass().getName());
-    			current=SessionFactory.instance().createSession();
-    		}
-    		try {
+    		/*
+    		 * method is not inside a transaction
+    		 */
+    		if (transaction==null) {
     			result = m.invoke(obj, args);
-    			if (creator==true && transaction!=null) {
-    				if (logger.isDebugEnabled()) logger.debug("commit session "+m2.getName()+" "+obj.getClass().getName());
-    				current.commit();
-    			}
     		}
-    		catch(RuntimeException e) {
-    			if (creator==true && transaction!=null) {
-    				if (logger.isDebugEnabled()) logger.debug("rollback session "+m2.getName()+" "+obj.getClass().getName());
-    				current.rollback();
+    		else {
+
+    			Session original = SessionFactory.instance().getCurrentSession();
+    			Session current = original ;
+    			boolean creator = (current==null)?true:false;
+    			if (current==null || transaction.create()) {
+    				if (logger.isDebugEnabled()) logger.debug("Create new session : for method "+m2.getName()+" "+obj.getClass().getName());
+    				current=SessionFactory.instance().createSession();
     			}
-    			throw e;
-    		}
-    		finally {
-    			if (creator==true) {
-    				if (logger.isDebugEnabled()) logger.debug("close session");
-    				current.close();
-    				SessionFactory.instance().removeSession();
+    			try {
+    				result = m.invoke(obj, args);
+    				if (creator==true || transaction.create()) {
+    					if (logger.isDebugEnabled()) logger.debug("commit session "+m2.getName()+" "+obj.getClass().getName());
+    					current.commit();
+    				}
+    			}
+    			catch(RuntimeException e) {
+    				if (creator==true || transaction.create()) {
+    					if (logger.isDebugEnabled()) logger.debug("rollback session "+m2.getName()+" "+obj.getClass().getName());
+    					current.rollback();
+    				}
+    				throw e;
+    			}
+    			finally {
+    				if (creator==true || transaction.create()) {
+    					if (logger.isDebugEnabled()) logger.debug("close session");
+    					current.close();
+    					SessionFactory.instance().removeSession();
+    					if (transaction.create() && original!=null) {
+    						SessionFactory.instance().replaceCurrentSession(original);
+    					}
+    				}
     			}
     		}
     	} catch (InvocationTargetException e) {
