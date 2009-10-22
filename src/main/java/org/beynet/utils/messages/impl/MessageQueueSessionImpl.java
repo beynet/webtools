@@ -8,12 +8,14 @@ import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
+import org.beynet.utils.sqltools.DataBaseAccessor;
 import org.beynet.utils.sqltools.Transaction;
 import org.beynet.utils.sqltools.interfaces.RequestManager;
 
 public class MessageQueueSessionImpl implements MessageQueueSession {
     
-	public MessageQueueSessionImpl(RequestManager manager,Constructor root,String queueName,boolean transacted) {
+	public MessageQueueSessionImpl(DataBaseAccessor accessor,RequestManager manager,Constructor root,String queueName,boolean transacted) {
+		this.accessor = accessor ;
 		this.queue = (MessageQueue)root.getService(queueName);
 		this.manager = manager ;
 		this.transacted=transacted;
@@ -77,15 +79,15 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	@Transaction(create=true)
 	public MessageQueueConsumer createConsumer(String consumerId) {
 		defineConsumer(consumerId);
-		createdConsumer= (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(manager,queue,consumerId));
+		createdConsumer= (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor,manager,queue,consumerId));
 		queue.addConsumer(createdConsumer);
 		return(createdConsumer);
 	}
 	@Override
-	@Transaction
+	@Transaction(create=true)
 	public MessageQueueConsumer createConsumer(String consumerId,String properties) {
 		defineConsumer(consumerId);
-		createdConsumer = (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(manager,queue,consumerId,properties));
+		createdConsumer = (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor,manager,queue,consumerId,properties));
 		queue.addConsumer(createdConsumer);
 		return(createdConsumer);
 	}
@@ -134,6 +136,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	private RequestManager             manager        ;
 	private MessageQueueConsumer       createdConsumer;
 	private MessageQueueProducer       createdProducer;
+	private DataBaseAccessor           accessor       ;
 	
 	private final Logger logger = Logger.getLogger(MessageQueueSession.class);
 }

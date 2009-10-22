@@ -15,14 +15,30 @@ import org.beynet.utils.sqltools.DataBaseAccessor;
 
 public class SessionImpl implements Session {
 	
-	public SessionImpl() {
+	public SessionImpl(boolean autoCommit) {
 		registeredConnection = new HashMap<DataBaseAccessor, Connection>();
 		registeredRessources = new HashMap<DataBaseAccessor, List<Ressource>>();
+		this.autoCommit = autoCommit ;
 	}
 	
 	public void registerConnection(DataBaseAccessor a,Connection connection) {
+		try {
+			connection.setAutoCommit(autoCommit);
+		} catch (SQLException e) {
+		}
 		registeredConnection.put(a, connection);
 	}
+	
+	public void releaseConnection(DataBaseAccessor a) {
+		Connection connection = getRegisteredConnection(a);
+		if (connection!=null)
+			try {
+				connection.close();
+			} catch (SQLException e) {
+			}
+		registeredConnection.remove(a);
+	}
+	
 	public void registerRessource(DataBaseAccessor a,Ressource ressource) {
 		List<Ressource> lst = registeredRessources.get(a);
 		if (lst==null) {
@@ -94,6 +110,7 @@ public class SessionImpl implements Session {
 			}
 		}
 	}
+	private boolean autoCommit ;
 	private Map<DataBaseAccessor,Connection>   registeredConnection ;
 	private Map<DataBaseAccessor,List<Ressource>> registeredRessources ;
 }

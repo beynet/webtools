@@ -107,7 +107,6 @@ public class DataBaseAccessorImpl implements DataBaseAccessor  {
 				throw new SQLException("No DataSource found");
 			}
 		}
-		result.setAutoCommit(false);
 		return(SqlToolsConnectionFactory.getInstance().makeNewSqlToolsConnection(result));
 	}
 

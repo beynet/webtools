@@ -9,22 +9,24 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
+import org.beynet.utils.framework.SessionFactory;
 import org.beynet.utils.io.CustomObjectInputStream;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
+import org.beynet.utils.sqltools.DataBaseAccessor;
 import org.beynet.utils.sqltools.Transaction;
 import org.beynet.utils.sqltools.interfaces.RequestManager;
 import org.beynet.utils.tools.Semaphore;
 
 public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 	
-	public MessageQueueConsumerImpl(RequestManager manager,MessageQueue queue,String consumerId) {
-		init(manager,queue,consumerId);
+	public MessageQueueConsumerImpl(DataBaseAccessor accessor,RequestManager manager,MessageQueue queue,String consumerId) {
+		init(accessor,manager,queue,consumerId);
 	}
 	
-	public MessageQueueConsumerImpl(RequestManager manager,MessageQueue queue,String consumerId,String properties) {
-		init(manager,queue,consumerId);
+	public MessageQueueConsumerImpl(DataBaseAccessor accessor,RequestManager manager,MessageQueue queue,String consumerId,String properties) {
+		init(accessor,manager,queue,consumerId);
 		StringTokenizer tokeni = new StringTokenizer(properties,",");
 		while (tokeni.hasMoreTokens()) {
 			StringTokenizer tokeni2 = new StringTokenizer(tokeni.nextToken(),"=");
@@ -102,6 +104,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 				break;
 			}
 			if (logger.isDebugEnabled()) logger.debug("waiting for new message");
+			SessionFactory.instance().getCurrentSession().releaseConnection(accessor);
 			pending.P();
 			if (logger.isDebugEnabled()) logger.debug("awake !");
 		}
@@ -121,7 +124,8 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 	 * @param session
 	 * @param connection
 	 */
-	private void init(RequestManager manager,MessageQueue queue,String consumerId) {
+	private void init(DataBaseAccessor accessor,RequestManager manager,MessageQueue queue,String consumerId) {
+		this.accessor = accessor ;
 		this.manager = manager ;
 		this.queue = queue;
 		this.consumerId = consumerId ;
@@ -151,6 +155,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 	}
 	
 	private MessageQueue           queue      ;
+	private DataBaseAccessor       accessor   ;
 	private RequestManager         manager    ;
 	private Semaphore              pending    ;
 	private String                 consumerId ;

@@ -13,6 +13,12 @@ public interface Session {
 	public void registerConnection(DataBaseAccessor a,Connection connection);
 	
 	/**
+	 * release connection
+	 * @param a
+	 */
+	public void releaseConnection(DataBaseAccessor a);
+	
+	/**
 	 * register a ressource associated with an active connection
 	 * @param a
 	 * @param connection

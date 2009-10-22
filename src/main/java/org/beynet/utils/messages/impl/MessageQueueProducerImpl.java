@@ -13,6 +13,7 @@ import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
+import org.beynet.utils.sqltools.Transaction;
 import org.beynet.utils.sqltools.interfaces.RequestManager;
 
 public class MessageQueueProducerImpl implements MessageQueueProducer {
@@ -39,6 +40,7 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 	}
 	
 	@Override
+	@Transaction
 	public synchronized void addMessage(Message message) throws UtilsException {
 		if (logger.isDebugEnabled()) logger.debug("adding new message to queue");
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();

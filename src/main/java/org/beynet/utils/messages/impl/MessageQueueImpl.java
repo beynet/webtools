@@ -1,5 +1,7 @@
 package org.beynet.utils.messages.impl;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,10 +40,34 @@ public class MessageQueueImpl implements MessageQueue {
 		return(new MessageImpl());
 	}
 	
+	@SuppressWarnings("unused")
+	private void createTables() {
+		synchronized (MessageQueueImpl.class) {
+			Connection connection= null ;
+			SessionFactory.instance().createSession();
+			try {
+				connection=accessor.getConnection();
+				manager.createTable(MessageQueueBean.class);
+				manager.createTable(MessageQueueConsumersBean.class);
+				connection.commit();
+			} catch (Exception e) {
+
+			}
+			finally {
+				if (connection!=null )
+					try {
+						connection.close();
+					} catch (SQLException e) {
+					}
+				SessionFactory.instance().removeSession();
+			}
+		}
+	}
+	
 	@Override
 	@Transaction
 	public MessageQueueSession createSession(boolean transacted) {
-		MessageQueueSession session = (MessageQueueSession)UtilsClassUJBProxy.newInstance(new MessageQueueSessionImpl(manager,root,getQueueName(),transacted));
+		MessageQueueSession session = (MessageQueueSession)UtilsClassUJBProxy.newInstance(new MessageQueueSessionImpl(accessor,manager,root,getQueueName(),transacted));
 		SessionFactory.instance().getCurrentSession().registerRessource(accessor, session);
 		return(session);
 	}

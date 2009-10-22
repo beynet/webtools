@@ -3,6 +3,7 @@ package org.beynet.utils.framework;
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -141,6 +142,11 @@ public class ConstructorImpl implements Constructor {
 			f.setAccessible(true);
 			f.set(result, ujbList.get(name));
 			f.setAccessible(false);
+			
+			
+			Method m = result.getClass().getDeclaredMethod("createTables");
+			m.setAccessible(true);
+			m.invoke(result );
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -481,7 +487,6 @@ public class ConstructorImpl implements Constructor {
 	private Context             localContext ;
 	private Map<String, Object> ujbList      ;
 	private Map<String, Object> originalList ;
-	
 	
 
 	private static final Logger logger = Logger.getLogger(ConstructorImpl.class);
