@@ -7,6 +7,9 @@ public class RssCommon {
 	 * @return
 	 */
 	protected String encodeEntities(final String original) {
+		if (original==null) {
+			return("");
+		}
 		StringBuffer ret=new StringBuffer();
 
 		for (int i=0;i<original.length();i++) {
