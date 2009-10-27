@@ -131,7 +131,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 					}
 				}
 				if (tableFound==true) {
-					logger.info("Table already exist");
+					logger.info("Table "+tableName+" already exist");
 					return;
 				}
 			}
