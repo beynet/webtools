@@ -84,7 +84,6 @@ public class RequestManagerImpl implements RequestManager {
 	public <T> void persist(T obj) throws UtilsException {
 		RequestFactory<T> requestFactorie =(RequestFactory<T>)getAssociatedFactory(obj.getClass());
 		try {
-			requestFactorie.createTable( accessor.getConnection());
 			requestFactorie.save(obj,  accessor.getConnection());
 		} catch(SQLException e) {
 			throw new UtilsException(UtilsExceptions.Error_Sql,e);
