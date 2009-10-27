@@ -79,7 +79,6 @@ public class DataBaseAccessorImpl implements DataBaseAccessor  {
 	
 	private Connection initConnection() throws SQLException {
 		Connection result;
-		System.err.println("create new connection !!!!!!!!!!!!!!");
 		if (dataSource!=null) {
 			/* creation de l'objet connection */
 			/* ------------------------------ */
