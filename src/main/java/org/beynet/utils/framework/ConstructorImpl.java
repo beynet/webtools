@@ -178,6 +178,7 @@ public class ConstructorImpl implements Constructor {
 						f.set(e,ujbList.get(ujb.name()));
 					}
 				} catch (Exception e1) {
+					logger.error("Error injecting ujb="+ujb.name()+" for target class="+e.getClass().getCanonicalName());
 					throw new UtilsRuntimeException(UtilsExceptions.Error_Param,e1);
 				}
 				f.setAccessible(accessible);
