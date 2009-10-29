@@ -57,9 +57,8 @@ public class FormSelect<T> extends FormElement {
 				addOption(element,clee);
 			}
 		}
-
-		
 	}
+
 	public FormSelect (String label,
 			String id,
 			String name,
@@ -80,9 +79,32 @@ public class FormSelect<T> extends FormElement {
 				addOption(element,clee);
 			}
 		}
-
-
 	}
+
+	public FormSelect (String label,
+					   String id,
+					   String name,
+					   boolean require,
+					   boolean multiple,
+					   HashMap<String,T> tableOptions,
+					   long size,
+					   boolean ordered,
+					   Map<String,String> optionals)  throws FormException {
+
+		super (label, id, name, require, optionals);
+		init (size, ordered);
+		_multiple = multiple;
+
+		if (! tableOptions.isEmpty()) {
+			Iterator<String> iter = tableOptions.keySet().iterator();
+			while (iter.hasNext()) {
+				String cle = iter.next();
+				T element = tableOptions.get (cle);
+				addOption (element, cle);
+			}
+		}
+	}
+
 	/**
 	 * construct a FormSelect with a list of objects annoted with FormSelectAnnotation
 	 * @param label
@@ -118,6 +140,7 @@ public class FormSelect<T> extends FormElement {
 			}
 		}
 	}
+
 	public FormSelect (String label,
                        String id,
                        String name,
@@ -139,10 +162,10 @@ public class FormSelect<T> extends FormElement {
 			}
 		}
 	}
-	
-	
+
+
 	private void addOption(T content,String ...value) throws FormException{
-		_lstOptions.add(new FormOption<T>(content,value));
+		_lstOptions.add (new FormOption<T> (content,value));
 	}
 
 	@Override
