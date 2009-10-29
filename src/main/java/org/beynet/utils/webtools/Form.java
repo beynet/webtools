@@ -91,30 +91,37 @@ public class Form {
 	public HttpServletRequest getRequete() {
 		return(_request);
 	}
+
 	public FormRequest getFormRequete() {
 		return(_formRequest);
 	}
-	
+
 	public String getAction() {
 		return(_action);
 	}
+
 	public void setAction(String action) {
 		_action = action;
 	}
-	
+
 	/**
 	 * 
 	 * @param formElement element a ajouter
 	 */
 	public void addFormElement(FormElement formElement) {
-		_lstElements.add(formElement);
-		_mapForm.put(formElement.getId(),formElement);
-		if (formElement  instanceof FormInputFile) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Ajout de l'element <" + formElement.getId() + "> au formulaire <" + _id + ">");
+		}
+
+		_lstElements.add (formElement);
+		_mapForm.put (formElement.getId(), formElement);
+
+		if (formElement instanceof FormInputFile) {
 			_encoding = "multipart/form-data";
 		}
 	}
 
-	    
+
 	public void beginForm(JspWriter writer) throws IOException {
 	      writer.print("<form id=\""+_id+"\" method=\""+_method+"\" action=\""+_action+"\"");
 	      if (!_onSubmit.equals("")) {
@@ -166,6 +173,10 @@ public class Form {
 	    }
 	    
 	    public void printElementById(JspWriter writer,String id,int ...opts)  throws IOException,FormException{
+	    	if (logger.isDebugEnabled()) {
+	    		logger.debug("Impression de l'element d'id <" + id + ">");
+	    	}
+
 	    	int tabIndex = 0;
 	    	if (opts.length>0) tabIndex=opts[0];
 	    	FormElement elem = getElementById(id);
@@ -218,16 +229,20 @@ public class Form {
 	    	if ( (_formRequest.getParameter("jetonForm")==null)                    ||
 	    		 (!(_formRequest.getParameter("jetonForm") instanceof String)) ||
 	    		 (_request.getSession().getAttribute("jeton_"+_id)==null) ||
-	    		 (!_request.getSession().getAttribute("jeton_"+_id).equals((String)_formRequest.getParameter("jetonForm")))
-	    	) {
+	    		 (!_request.getSession().getAttribute("jeton_"+_id).equals((String)_formRequest.getParameter("jetonForm")))) {
 	    		_request.getSession().setAttribute("jeton_"+_id,
 	    				champ.getValue()
 	    		);
 	    		erreur.append("jeton");
 	    		return false;
 	    	}
+
 	    	boolean res = true;
 	    	for (FormElement elem : _lstElements) {
+
+	    		if (logger.isDebugEnabled()) {
+	    			logger.debug("Element courant en cours de verification : <" + elem._id + ">");
+	    		}
 
 	    		// test de tous les elements du formulaire
 	    		// sauf du jeton dont on ne doit pas modifier la valeur
@@ -258,10 +273,8 @@ public class Form {
 	    	return(res);
 	    }
 	    
-	    /**
-	     * return true if current form has been validated
-	     * @return
-	     */
+	    // return true if current form has been validated
+	    // ----------------------------------------------
 	    public boolean isFormPosted() {
 	    	/*Object jetonForm = _formRequest.getParameter("jetonForm") ;
 	    	String jeton     = (String)_request.getSession().getAttribute("jeton_"+_id) ;
@@ -282,9 +295,6 @@ public class Form {
 	    	return(false);
 	    }
 
-	    /**
-	     * sync session with current form - to be called before displaying form twice
-	     */
 	    public void syncSession() {
 	    	try {
 	    	  FormElement champ = getElementById("jeton_"+_id) ;
