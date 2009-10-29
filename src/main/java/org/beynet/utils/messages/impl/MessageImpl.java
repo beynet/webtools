@@ -23,9 +23,9 @@ public class MessageImpl implements Message {
 	public boolean matchFilter(Map<String,String> filter) {
 		if (filter.size()==0) return(true);
 		for (String key : filter.keySet()) {
-			String attended = filter.get(key);
+			String expected = filter.get(key);
 			String found = properties.get(key);
-			if (!attended.equals(found)) {
+			if (!expected.equals(found)) {
 				return(false);
 			}
 		}

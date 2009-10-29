@@ -88,7 +88,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 					mqBean = loadBean(from);
 					message = readMessageFromBean(mqBean);
 					if (message.matchFilter(properties)) {
-						if (logger.isDebugEnabled()) logger.debug("Message match properties");
+						if (logger.isDebugEnabled()) logger.debug("Message matches properties");
 						break;
 					}
 					else {
@@ -108,7 +108,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 			pending.P();
 			if (logger.isDebugEnabled()) logger.debug("awake !");
 		}
-		// delete message readed from queue
+		// delete message read from queue
 		manager.delete(mqBean);
 		return(message);
 	}
