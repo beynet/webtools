@@ -22,6 +22,14 @@ public interface RequestManager {
 	public <T> void delete(T obj) throws UtilsException  ;
 	
 	/**
+	 * delete using query=query
+	 * @param <T>
+	 * @param obj
+	 * @throws UtilsException
+	 */
+	public <T> void delete(Class<T> cl,String query) throws UtilsException  ;
+	
+	/**
 	 * load obj
 	 * @param <T>
 	 * @param obj
