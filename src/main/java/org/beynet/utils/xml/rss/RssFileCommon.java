@@ -71,7 +71,7 @@ public abstract class RssFileCommon extends RssCommon implements RssFile {
 				throw new UtilsException(UtilsExceptions.Error_Io,"Could not delete file");
 			}
 		}
-		File parent = dest.getParentFile();
+		File parent = dest.getAbsoluteFile().getParentFile();
 		if (!parent.exists()) {
 			parent.mkdirs();
 		}
