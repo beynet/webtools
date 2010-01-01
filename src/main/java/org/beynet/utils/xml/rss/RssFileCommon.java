@@ -130,9 +130,24 @@ public abstract class RssFileCommon extends RssCommon implements RssFile {
 
 	@Override
 	public void addItem(RssItem item) {
+		
+		// if one item with the same path exist we remove it
+		// -------------------------------------------------
+		List<RssItem> toRemove = new ArrayList<RssItem>();
+		for (RssItem i : _items) {
+			if (i.getPath().equals(item.getPath())) {
+				toRemove.add(i);
+			}
+		}
+		for (RssItem i : toRemove) {
+			_items.remove(i);
+		}
+		
+		// if size is reached
 		if (_items.size()==getMaxItems()) {
 			_items.remove(0);
 		}
+		
 		_items.add(item);
 	}
 
