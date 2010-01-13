@@ -5,6 +5,11 @@ import java.io.Serializable;
 
 import org.beynet.utils.event.Event;
 
+/**
+ * This class is used to represent an Event into a file System 
+ * @author beynet
+ *
+ */
 public class FileChangeEvent implements Serializable,Event {	
 
 	public FileChangeEvent(int event,File watchedFile,File associated) {
