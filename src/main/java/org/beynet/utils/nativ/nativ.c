@@ -74,6 +74,13 @@ JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natAdd
   return(watch) ;
 }
 
+
+JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natRemoveDirectory
+  (JNIEnv * env, jobject obj, jint fd, jint watched) {
+  return(inotify_rm_watch(fd,watched));
+ }
+
+
 JNIEXPORT void JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natSelect 
 (JNIEnv * env, jobject obj, jint fd,jint maxSeq) {
 	  fd_set rfds       ;

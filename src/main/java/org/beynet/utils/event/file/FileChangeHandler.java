@@ -15,7 +15,12 @@ import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.io.Fd;
 import org.beynet.utils.tools.Semaphore;
 
-
+/**
+ * this class is used to handle events on a file system
+ * events are sent to registered EventListeners
+ * @author beynet
+ *
+ */
 public class FileChangeHandler implements EventHandler,Callable<Object> {
 	/**
 	 * construct a FileChangeHandler - wake up every waitTimeout
@@ -30,6 +35,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		stop=false ;
 		inotifyFd = new Fd(natInit());
 		directoryWatched = new HashMap<Integer, File>();
+		watchedIds       = new HashMap<String, Integer>();
 		pendingEvents= new ArrayList<FileChangeEvent>();
 		this.waitTimeout = waitTimeout;
 		filesWatchedSem = new Semaphore(1);
@@ -82,6 +88,14 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 * @return
 	 */
 	private native int natAddDirectory(int fd,String path);
+	
+	/**
+	 * remove watched directory with associated id= watchedId
+	 * @param fd
+	 * @param watchedId
+	 * @return
+	 */
+	private native int natRemoveDirectory(int fd,int watchedId);
 
 	/**
 	 * wait for an event during maxSec secondes
@@ -138,6 +152,36 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 				throw new UtilsException(UtilsExceptions.Error_Param,"Could not watch directory:"+path);
 			}
 			directoryWatched.put(new Integer(watchId), f);
+			watchedIds.put(f.getAbsolutePath(), new Integer(watchId));
+		} finally {
+			filesWatchedSem.V();
+		}
+	}
+	
+	/**
+	 * remove a watched directory
+	 * @param path
+	 * @throws UtilsException
+	 * @throws InterruptedException
+	 */
+	public void removeWatchedDirectory(String path) throws UtilsException,InterruptedException{
+		File f = new File(path);
+		filesWatchedSem.P();
+		try {
+			// Handler is stopped
+			if (stop==true) return;
+			Integer watchId = watchedIds.get(f.getAbsolutePath());
+			if (watchId!=null) {
+				int result = natRemoveDirectory(inotifyFd.getFd(), watchId);
+				if (result==-1) {
+					throw new UtilsException(UtilsExceptions.Error_Param,"Could not remove watched directory:"+path);
+				}
+				watchedIds.remove(f.getAbsolutePath());
+				directoryWatched.remove(new Integer(watchId));
+			}
+			else {
+				logger.warn("Directory "+f.getAbsolutePath()+" is not a watched directory");
+			}
 		} finally {
 			filesWatchedSem.V();
 		}
@@ -189,6 +233,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		} finally {
 			inotifyFd.close();
 		}
+		if (logger.isDebugEnabled()) logger.debug("end of loop");
 		return(null);
 	}
 
@@ -202,6 +247,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	private boolean					stop				;
 	private Fd						inotifyFd			;
 	private Map<Integer,File>		directoryWatched	;
+	private Map<String,Integer>		watchedIds			;
 	private List<FileChangeEvent>	pendingEvents		;
 	private int						waitTimeout			;
 	private Semaphore				filesWatchedSem		; // used to protect access to pendingEvents and directoryWatched

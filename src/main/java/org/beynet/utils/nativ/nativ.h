@@ -41,6 +41,14 @@ JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natIni
  */
 JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natAddDirectory
   (JNIEnv *, jobject, jint, jstring);
+  
+/*
+ * Class:     FileChangeHandler
+ * Method:    natRemoveDirectory
+ * Signature: (ILjava/lang/String;)V
+ */
+JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natRemoveDirectory
+  (JNIEnv *, jobject, jint, jint);
 
 
 JNIEXPORT void JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natSelect 
