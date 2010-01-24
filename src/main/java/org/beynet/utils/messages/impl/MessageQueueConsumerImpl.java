@@ -95,6 +95,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 						from = mqBean.getMessageId();
 						if (logger.isDebugEnabled()) logger.debug("Message does not match properties");
 						manager.delete(mqBean);
+						mqBean.setMessageId(0);
 					}
 				}
 			} catch(UtilsException e) {
