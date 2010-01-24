@@ -139,13 +139,13 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 * @throws InterruptedException
 	 */
 	public void addWatchedDirectory(String path) throws UtilsException,InterruptedException{
+		logger.debug("start to add watch dir "+path);
 		File f = new File(path);
 		/*if (!f.isDirectory()) {
 			throw new UtilsException(UtilsExceptions.Error_Param,path+" is not a directory");
 		}*/
 		filesWatchedSem.P();
 		try {
-			if (logger.isDebugEnabled()) logger.debug("adding directory to watch :"+path);
 			// Handler is stopped
 			if (stop==true) return;
 			int watchId = natAddDirectory(inotifyFd.getFd(), path);
@@ -154,6 +154,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 			}
 			directoryWatched.put(new Integer(watchId), f);
 			watchedIds.put(f.getAbsolutePath(), new Integer(watchId));
+			if (logger.isDebugEnabled()) logger.debug("directory to watch added :"+path);
 		} finally {
 			filesWatchedSem.V();
 		}
@@ -192,7 +193,8 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 * process events detected
 	 */
 	void processEvents() throws InterruptedException,UtilsException{
-		filesWatchedSem.P();
+//		filesWatchedSem.P();
+		logger.debug("processing events");
 		try {
 			for (FileChangeEvent event :pendingEvents) {
 				listenersSem.P();
@@ -206,7 +208,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 			}
 			pendingEvents.clear();
 		} finally {
-			filesWatchedSem.V();
+//			filesWatchedSem.V();
 		}
 	}
 
