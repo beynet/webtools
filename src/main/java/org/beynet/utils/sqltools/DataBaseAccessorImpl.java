@@ -90,7 +90,7 @@ public class DataBaseAccessorImpl implements DataBaseAccessor  {
 				try {
 					Class.forName(debugDataBaseClass).newInstance();
 					result  = DriverManager.getConnection(dataBaseDebugUrl);
-					logger.info("Debug jdbc connection done");
+					if (logger.isDebugEnabled()) logger.debug("Debug jdbc connection done");
 				} catch (InstantiationException e) {
 					e.printStackTrace();
 					throw new SQLException(e);
