@@ -22,7 +22,7 @@ public class Semaphore {
 	 */
 	public synchronized void V() {
 		value++;
-		notify();
+		notifyAll();
 	}
 	
 	private int value ;
