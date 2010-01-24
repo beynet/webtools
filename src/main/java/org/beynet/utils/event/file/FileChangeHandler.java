@@ -145,6 +145,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		}*/
 		filesWatchedSem.P();
 		try {
+			if (logger.isDebugEnabled()) logger.debug("adding directory to watch :"+path);
 			// Handler is stopped
 			if (stop==true) return;
 			int watchId = natAddDirectory(inotifyFd.getFd(), path);
