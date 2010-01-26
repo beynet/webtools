@@ -41,6 +41,8 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		filesWatchedSem = new Semaphore(1);
 		listenersSem= new Semaphore(1);
 		listeners = new ArrayList<EventListener>();
+		directoryToAdd=new ArrayList<File>();
+		directoryToRemove=new ArrayList<File>();
 	}
 	
 	public void stop() throws InterruptedException {
@@ -109,14 +111,9 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 * wait for event for watched files
 	 * @throws InterruptedException
 	 */
-	protected void waitForChange() throws InterruptedException{
+	protected void waitForChange() {
 		if (logger.isDebugEnabled()) logger.debug("calling native method directoryWatched");
-		filesWatchedSem.P();
-		try {
-			natSelect(inotifyFd.getFd(),waitTimeout);
-		} finally {
-			filesWatchedSem.V();
-		}
+		natSelect(inotifyFd.getFd(),waitTimeout);
 	}
 
 	@SuppressWarnings("unused")
@@ -141,22 +138,40 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	public void addWatchedDirectory(String path) throws UtilsException,InterruptedException{
 		logger.debug("start to add watch dir "+path);
 		File f = new File(path);
-		/*if (!f.isDirectory()) {
-			throw new UtilsException(UtilsExceptions.Error_Param,path+" is not a directory");
-		}*/
+		filesWatchedSem.P();
+		try {
+			if (!f.isDirectory()) {
+				throw new UtilsException(UtilsExceptions.Error_Param,path+" is not a directory");
+			}
+			directoryToAdd.add(f);
+		} finally {
+			filesWatchedSem.V();
+		}
+	}
+	
+	/**
+	 * add all file from directoryToAdd list to inotify
+	 * @throws UtilsException
+	 * @throws InterruptedException
+	 */
+	private void addNewDirectoriesToInotify() throws UtilsException,InterruptedException{
 		filesWatchedSem.P();
 		try {
 			// Handler is stopped
 			if (stop==true) return;
-			int watchId = natAddDirectory(inotifyFd.getFd(), path);
-			if (watchId==-1) {
-				throw new UtilsException(UtilsExceptions.Error_Param,"Could not watch directory:"+path);
+			for (File f : directoryToAdd) {
+				String path = f.getAbsolutePath();
+				int watchId = natAddDirectory(inotifyFd.getFd(), path);
+				if (watchId==-1) {
+					throw new UtilsException(UtilsExceptions.Error_Param,"Could not watch directory:"+path);
+				}
+				directoryWatched.put(new Integer(watchId), f);
+				watchedIds.put(f.getAbsolutePath(), new Integer(watchId));
+				if (logger.isDebugEnabled()) logger.debug("directory to watch <"+path+"> added to inotify");
 			}
-			directoryWatched.put(new Integer(watchId), f);
-			watchedIds.put(f.getAbsolutePath(), new Integer(watchId));
-			if (logger.isDebugEnabled()) logger.debug("directory to watch added :"+path);
 		} finally {
 			filesWatchedSem.V();
+			directoryToAdd.clear();
 		}
 	}
 	
@@ -170,19 +185,35 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		File f = new File(path);
 		filesWatchedSem.P();
 		try {
+			directoryToRemove.add(f);
+		} finally {
+			filesWatchedSem.V();
+		}
+	}
+	/**
+	 * remove all file from directoryToRemove list to inotify
+	 * @throws UtilsException
+	 * @throws InterruptedException
+	 */
+	private void removeDirectoriesToInitofy() throws UtilsException,InterruptedException{
+		filesWatchedSem.P();
+		try {
 			// Handler is stopped
 			if (stop==true) return;
-			Integer watchId = watchedIds.get(f.getAbsolutePath());
-			if (watchId!=null) {
-				int result = natRemoveDirectory(inotifyFd.getFd(), watchId);
-				if (result==-1) {
-					throw new UtilsException(UtilsExceptions.Error_Param,"Could not remove watched directory:"+path);
+			for (File f:directoryToRemove) {
+				String path = f.getAbsolutePath();
+				Integer watchId = watchedIds.get(f.getAbsolutePath());
+				if (watchId!=null) {
+					int result = natRemoveDirectory(inotifyFd.getFd(), watchId);
+					if (result==-1) {
+						throw new UtilsException(UtilsExceptions.Error_Param,"Could not remove watched directory:"+path);
+					}
+					watchedIds.remove(f.getAbsolutePath());
+					directoryWatched.remove(new Integer(watchId));
 				}
-				watchedIds.remove(f.getAbsolutePath());
-				directoryWatched.remove(new Integer(watchId));
-			}
-			else {
-				logger.warn("Directory "+f.getAbsolutePath()+" is not a watched directory");
+				else {
+					logger.warn("Directory "+f.getAbsolutePath()+" is not a watched directory");
+				}
 			}
 		} finally {
 			filesWatchedSem.V();
@@ -224,6 +255,8 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 				try {
 					waitForChange();
 					processEvents();
+					addNewDirectoriesToInotify();
+					removeDirectoriesToInitofy();
 				} catch (InterruptedException e) {
 					if (logger.isDebugEnabled()) logger.debug("InterruptedException -> stopping");
 					stop=true;
@@ -250,6 +283,8 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	private boolean					stop				;
 	private Fd						inotifyFd			;
 	private Map<Integer,File>		directoryWatched	;
+	private List<File>				directoryToAdd		;
+	private List<File>				directoryToRemove	;
 	private Map<String,Integer>		watchedIds			;
 	private List<FileChangeEvent>	pendingEvents		;
 	private int						waitTimeout			;
