@@ -105,6 +105,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 				break;
 			}
 			if (logger.isDebugEnabled()) logger.debug("waiting for new message");
+			SessionFactory.instance().getCurrentSession().commit();
 			SessionFactory.instance().getCurrentSession().releaseConnection(accessor);
 			pending.P();
 			if (logger.isDebugEnabled()) logger.debug("awake !");
