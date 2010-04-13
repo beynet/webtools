@@ -1,6 +1,7 @@
 package org.beynet.utils;
 
 
+import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -14,6 +15,9 @@ import junit.framework.TestSuite;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.beynet.utils.cache.Cache;
+import org.beynet.utils.cache.impl.ByteOrFileCacheItem;
+import org.beynet.utils.cache.impl.SimpleCache;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.ConstructorFactory;
 import org.beynet.utils.framework.SessionFactory;
@@ -24,6 +28,7 @@ import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.impl.ShellCommandResultImpl;
+import org.beynet.utils.tools.FileUtils;
 import org.beynet.utils.xml.XmlReader;
 import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
@@ -49,6 +54,29 @@ public class AppTest
         ConstructorFactory.instance(".").configure(this);
     }
     
+    public void testLoadFile() {
+    	try {
+    		String fileName = "/etc/passwd";
+    		Cache cache = new SimpleCache("org.beynet.test:name=cache","/tmp",100,3000);
+    		cache.add(new ByteOrFileCacheItem(true, fileName, FileUtils.loadFile(new File(fileName))));
+    		
+    		fileName = "/home/beynet/yan_lisa.jpg";
+    		cache.add(new ByteOrFileCacheItem(true, fileName, FileUtils.loadFile(new File(fileName))));
+    		
+    		assertTrue(true);
+    		
+    		cache.removeObject(fileName).dispose();
+    		
+    		assertTrue(true);
+    		cache.flush();
+    		assertTrue(true);
+    		
+    	}
+    	catch(Exception e) {
+    		e.printStackTrace();
+    		assertTrue(false);
+    	}
+    }
     
     RssItem makeItemV1(int offset) throws UtilsException {
     	RssItem it1 = new RssItemV1();
