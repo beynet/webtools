@@ -53,6 +53,13 @@ public class ByteOrFileCacheItem implements CacheItem {
 	public boolean onDiskAllowed() {
 		return(shouldBeStoredOnDisk);
 	}
+	@Override
+	public boolean isOnDisk() {
+		if (destination!=null) {
+			return(true);
+		}
+		return(false);
+	}
 	
 	@Override
 	public void saveToTemporaryFile(File destination) throws UtilsException {

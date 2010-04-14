@@ -21,6 +21,12 @@ public interface CacheItem {
 	public boolean onDiskAllowed() ;
 	
 	/**
+	 * return true if item is on disk
+	 * @return
+	 */
+	public boolean isOnDisk();
+	
+	/**
 	 * this method will be call by the cache : to ensure that this item is saved on disk
 	 * 
 	 * @throws UtilsException

@@ -54,20 +54,18 @@ public class AppTest
         ConstructorFactory.instance(".").configure(this);
     }
     
-    public void testLoadFile() {
+    public void testCache() {
     	try {
-    		String fileName = "/etc/passwd";
-    		Cache cache = new SimpleCache("org.beynet.test:name=cache","/tmp",100,3000);
-    		cache.add(new ByteOrFileCacheItem(true, fileName, FileUtils.loadFile(new File(fileName))));
-    		
-    		fileName = "/home/beynet/yan_lisa.jpg";
-    		cache.add(new ByteOrFileCacheItem(true, fileName, FileUtils.loadFile(new File(fileName))));
-    		
+    		File tmpDir = new File("/etc");
+    		Cache cache = new SimpleCache("org.beynet.test:name=cache","/tmp",10,3000);
+    		File [] childs = tmpDir.listFiles();
+    		for (File f: childs) {
+    			if (!f.isDirectory() && f.canRead()) {
+    				cache.add(new ByteOrFileCacheItem(false, f.getCanonicalPath(), FileUtils.loadFile(f)));
+    			}
+    		}
     		assertTrue(true);
     		
-    		cache.removeObject(fileName).dispose();
-    		
-    		assertTrue(true);
     		cache.flush();
     		assertTrue(true);
     		

@@ -2,9 +2,11 @@ package org.beynet.utils.cache.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedHashMap;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.beynet.utils.admin.AdminMBean;
 import org.beynet.utils.cache.Cache;
 import org.beynet.utils.cache.CacheItem;
@@ -22,7 +24,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	 */
 	public SimpleCache(String mbeanCacheName,String cacheDirectory,int maxElements,int maxElementSize) throws UtilsException {
 		super(mbeanCacheName);
-		cache=new LinkedHashMap<String, CacheItem>(); 
+		cache=new HashMap<String, CacheItem>(); 
 		this.maxElements = maxElements;
 		this.maxElementSize = maxElementSize;
 		this.cacheDirectory = new File(cacheDirectory);
@@ -32,35 +34,78 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	 * update cache statistiques :
 	 * 	 - update total cache size
 	 *   - update in memory cache size
-	 * @param item
+	 * @param item  : the item
+	 * @param added : if true the item is added - if false the item is removed 
 	 */
-	protected void updateCacheStats(CacheItem item) throws UtilsException {
-		if ( (item.getSize()>maxElementSize) && (item.onDiskAllowed()==true) ) {
-			File destination;
-			try {
-				destination = File.createTempFile("cache", ".cache", cacheDirectory);
-			} catch (IOException e) {
-				throw new UtilsException(UtilsExceptions.Error_Io,e);
+	protected void updateCacheStats(CacheItem item,boolean added) throws UtilsException {
+		if (added) {
+			if ( (item.getSize()>maxElementSize) && (item.onDiskAllowed()==true) ) {
+				File destination;
+				try {
+					destination = File.createTempFile("cache", ".cache", cacheDirectory);
+				} catch (IOException e) {
+					throw new UtilsException(UtilsExceptions.Error_Io,e);
+				}
+				item.saveToTemporaryFile(destination);
+				cacheSize+=item.getSize();
 			}
-			item.saveToTemporaryFile(destination);
-			cacheSize+=item.getSize();
+			else {
+				cacheSize+=item.getSize();
+				inMemory+=item.getSize();
+			}
+		} else {
+			cacheSize-=item.getSize();
+			if (!item.isOnDisk()) {
+				inMemory-=item.getSize();
+			}
 		}
-		else {
-			cacheSize+=item.getSize();
-			inMemory+=item.getSize();
+	}
+	
+	/**
+	 * remove the latest used item
+	 */
+	private void removeOldestUsedItem() {
+		CacheItem toRemove = null ;
+		Date oldest = null ;
+		for (String id : cache.keySet()) {
+			CacheItem item = cache.get(id);
+			if ( (oldest== null) || (item.getLastAccess().getTime()<oldest.getTime()) ) {
+				oldest = item.getLastAccess() ;
+				toRemove = item ;
+			}
+		}
+		try {
+			logger.debug("Oldest item :"+toRemove.getId());
+			_removeObject(toRemove.getId());
+		} catch (UtilsException e) {
+			logger.error("Could not remove item",e);
 		}
 	}
 
+	/**
+	 * add item to cache - without synchronized
+	 * @param item
+	 * @throws UtilsException
+	 */
+	private void _add(CacheItem item) throws UtilsException {
+		
+		if (cache.size()==getMaxElements()) {
+			logger.debug("Max cache item reached : removing lastest used item");
+			removeOldestUsedItem();
+		}
+		
+		// adding element to cache
+		updateCacheStats(item,true);
+		cache.put(item.getId(), item);
+	}
+	
 	@Override
 	public void add(CacheItem item) throws UtilsException {
 		synchronized(cache) {
 			if (cache.get(item.getId())!=null) {
 				throw new UtilsException(UtilsExceptions.Error_Param,"Id already exist");
 			}
-			
-			// adding element to cache
-			updateCacheStats(item);
-			cache.put(item.getId(), item);
+			_add(item);
 		}
 	}
 
@@ -81,16 +126,26 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 		return maxElements;
 	}
 
+	/**
+	 * remove an item from cache - whitout synchronized
+	 * @param itemId
+	 * @return
+	 * @throws UtilsException
+	 */
+	private CacheItem _removeObject(String itemId) throws UtilsException {
+		CacheItem item = cache.get(itemId);
+		updateCacheStats(item, false);
+		cache.remove(itemId);
+		return(item);
+	}
+	
 	@Override
 	public CacheItem removeObject(String itemId) throws UtilsException {
 		synchronized(cache) {
 			if (cache.get(itemId)==null) {
 				throw new UtilsException(UtilsExceptions.Error_Param,"Id does not exist");
 			}
-			CacheItem item = cache.get(itemId);
-			cache.remove(itemId);
-			cacheSize-=item.getSize();
-			return(item);
+			return(_removeObject(itemId));
 		}
 	}
 
@@ -132,4 +187,6 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	private int maxElements ;
 	private int maxElementSize ;
 	private File cacheDirectory;
+	
+	private final static Logger logger = Logger.getLogger(SimpleCache.class);
 }
