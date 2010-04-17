@@ -57,7 +57,7 @@ public class AppTest
     public void testCache() {
     	try {
     		File tmpDir = new File("/etc");
-    		Cache cache = new SimpleCache("org.beynet.test:name=cache","/tmp",10,3000);
+    		Cache cache = new SimpleCache("org.beynet.test:name=cache","/tmp",1000,3000);
     		File [] childs = tmpDir.listFiles();
     		for (File f: childs) {
     			if (!f.isDirectory() && f.canRead()) {

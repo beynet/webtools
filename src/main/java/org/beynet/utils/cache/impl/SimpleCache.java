@@ -24,7 +24,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	 */
 	public SimpleCache(String mbeanCacheName,String cacheDirectory,int maxElements,int maxElementSize) throws UtilsException {
 		super(mbeanCacheName);
-		cache=new HashMap<String, CacheItem>(); 
+		cache=new HashMap<String, CacheItem>(maxElements+1);
 		this.maxElements = maxElements;
 		this.maxElementSize = maxElementSize;
 		this.cacheDirectory = new File(cacheDirectory);
@@ -115,6 +115,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 			if (cache.get(itemId)==null) {
 				throw new UtilsException(UtilsExceptions.Error_Param,"Id does not exist");
 			}
+			logger.debug("Cache hit for id="+itemId);
 			CacheItem item = cache.get(itemId);
 			item.accessed();
 			return(item);
