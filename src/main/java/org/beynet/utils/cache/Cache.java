@@ -25,10 +25,9 @@ public interface Cache {
 	/**
 	 * retrieve object into cache using it's id
 	 * @param id : id of the searched object
-	 * @return
-	 * @throws UtilsException
+	 * @return the item or null if not found
 	 */
-	public CacheItem get(String itemId) throws UtilsException ;
+	public CacheItem get(String itemId) ;
 	
 	/**
 	 * return max number of elements allowed into this cache

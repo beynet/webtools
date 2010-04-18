@@ -110,10 +110,10 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	}
 
 	@Override
-	public CacheItem get(String itemId) throws UtilsException {
+	public CacheItem get(String itemId) {
 		synchronized(cache) {
 			if (cache.get(itemId)==null) {
-				throw new UtilsException(UtilsExceptions.Error_Param,"Id does not exist");
+				return(null);
 			}
 			logger.debug("Cache hit for id="+itemId);
 			CacheItem item = cache.get(itemId);
