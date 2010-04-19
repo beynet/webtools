@@ -101,25 +101,22 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	
 	@Override
 	public void add(CacheItem item) throws UtilsException {
-		synchronized(cache) {
-			if (cache.get(item.getId())!=null) {
-				throw new UtilsException(UtilsExceptions.Error_Param,"Id already exist");
-			}
-			_add(item);
+		if (cache.get(item.getId())!=null) {
+			throw new UtilsException(UtilsExceptions.Error_Param,"Id already exist");
 		}
+		_add(item);
 	}
 
 	@Override
 	public CacheItem get(String itemId) {
-		synchronized(cache) {
-			if (cache.get(itemId)==null) {
-				return(null);
-			}
-			logger.debug("Cache hit for id="+itemId);
-			CacheItem item = cache.get(itemId);
-			item.accessed();
-			return(item);
+		if (cache.get(itemId)==null) {
+			logger.debug("Cache miss for id="+itemId);
+			return(null);
 		}
+		logger.debug("Cache hit for id="+itemId);
+		CacheItem item = cache.get(itemId);
+		item.accessed();
+		return(item);
 	}
 
 	@Override
@@ -142,25 +139,21 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	
 	@Override
 	public CacheItem removeObject(String itemId) throws UtilsException {
-		synchronized(cache) {
-			if (cache.get(itemId)==null) {
-				throw new UtilsException(UtilsExceptions.Error_Param,"Id does not exist");
-			}
-			return(_removeObject(itemId));
+		if (cache.get(itemId)==null) {
+			throw new UtilsException(UtilsExceptions.Error_Param,"Id does not exist");
 		}
+		return(_removeObject(itemId));
 	}
 
 	private void flush(boolean dispose) {
-		synchronized(cache) {
-			if (dispose==true) {
-				for (String itemId : cache.keySet()) {
-					cache.get(itemId).dispose();
-				}
+		if (dispose==true) {
+			for (String itemId : cache.keySet()) {
+				cache.get(itemId).dispose();
 			}
-			cache.clear();
-			cacheSize=0;
-			inMemory = 0 ;
 		}
+		cache.clear();
+		cacheSize=0;
+		inMemory = 0 ;
 	}
 	
 	@Override
@@ -183,9 +176,9 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	}
 
 	private Map<String,CacheItem> cache      ;
-	private int cacheSize ;
-	private int inMemory ;
-	private int maxElements ;
+	private int cacheSize      ;
+	private int inMemory       ;
+	private int maxElements    ;
 	private int maxElementSize ;
 	private File cacheDirectory;
 	
