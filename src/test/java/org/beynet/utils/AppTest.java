@@ -23,9 +23,6 @@ import org.beynet.utils.framework.ConstructorFactory;
 import org.beynet.utils.framework.SessionFactory;
 import org.beynet.utils.framework.UJB;
 import org.beynet.utils.messages.api.MessageQueue;
-import org.beynet.utils.messages.api.MessageQueueConsumer;
-import org.beynet.utils.messages.api.MessageQueueProducer;
-import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.impl.ShellCommandResultImpl;
 import org.beynet.utils.tools.FileUtils;
@@ -139,8 +136,8 @@ public class AppTest
     private class ThreadConsumer implements Runnable {
     	
 		public ThreadConsumer(MessageQueue queue,String id,String properties) {
-    		this.queue= queue ;
-    		this.properties = properties;
+//    		this.queue= queue ;
+//    		this.properties = properties;
     		this.id = id ;
     	}
     	@Override
@@ -182,16 +179,12 @@ public class AppTest
     			SessionFactory.instance().removeSession();
     		}
     	}
-    	MessageQueue         queue   ;
-    	MessageQueueSession  session ;
-    	MessageQueueConsumer consumer;
     	String id;
-    	String properties;
     }
     
     private class ThreadProducer implements Runnable { 
     	ThreadProducer(MessageQueue queue) {
-			this.queue = queue ;
+//			this.queue = queue ;
     		
 		}
 		@Override
@@ -221,9 +214,6 @@ public class AppTest
 				SessionFactory.instance().removeSession();
 			}
 		}
-		MessageQueueProducer producer ;
-		MessageQueueSession  session  ;
-		MessageQueue         queue    ;
 	}
     
     

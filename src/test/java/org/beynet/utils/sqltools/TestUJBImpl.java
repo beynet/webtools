@@ -1,7 +1,6 @@
 package org.beynet.utils.sqltools;
 
 import org.beynet.utils.exception.UtilsException;
-import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.framework.UJB;
 import org.beynet.utils.sqltools.interfaces.RequestManager;
 
