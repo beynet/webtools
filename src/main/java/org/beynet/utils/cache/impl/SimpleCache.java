@@ -123,6 +123,10 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	public int getMaxElements() {
 		return maxElements;
 	}
+	@Override
+	public int getTotalItemsInCache() {
+		return(cache.size());
+	}
 
 	/**
 	 * remove an item from cache - whitout synchronized
@@ -168,6 +172,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	@Override
 	public int getTotalCacheSize() {
 		return(cacheSize);
+		
 	}
 	
 	@Override
