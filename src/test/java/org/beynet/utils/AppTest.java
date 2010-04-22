@@ -2,6 +2,7 @@ package org.beynet.utils;
 
 
 import java.io.File;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -47,20 +48,28 @@ public class AppTest
     {
         super( testName );
         BasicConfigurator.configure();
-        Logger.getRootLogger().setLevel(Level.DEBUG);
+        Logger.getRootLogger().setLevel(Level.INFO);
         ConstructorFactory.instance(".").configure(this);
     }
     
-    public void testCache() {
+    
+    private void cacheDir(Cache cache,File dir) throws UtilsException,IOException {
+    	File [] childs = dir.listFiles();
+		for (File f: childs) {
+			if (!f.isDirectory() && f.canRead()) {
+				cache.add(new ByteOrFileCacheItem(false, f.getCanonicalPath(), FileUtils.loadFile(f)));
+			}
+			if (f.isDirectory()) {
+				cacheDir(cache,f);
+			}
+		}
+    }
+    
+    public void myTestCache() {
     	try {
-    		File tmpDir = new File("/etc");
-    		Cache cache = new SimpleCache("org.beynet.test:name=cache","/tmp",1000,3000);
-    		File [] childs = tmpDir.listFiles();
-    		for (File f: childs) {
-    			if (!f.isDirectory() && f.canRead()) {
-    				cache.add(new ByteOrFileCacheItem(false, f.getCanonicalPath(), FileUtils.loadFile(f)));
-    			}
-    		}
+    		File tmpDir = new File("/home/beynet/XML/1995/01");
+    		Cache cache = new SimpleCache("org.beynet.test:name=cache","/tmp",10000,3000);
+    		cacheDir(cache,tmpDir);
     		assertTrue(true);
     		
     		cache.flush();
