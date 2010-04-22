@@ -2,9 +2,9 @@ package org.beynet.utils.cache.impl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.admin.AdminMBean;
@@ -28,6 +28,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 		this.maxElements = maxElements;
 		this.maxElementSize = maxElementSize;
 		this.cacheDirectory = new File(cacheDirectory);
+		this.sortedItems = new TreeSet<CacheItem>();
 	}
 		
 	/**
@@ -65,15 +66,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 	 * remove the latest used item
 	 */
 	private void removeOldestUsedItem() {
-		CacheItem toRemove = null ;
-		Date oldest = null ;
-		for (String id : cache.keySet()) {
-			CacheItem item = cache.get(id);
-			if ( (oldest== null) || (item.getLastAccess().getTime()<oldest.getTime()) ) {
-				oldest = item.getLastAccess() ;
-				toRemove = item ;
-			}
-		}
+		CacheItem toRemove = sortedItems.first();
 		try {
 			logger.debug("Oldest item :"+toRemove.getId());
 			_removeObject(toRemove.getId());
@@ -97,6 +90,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 		// adding element to cache
 		updateCacheStats(item,true);
 		cache.put(item.getId(), item);
+		sortedItems.add(item);
 	}
 	
 	@Override
@@ -115,7 +109,9 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 		}
 		logger.debug("Cache hit for id="+itemId);
 		CacheItem item = cache.get(itemId);
+		sortedItems.remove(item);
 		item.accessed();
+		sortedItems.add(item);
 		return(item);
 	}
 
@@ -138,6 +134,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 		CacheItem item = cache.get(itemId);
 		updateCacheStats(item, false);
 		cache.remove(itemId);
+		sortedItems.remove(item);
 		return(item);
 	}
 	
@@ -156,6 +153,7 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 			}
 		}
 		cache.clear();
+		sortedItems.clear();
 		cacheSize=0;
 		inMemory = 0 ;
 	}
@@ -180,12 +178,13 @@ public class SimpleCache extends AdminMBean implements Cache,SimpleCacheMBean {
 		return(inMemory);
 	}
 
-	private Map<String,CacheItem> cache      ;
-	private int cacheSize      ;
-	private int inMemory       ;
-	private int maxElements    ;
-	private int maxElementSize ;
-	private File cacheDirectory;
+	private Map<String,CacheItem> cache       ;
+	private TreeSet<CacheItem>    sortedItems ;
+	private int cacheSize                     ;
+	private int inMemory                      ;
+	private int maxElements                   ;
+	private int maxElementSize                ;
+	private File cacheDirectory               ;
 	
 	private final static Logger logger = Logger.getLogger(SimpleCache.class);
 }
