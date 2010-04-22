@@ -22,6 +22,17 @@ public class ByteOrFileCacheItem implements CacheItem {
 		accessed();
 	}
 	
+	
+	@Override
+	public int compareTo(CacheItem t) {
+		if (this.lastAccess.getTime()<t.getLastAccess().getTime()) return(-1);
+		if (this.lastAccess.getTime()>t.getLastAccess().getTime()) return(1);
+		else {
+			return(id.compareTo(t.getId()));
+		}
+	}
+	
+	
 	private byte[] loadBytesFromFile() throws UtilsException {
 		return(FileUtils.loadFile(destination));
 	}

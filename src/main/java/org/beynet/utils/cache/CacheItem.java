@@ -5,8 +5,8 @@ import java.util.Date;
 
 import org.beynet.utils.exception.UtilsException;
 
-public interface CacheItem {
-
+public interface CacheItem extends Comparable<CacheItem> {
+	
 	/**
 	 * return cache Item id
 	 * @return
