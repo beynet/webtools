@@ -1,6 +1,7 @@
 package org.beynet.utils;
 
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
@@ -8,6 +9,9 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -32,6 +36,7 @@ import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
 import org.beynet.utils.xml.rss.RssItem;
 import org.beynet.utils.xml.rss.RssItemV1;
+import org.xml.sax.InputSource;
 
 /**
  * Unit test for simple App.
@@ -80,6 +85,39 @@ public class AppTest
     		e.printStackTrace();
     		assertTrue(false);
     	}
+    }
+    
+    public void testXml() {
+    	// 1. Instantiate an XPathFactory.
+    	javax.xml.xpath.XPathFactory factory = 
+    		javax.xml.xpath.XPathFactory.newInstance();
+
+    	// 2. Use the XPathFactory to create a new XPath object
+    	javax.xml.xpath.XPath xpath = factory.newXPath();
+
+    	// 3. Compile an XPath string into an XPathExpression
+    	javax.xml.xpath.XPathExpression expression=null ;
+    	try {
+    		expression = xpath.compile("/Xafp/Item/Bag/Content/p");
+    	} catch (XPathExpressionException e) {
+    		e.printStackTrace();
+    		assertTrue(false);
+		}
+    	
+    	  
+    	  // 4. Evaluate the XPath expression on an input document
+		try {
+			byte[] res= FileUtils.loadFile(new File("/home/beynet/xafp-in.xafp.xml"));
+			org.w3c.dom.NodeList resultat = (org.w3c.dom.NodeList) expression.evaluate(new InputSource(new ByteArrayInputStream(res)),XPathConstants.NODESET);
+			for (int i=0;i<resultat.getLength();i++) {
+				org.w3c.dom.Node n = resultat.item(i);
+				System.out.println(n.getTextContent());
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			assertTrue(false);
+		}
     }
     
     RssItem makeItemV1(int offset) throws UtilsException {
