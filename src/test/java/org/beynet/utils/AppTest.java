@@ -1,15 +1,19 @@
 package org.beynet.utils;
 
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 
@@ -36,7 +40,7 @@ import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
 import org.beynet.utils.xml.rss.RssItem;
 import org.beynet.utils.xml.rss.RssItemV1;
-import org.xml.sax.InputSource;
+import org.w3c.dom.Document;
 
 /**
  * Unit test for simple App.
@@ -88,6 +92,57 @@ public class AppTest
     }
     
     public void testXml() {
+    	 class NamespaceContextImpl implements NamespaceContext {
+    		public String uri;
+
+    		public String prefix;
+
+    		public NamespaceContextImpl(){}
+
+    		public NamespaceContextImpl(String prefix, String uri){
+    			this.uri=uri;
+    			this.prefix=prefix;
+    		}
+
+    		public String getNamespaceURI(String prefix){
+    			return uri;
+    		}
+    		public void setNamespaceURI(String uri){
+    			this.uri=uri;
+    		}
+
+    		public String getPrefix(String uri){
+    			return prefix;
+    		}
+    		public void setPrefix(String prefix){
+    			this.prefix=prefix;
+    		}
+
+    		public Iterator getPrefixes(String uri){return null;}
+
+    	}
+    	 
+    	 
+    	// parsing document
+     	DocumentBuilderFactory dbf =
+             DocumentBuilderFactory.newInstance();
+
+         DocumentBuilder db = null ;
+ 		try {
+ 			db = dbf.newDocumentBuilder();
+ 		} catch (ParserConfigurationException e) {
+ 			e.printStackTrace();
+ 			assertTrue(false);
+ 		}
+ 		Document doc = null ;
+         try {
+ 			 doc = db.parse(new File("/home/beynet/xafp-in.xafp.xml"));
+ 		} catch (Exception e) {
+ 			e.printStackTrace();
+ 			assertTrue(false);
+ 		}
+    	
+    	
     	// 1. Instantiate an XPathFactory.
     	javax.xml.xpath.XPathFactory factory = 
     		javax.xml.xpath.XPathFactory.newInstance();
@@ -98,7 +153,8 @@ public class AppTest
     	// 3. Compile an XPath string into an XPathExpression
     	javax.xml.xpath.XPathExpression expression=null ;
     	try {
-    		expression = xpath.compile("/Xafp/Item/Bag/Content/p");
+    		xpath.setNamespaceContext(new NamespaceContextImpl("xml","http://www.w3.org/XML/1998/namespace"));
+    		expression = xpath.compile("/Xafp/Item/Labels");
     	} catch (XPathExpressionException e) {
     		e.printStackTrace();
     		assertTrue(false);
@@ -107,8 +163,7 @@ public class AppTest
     	  
     	  // 4. Evaluate the XPath expression on an input document
 		try {
-			byte[] res= FileUtils.loadFile(new File("/home/beynet/xafp-in.xafp.xml"));
-			org.w3c.dom.NodeList resultat = (org.w3c.dom.NodeList) expression.evaluate(new InputSource(new ByteArrayInputStream(res)),XPathConstants.NODESET);
+			org.w3c.dom.NodeList resultat = (org.w3c.dom.NodeList) expression.evaluate(doc,XPathConstants.NODESET);
 			for (int i=0;i<resultat.getLength();i++) {
 				org.w3c.dom.Node n = resultat.item(i);
 				System.out.println(n.getTextContent());
