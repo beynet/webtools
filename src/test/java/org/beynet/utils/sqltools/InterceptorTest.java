@@ -7,7 +7,7 @@ import org.beynet.utils.framework.InvocationContext;
 public class InterceptorTest {
 	@AroundInvoke
 	public Object myTest(InvocationContext context) throws Throwable {
-		logger.debug("Avant call");
+		logger.debug("Avant call :"+context.getMethod().getName());
 		Object res = context.proceed();
 		logger.debug("Apres call");
 		return(res);
