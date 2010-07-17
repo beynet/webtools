@@ -79,7 +79,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	@Transaction(create=true)
 	public MessageQueueConsumer createConsumer(String consumerId) {
 		defineConsumer(consumerId);
-		createdConsumer= (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor,manager,queue,consumerId));
+		createdConsumer= (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor,manager,queue,consumerId),null);
 		queue.addConsumer(createdConsumer);
 		return(createdConsumer);
 	}
@@ -87,14 +87,14 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	@Transaction(create=true)
 	public MessageQueueConsumer createConsumer(String consumerId,String properties) {
 		defineConsumer(consumerId);
-		createdConsumer = (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor,manager,queue,consumerId,properties));
+		createdConsumer = (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor,manager,queue,consumerId,properties),null);
 		queue.addConsumer(createdConsumer);
 		return(createdConsumer);
 	}
 
 	@Override
 	public MessageQueueProducer createProducer() {
-		createdProducer = (MessageQueueProducer)UtilsClassUJBProxy.newInstance(new MessageQueueProducerImpl(manager,queue,this));
+		createdProducer = (MessageQueueProducer)UtilsClassUJBProxy.newInstance(new MessageQueueProducerImpl(manager,queue,this),null);
 		return(createdProducer);
 	}
 	

@@ -17,7 +17,7 @@ public class TestFramework extends TestCase {
 	        super( testName );
 	        BasicConfigurator.configure();
 	        Logger.getRootLogger().setLevel(Level.DEBUG);
-	        testUJB = (TestUJB)ConstructorFactory.instance(".").getService("testujb");
+	        testUJB = (UJBTest)ConstructorFactory.instance(".").getService("testujb");
 	        testUJB.createTables();
 	}
 	
@@ -57,5 +57,5 @@ public class TestFramework extends TestCase {
 	}
 	
 	@UJB(name="testujb")
-	TestUJB testUJB ;
+	UJBTest testUJB ;
 }

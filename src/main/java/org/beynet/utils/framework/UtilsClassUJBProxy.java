@@ -2,8 +2,11 @@ package org.beynet.utils.framework;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.beynet.utils.framework.impl.InvocationContextImpl;
 import org.beynet.utils.sqltools.Transaction;
 
 /**
@@ -15,27 +18,76 @@ import org.beynet.utils.sqltools.Transaction;
  * @author beynet
  *
  */
-public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler{
-	private Object obj;
+public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
+	
 
 	/**
 	 * return proxy instance
 	 * @param obj
 	 * @return
 	 */
-    public static Object newInstance(Object obj) {
+    public static Object newInstance(Object obj,List<Class<? extends Object>> interceptors) {
     	return java.lang.reflect.Proxy.newProxyInstance(
     			obj.getClass().getClassLoader(),
     			obj.getClass().getInterfaces(),
-    			new UtilsClassUJBProxy(obj));
+    			new UtilsClassUJBProxy(obj,interceptors));
     }
 
     /**
      * construct class for ujb=obj
      * @param obj
      */
-    private UtilsClassUJBProxy(Object obj) {
+    private UtilsClassUJBProxy(Object obj,List<Class<? extends Object>> interceptors) {
     	this.obj = obj;
+    	this.interceptors = new ArrayList<Object>();
+    	
+    	/* constructing all interceptors for that UJB */
+    	if (interceptors!=null) {
+    		for (Class<? extends Object> cl : interceptors) {
+    			try {
+					this.interceptors.add(cl.newInstance());
+				} catch (Exception e) {
+					logger.error("Error constructing interceptor",e);
+					throw new RuntimeException(e);
+				}
+    		}
+    	}
+    }
+    
+    
+    
+    /**
+     * invoke business method on object obj
+     * call all interceptors
+     * @param obj
+     * @param m
+     * @param args
+     * @return
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private Object invokeMethodOnObject(Object obj,Method m,Object[] args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    	if (interceptors.size()==0) {
+    		return(m.invoke(obj, args));
+    	} else {
+    		InvocationContextImpl invocation = createInvocationContexts(obj,m,args);
+    		return(invocation.callMethod());
+    	}
+    }
+    
+    private InvocationContextImpl createInvocationContexts(Object obj,Method m,Object[] args) {
+    	InvocationContextImpl first = null , previous = null ;
+    	for (Object i : interceptors) {
+    		InvocationContextImpl invok = new InvocationContextImpl(obj, m, args, i);
+    		if (first==null) {
+    			first=invok;
+    		}
+    		if (previous!=null) {
+    			invok.setNextInterceptorContext(previous);
+    		}
+    	}
+    	return(first);
     }
 
     @Override
@@ -63,22 +115,25 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler{
     		}
     		Transaction transaction = m2.getAnnotation(Transaction.class);
     		/*
-    		 * method is not inside a transaction
+    		 * the method to call m2 is not annoted with @Transaction
     		 */
     		if (transaction==null) {
-    			result = m.invoke(obj, args);
+    			result = invokeMethodOnObject(obj, m, args);
     		}
+    		/*
+    		 * create a transaction if needed
+    		 */
     		else {
-
     			Session original = SessionFactory.instance().getCurrentSession();
     			Session current = original ;
     			boolean creator = (current==null)?true:false;
+    			/* create a new transaction if no transaction exist - or if create==true*/
     			if (current==null || transaction.create()) {
     				if (logger.isDebugEnabled()) logger.debug("Create new session : for method "+m2.getName()+" "+obj.getClass().getName());
     				current=SessionFactory.instance().createSession();
     			}
     			try {
-    				result = m.invoke(obj, args);
+    				result = invokeMethodOnObject(obj, m, args);
     				if (creator==true || transaction.create()) {
     					if (logger.isDebugEnabled()) logger.debug("commit session "+m2.getName()+" "+obj.getClass().getName());
     					current.commit();
@@ -105,6 +160,7 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler{
     	} catch (InvocationTargetException e) {
     		throw e.getTargetException();
     	} catch (Exception e) {
+    		logger.error("unexpected invocation exception",e);
     		throw new RuntimeException("unexpected invocation exception: <" +
     				e.getMessage()+">");
     	} finally {
@@ -113,6 +169,7 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler{
     	return result;
     }
 
-    
+    private Object                 obj;
+    private List<Object> interceptors ; 
     private final static Logger logger = Logger.getLogger(UtilsClassUJBProxy.class);
 }

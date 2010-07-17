@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,17 +81,23 @@ public class ConstructorImpl implements Constructor {
 	 */
 	private Object createUJB(Class<?> classFound,String name) {
 		try {
-			Object u = classFound.newInstance();
-			Object p = UtilsClassUJBProxy.newInstance(u);
+			Object ujb      = classFound.newInstance();
+			List<Class<? extends Object>> interceptors = null ;
+			Interceptors interceptorsAnnotation = classFound.getAnnotation(Interceptors.class);
+			if (interceptorsAnnotation!=null) {
+				interceptors = new ArrayList<Class<? extends Object>>() ;
+				interceptors.add(interceptorsAnnotation.value());
+			}
+			Object ujbProxy = UtilsClassUJBProxy.newInstance(ujb,interceptors);
 			if (logger.isDebugEnabled()) logger.debug("!!!!!!!!!!!!!! Adding new UJB "+name+" to list");
-			ujbList.put(name, p);
-			originalList.put(name, u);
+			ujbList.put(name, ujbProxy);
+			originalList.put(name, ujb);
 			try {
-				localContext.addToEnvironment(name, p);
+				localContext.addToEnvironment(name, ujbProxy);
 			}catch(NamingException e) {
 				
 			}
-			return(u);
+			return(ujb);
 			
 		} catch (Exception e) {
 			throw new UtilsRuntimeException(UtilsExceptions.Error_Param,"Class instanciation "+classFound.getName(),e);

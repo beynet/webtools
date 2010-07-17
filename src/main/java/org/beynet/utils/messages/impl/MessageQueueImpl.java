@@ -67,7 +67,7 @@ public class MessageQueueImpl implements MessageQueue {
 	@Override
 	@Transaction
 	public MessageQueueSession createSession(boolean transacted) {
-		MessageQueueSession session = (MessageQueueSession)UtilsClassUJBProxy.newInstance(new MessageQueueSessionImpl(accessor,manager,root,getQueueName(),transacted));
+		MessageQueueSession session = (MessageQueueSession)UtilsClassUJBProxy.newInstance(new MessageQueueSessionImpl(accessor,manager,root,getQueueName(),transacted),null);
 		SessionFactory.instance().getCurrentSession().registerRessource(accessor, session);
 		return(session);
 	}
