@@ -97,7 +97,8 @@ public class AppTest
 
     		public String prefix;
 
-    		public NamespaceContextImpl(){}
+    		@SuppressWarnings("unused")
+			public NamespaceContextImpl(){}
 
     		public NamespaceContextImpl(String prefix, String uri){
     			this.uri=uri;
@@ -107,18 +108,21 @@ public class AppTest
     		public String getNamespaceURI(String prefix){
     			return uri;
     		}
-    		public void setNamespaceURI(String uri){
+    		@SuppressWarnings("unused")
+			public void setNamespaceURI(String uri){
     			this.uri=uri;
     		}
 
     		public String getPrefix(String uri){
     			return prefix;
     		}
-    		public void setPrefix(String prefix){
+    		@SuppressWarnings("unused")
+			public void setPrefix(String prefix){
     			this.prefix=prefix;
     		}
 
-    		public Iterator getPrefixes(String uri){return null;}
+    		@SuppressWarnings("unchecked")
+			public Iterator getPrefixes(String uri){return null;}
 
     	}
     	 
