@@ -8,7 +8,7 @@ public interface InvocationContext {
 	 * Proceed to the next entry in the interceptor chain.
 	 * @return
 	 */
-	public Object proceed() throws Throwable ;
+	public Object proceed() throws Exception ;
 	
 	/**
 	 * Returns the target instance.

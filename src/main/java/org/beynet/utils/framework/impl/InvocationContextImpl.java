@@ -45,16 +45,12 @@ public class InvocationContextImpl implements InvocationContext {
 	}
 
 	@Override
-	public Object proceed() throws Throwable {
-		try {
-			if (nextInterceptorContext!=null) {
-				return(nextInterceptorContext.callMethod());
-			}
-			else {
-				return(toCallOnTarget.invoke(target, args));
-			}
-		} catch(InvocationTargetException e) {
-			throw e.getCause();
+	public Object proceed() throws Exception {
+		if (nextInterceptorContext!=null) {
+			return(nextInterceptorContext.callMethod());
+		}
+		else {
+			return(toCallOnTarget.invoke(target, args));
 		}
 	}
 	
@@ -65,7 +61,16 @@ public class InvocationContextImpl implements InvocationContext {
 	 * @throws IllegalArgumentException 
 	 */
 	public Object callMethod() throws InvocationTargetException, IllegalArgumentException, IllegalAccessException {
-		return(methodToCall.invoke(currentInterceptor, this));
+		try {
+			return(methodToCall.invoke(currentInterceptor, this));
+		} catch(InvocationTargetException e) {
+			if (e.getCause() instanceof InvocationTargetException) {
+				throw (InvocationTargetException)e.getCause();
+			}
+			else {
+				throw e;
+			}
+		}
 	}
 
 	private Object   			  target             ;
