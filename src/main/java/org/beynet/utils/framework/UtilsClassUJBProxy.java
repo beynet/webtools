@@ -91,13 +91,15 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     	Object result;
     	Method m2=null;
     	try {
     		Method[] methods = obj.getClass().getMethods();
+    		/* searching same method as m on object obj */
+    		/* ---------------------------------------- */
     		for (Method m3 : methods) {
-    			if (m3.getName().equals(m.getName())) {
+    			if (m3.getName().equals(method.getName())) {
     				Class<? extends Object> [] lstClass = m3.getParameterTypes();
     				if (lstClass.length==0 && args==null) {
     					m2=m3;
@@ -113,12 +115,13 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     				break;
     			}
     		}
-    		Transaction transaction = m2.getAnnotation(Transaction.class);
+    		method=m2;
+    		Transaction transaction = method.getAnnotation(Transaction.class);
     		/*
     		 * the method to call m2 is not annoted with @Transaction
     		 */
     		if (transaction==null) {
-    			result = invokeMethodOnObject(obj, m, args);
+    			result = invokeMethodOnObject(obj, method, args);
     		}
     		/*
     		 * create a transaction if needed
@@ -133,7 +136,7 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     				current=SessionFactory.instance().createSession();
     			}
     			try {
-    				result = invokeMethodOnObject(obj, m, args);
+    				result = invokeMethodOnObject(obj, method, args);
     				if (creator==true || transaction.create()) {
     					if (logger.isDebugEnabled()) logger.debug("commit session "+m2.getName()+" "+obj.getClass().getName());
     					current.commit();
