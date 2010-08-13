@@ -3,6 +3,13 @@ package org.beynet.utils.shell;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+/**
+ * this is the class used to retrieve commands result. ie :
+ *  - to display results
+ *  - to know command state (stopped or not)
+ * @author beynet
+ *
+ */
 public interface ShellCommandResult extends Remote {
 	/**
 	 * return true when command is completed
