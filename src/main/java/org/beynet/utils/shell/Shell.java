@@ -4,18 +4,23 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 
-
-public interface Shell extends Remote{
+/**
+ * a remote shell
+ * @author beynet
+ *
+ */
+public interface Shell extends Remote {
 	
 	/**
 	 * ask to current shell to execute one command
+	 * ShellCommandResult is used to display the results
 	 * @param commandLine
 	 * @return
 	 */
 	public ShellCommandResult execute(String commandLine) throws RemoteException;
 	
 	/**
-	 * should be call by client mark shell as stopped
+	 * should be call by client to mark shell as stopped
 	 * (clear underlying resources ) 
 	 * @throws RemoteException
 	 */

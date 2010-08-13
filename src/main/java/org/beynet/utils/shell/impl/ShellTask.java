@@ -9,6 +9,11 @@ import org.beynet.utils.shell.ShellCommand;
 import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.ShellSession;
 
+/**
+ * every command launched into a shell will be run into a separated thread
+ * @author beynet
+ *
+ */
 public class ShellTask implements Callable<ShellCommandResult> {
 	public ShellTask(Shell shell,ShellCommand command,ShellSession session,List<String> args,ShellCommandResult result) {
 		this.args    = args;

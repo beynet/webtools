@@ -51,14 +51,31 @@ public abstract class AbstractShellExecutor implements ShellExecutor {
 	
 	@Override
 	public void stop() {
+		logger.info("stopping");
+		try {
 		for (RemoteShell shell : shells) {
+			boolean first = true ;
 			while (!shell.isStopped()) {
+				if (logger.isDebugEnabled()) logger.debug("stopping shell");
+				if (first==true) {
+					try {
+						shell.stop();
+						if (logger.isDebugEnabled()) logger.debug("after calling stop");
+					} catch (RemoteException e) {
+					}
+					first=false;
+				}
+				if (logger.isDebugEnabled()) logger.debug("sleeping");
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 				}
 			}
 		}
+		}catch(Exception e) {
+			logger.error("error stopping shells",e);
+		}
+		logger.info("removing dead shells");
 		removeDeadShells();
 		try {
 			registry.unbind("ShellExecutor");
@@ -70,6 +87,7 @@ public abstract class AbstractShellExecutor implements ShellExecutor {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+		logger.info("is stopped");
 	}
 	/**
 	 * user should implement this method to fill session 

@@ -10,11 +10,17 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.log4j.Logger;
 import org.beynet.utils.shell.Shell;
 import org.beynet.utils.shell.ShellCommand;
 import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.ShellSession;
 
+/**
+ * this class is the remote shell object manipulated by the remote shell client
+ * @author beynet
+ *
+ */
 public class RemoteShell implements Shell {
 	public RemoteShell(ShellSession session,int rmiPort) {
 		commands = new HashMap<String, ShellCommand>();
@@ -25,6 +31,12 @@ public class RemoteShell implements Shell {
 		this.stopped = false;
 	}
 	
+	/**
+	 * create an executor that will be used to start a thread (a shell task)
+	 */
+	private void createNewExecutor() {
+		executor = Executors.newFixedThreadPool(1);	
+	}
 
 	@Override
 	public boolean isStopped()  {
@@ -38,22 +50,27 @@ public class RemoteShell implements Shell {
 	 */
 	private void waitForCommandEnd() throws RemoteException {
 		if (pendingResult!=null ) {
-			try {
-				while(pendingResult.isStopped()==false) {
-					pendingResult.wait();
+			synchronized (pendingResult) {
+				try {
+					while(pendingResult.isStopped()==false) {
+						pendingResult.wait();
+					}
+					UnicastRemoteObject.unexportObject(pendingResult, true);
+				}catch(InterruptedException e) {
+					throw new RemoteException("error wait",e);
 				}
-				UnicastRemoteObject.unexportObject(pendingResult, true);
-			}catch(InterruptedException e) {
-				throw new RemoteException("error wait",e);
+				pendingResult = null ;
 			}
-			pendingResult = null ;
 		}
 	}
 	
 	@Override
 	public void stop()  throws RemoteException {
+		if (logger.isDebugEnabled()) logger.debug("stopping ...");
 		stopped = true ;
+		if (executor!=null) executor.shutdownNow();
 		waitForCommandEnd();
+		if (logger.isDebugEnabled()) logger.debug("is in stopped state");
 	}
 
 
@@ -86,7 +103,7 @@ public class RemoteShell implements Shell {
 			throws RemoteException {
 		if (isStopped()) return(null);
 		waitForCommandEnd();
-		ExecutorService executor = Executors.newFixedThreadPool(1);
+		createNewExecutor(); 
 		ShellCommand command;
 		List<String> commandArgs = parseCommandLine(commandLine);
 		if ("".equals(commandLine) || commandArgs.size()==0) {
@@ -105,7 +122,7 @@ public class RemoteShell implements Shell {
 		return(pendingResultStub);
 	}
 	
-
+	private ExecutorService    executor ;
 	private int                rmiPort ;
 	private ShellSession       session ;
 	private ShellCommandResult pendingResult =null;
@@ -117,4 +134,5 @@ public class RemoteShell implements Shell {
 	 * 
 	 */
 	private static final long serialVersionUID = -9015749305261868361L;
+	private static final Logger logger = Logger.getLogger(RemoteShell.class);
 }
