@@ -117,7 +117,7 @@ public class RemoteShell implements Shell {
 		}
 		pendingResult = new ShellCommandResultImpl();
 		pendingResultStub = (ShellCommandResult)UnicastRemoteObject.exportObject(pendingResult,rmiPort);
-		executor.submit(new ShellTask(this,command,session,commandArgs,pendingResultStub));
+		executor.submit(new ShellTask(this,command,session,commandArgs,pendingResult));
 		executor.shutdown();
 		return(pendingResultStub);
 	}
