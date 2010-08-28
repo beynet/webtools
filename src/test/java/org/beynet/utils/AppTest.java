@@ -94,8 +94,8 @@ public class AppTest
     
     public void testBase64() {
     	try {
-    		String result = Base64.toBase64(FileUtils.loadFile(new File("/home/beynet/essai.xml")));
-    		System.out.println(result);
+    		String result = Base64.toBase64("étoile de mon coeur|@ôtt".getBytes());
+    		assertEquals(result, "w6l0b2lsZSBkZSBtb24gY29ldXJ8QMO0dHQ=");
     	} catch(Exception e) {
     		e.printStackTrace();
     		assertTrue(false);
