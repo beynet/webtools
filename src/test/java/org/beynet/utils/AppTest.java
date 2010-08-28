@@ -34,6 +34,7 @@ import org.beynet.utils.framework.UJB;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.impl.ShellCommandResultImpl;
+import org.beynet.utils.tools.Base64;
 import org.beynet.utils.tools.FileUtils;
 import org.beynet.utils.xml.XmlReader;
 import org.beynet.utils.xml.rss.RssFile;
@@ -86,6 +87,16 @@ public class AppTest
     		
     	}
     	catch(Exception e) {
+    		e.printStackTrace();
+    		assertTrue(false);
+    	}
+    }
+    
+    public void testBase64() {
+    	try {
+    		String result = Base64.toBase64(FileUtils.loadFile(new File("/home/beynet/essai.xml")));
+    		System.out.println(result);
+    	} catch(Exception e) {
     		e.printStackTrace();
     		assertTrue(false);
     	}
