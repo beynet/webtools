@@ -24,6 +24,10 @@ public class XmlLogCallBack implements XmlCallBack {
 			throws UtilsException {
 		if (logger.isDebugEnabled()) logger.debug("New Tag : "+tagName);
 	}
+	@Override
+	public void onTagContent(List<String> tags, String content)
+			throws UtilsException {	
+	}
 
 	@Override
 	public void onNewTagAttributs(List<String> parents, String tagName,

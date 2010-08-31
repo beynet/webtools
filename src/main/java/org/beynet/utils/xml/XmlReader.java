@@ -393,14 +393,37 @@ public class XmlReader {
 				// UPDATE_OFFSET_PARSING(pos);
 				return;
 			} else {
+				String content =null;
+				try {
+					content = new String(_currentBuffer,_encoding);
+				} catch (UnsupportedEncodingException e) {
+					throw new UtilsException(UtilsExceptions.Error_Encoding,"Encoding not supported");
+				}
+				onTagContent(content);
 				UPDATE_OFFSET_PARSING(_currentBuffer.length);
 				return;
 			}
+		}
+		else if (pos>0) {
+			
+			String content =null;
+			try {
+				content = new String(_currentBuffer,0,pos,_encoding);
+			}catch (UnsupportedEncodingException e) {
+				throw new UtilsException(UtilsExceptions.Error_Encoding,"Encoding not supported");
+			}
+			onTagContent(content);
 		}
 		_state = XmlReaderState.XML_PARSE_TAG;
 		UPDATE_OFFSET_PARSING(pos);
 	}
 	
+	private void onTagContent(String content) throws UtilsException {
+		if (logger.isDebugEnabled()) logger.debug("On tag content="+content);
+		for (XmlCallBack callBack : _callBacks) {
+			callBack.onTagContent(_nomBalise, content);
+		}
+	}
 	
 	private void parseBegin() throws UtilsException {
 		int pos ;

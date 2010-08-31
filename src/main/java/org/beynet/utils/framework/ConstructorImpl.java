@@ -283,6 +283,10 @@ public class ConstructorImpl implements Constructor {
 				
 			}
 			@Override
+			public void onTagContent(List<String> tags, String content)
+					throws UtilsException {	
+			}
+			@Override
 			public void onCloseTag(List<String> parents, String tagName)
 					throws UtilsException {
 				
@@ -368,6 +372,10 @@ public class ConstructorImpl implements Constructor {
 				
 			}
 			@Override
+			public void onTagContent(List<String> tags, String content)
+					throws UtilsException {	
+			}
+			@Override
 			public void onCloseTag(List<String> parents, String tagName)
 					throws UtilsException {
 				
@@ -423,6 +431,10 @@ public class ConstructorImpl implements Constructor {
 			public void onCloseTag(List<String> parents, String tagName)
 					throws UtilsException {
 				
+			}
+			@Override
+			public void onTagContent(List<String> tags, String content)
+					throws UtilsException {				
 			}
 
 			@Override

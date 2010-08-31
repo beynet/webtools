@@ -45,6 +45,10 @@ public class RssFileV1 extends RssFileCommon implements RssFile {
 					throws UtilsException {
 				
 			}
+			@Override
+			public void onTagContent(List<String> tags, String content)
+					throws UtilsException {	
+			}
 
 			@Override
 			public void onNewTag(List<String> parents, String tagName)

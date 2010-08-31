@@ -32,4 +32,12 @@ public interface XmlCallBack {
 	 * @throws UtilsException
 	 */
 	void onCloseTag(List<String> parents,String tagName) throws UtilsException;
+	
+	/**
+	 * called when content is found into a tag
+	 * @param tags
+	 * @param content
+	 * @throws UtilsException
+	 */
+	void onTagContent(List<String> tags,String content) throws UtilsException ;
 }
