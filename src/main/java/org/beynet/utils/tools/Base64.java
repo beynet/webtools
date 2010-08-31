@@ -9,8 +9,20 @@ import java.util.Arrays;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 
+/**
+ * class used to convert data into base64 or to decode base64
+ * @author beynet
+ *
+ */
 public class Base64 {
 	
+	/**
+	 * convert a serializable object into base64
+	 * @param <T>
+	 * @param obj
+	 * @return
+	 * @throws UtilsException
+	 */
 	public static <T extends Serializable> String toBase64(T obj)throws UtilsException {
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();
 		ObjectOutputStream os = null ;
@@ -25,6 +37,12 @@ public class Base64 {
 		
 	}
 	
+	/**
+	 * convert bytes into base64
+	 * @param tmpBuffer
+	 * @return
+	 * @throws UtilsException
+	 */
 	public static String toBase64(byte[] tmpBuffer) throws UtilsException{
 		StringBuffer newBuffer= new StringBuffer(); 
 		//converting tmpMessage to base64
