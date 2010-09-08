@@ -1,6 +1,7 @@
 package org.beynet.utils.sync.impl.tcp;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -192,6 +193,12 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	public Boolean isUp() {
 		return Boolean.TRUE;
 	}
+	
+	@Override
+	public <T extends Serializable> void saveRessource(T ressource) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	private SyncManager      manager    ;          
 	private Integer          id         ;
@@ -204,4 +211,5 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	private Integer          weight     ;
 	private CommandMounter   mounter  ;
 	private final static Logger logger = Logger.getLogger(LocalTcpSyncHost.class);
+	
 }

@@ -18,7 +18,10 @@ public class CommandMounter extends XmlMessageAnalyser {
 		}
 		else if (SyncCommand.TAG_SYNC.equals(commandName)) {
 			command=SyncRessourceCommand.makeFromBase64Buffer(manager,commandContent);
-		} 
+		}
+		else if (SyncCommand.TAG_SAVE.equals(commandName)) {
+			command=SaveRessourceCommand.makeFromBase64Buffer(commandContent);
+		}
 		return(command);
 	}
 	

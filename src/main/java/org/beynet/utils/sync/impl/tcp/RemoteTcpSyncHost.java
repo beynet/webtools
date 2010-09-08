@@ -38,6 +38,12 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 		return(id);
 	}
 	
+	@Override
+	public <T extends Serializable> void saveRessource(T ressource) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	/**
 	 * ask to main remote host to sync a ressource
 	 * @param ress

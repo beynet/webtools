@@ -32,6 +32,7 @@ public interface SyncCommand {
 	public static final String TAG_NOK	        = "nok" ;
 	public static final String TAG_GETSTATE     = "getstate" ;
 	public static final String TAG_SYNC         = "sync"     ;
+	public static final String TAG_SAVE         = "save"     ;
 	public static final String TAG_STATE        = "state"    ;
 	public static final String ATTRIBUT_MESSAGE = "state"    ;
 	public static final String ATTRIBUT_STATE   = "state"    ;
