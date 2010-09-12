@@ -28,9 +28,10 @@ public interface SyncCommand {
 	
 	public static final String TAG_COMMAND       = "command"  ;
 	public static final String TAG_RESPONSE      = "response" ;
-	public static final String TAG_OK	         = "ok" ;
-	public static final String TAG_NOK	         = "nok" ;
+	public static final String TAG_OK	         = "ok"       ;
+	public static final String TAG_NOK	         = "nok"      ;
 	public static final String TAG_GETSTATE      = "getstate" ;
+	public static final String TAG_RESYNC        = "resync"   ;
 	public static final String TAG_SYNC          = "sync"     ;
 	public static final String TAG_SAVE          = "save"     ;
 	public static final String TAG_STATE         = "state"    ;
@@ -39,4 +40,6 @@ public interface SyncCommand {
 	public static final String ATTRIBUT_WEIGHT   = "weight"   ;
 	public static final String ATTRIBUT_NAME     = "name"     ;
 	public static final String ATTRIBUT_SEQUENCE = "sequence" ;
+	public static final String ATTRIBUT_FROM     = "from"     ;
+	public static final String ATTRIBUT_PAGESIZE = "pagesize" ;
 }

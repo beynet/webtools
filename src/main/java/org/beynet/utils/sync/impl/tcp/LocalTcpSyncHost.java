@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.beynet.utils.sync.api.SyncException;
 import org.beynet.utils.sync.api.SyncHost;
 import org.beynet.utils.sync.api.SyncManager;
+import org.beynet.utils.sync.api.SyncManagerState;
 import org.beynet.utils.sync.api.SyncRessourceSaver;
 import org.beynet.utils.sync.impl.SyncRessourceSaverImpl;
 
@@ -38,6 +39,16 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 			logger.error("unable to construct SyncRessourceSaver :",e);
 			throw new SyncException("IO error",e);
 		}
+	}
+	
+	@Override
+	public SyncRessourceSaver getSaver() {
+		return(saver);
+	}
+	
+	@Override
+	public void sync(long from,int pageSize) {
+		
 	}
 	
 	public void setManager(SyncManager manager) {
@@ -130,8 +141,12 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	}
 	
 	@Override
-	public synchronized <T extends Serializable>  long saveRessource(T ressource,long sequence) throws SyncException {
+	public <T extends Serializable>  long saveRessource(T ressource,long sequence) throws SyncException {
 		if (logger.isDebugEnabled()) logger.debug("Saving ressource : sequence="+sequence);
+		if (manager.getSyncStatus().equals(SyncManagerState.SYNCING)) {
+			if (logger.isDebugEnabled()) logger.debug("Dropping save command - already into sync");
+			return(sequence);
+		}
 		try {
 			return(saver.saveRessource(ressource, sequence));
 		}catch(SyncException e) {

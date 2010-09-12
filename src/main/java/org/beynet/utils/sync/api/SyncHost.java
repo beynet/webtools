@@ -50,5 +50,18 @@ public interface SyncHost {
 	 * @throws SyncException
 	 */
 	public <T extends Serializable> long saveRessource(T ressource,long sequence) throws SyncException ;
+	
+	/**
+	 * return saver used to save ressources - could be null for remote host
+	 * @return
+	 */
+	public SyncRessourceSaver getSaver();
+	
+	/**
+	 * sync with remote host
+	 * @param from
+	 * @param pageSize
+	 */
+	public void sync(long from,int pageSize) throws SyncException ;
 
 }

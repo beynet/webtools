@@ -28,6 +28,17 @@ public class CommandMounter extends XmlMessageAnalyser {
 			}
 			command=SaveRessourceCommand.makeFromBase64Buffer(commandContent,sequence);
 		}
+		else if (SyncCommand.TAG_RESYNC.equals(commandName)) {
+			long from = 0  ;
+			int pageSize = 0  ;
+			try {
+				from = Long.parseLong(commandAttributs.get(SyncCommand.ATTRIBUT_FROM),10);
+				pageSize = Integer.parseInt(commandAttributs.get(SyncCommand.ATTRIBUT_PAGESIZE),10);
+			}catch (NumberFormatException e) {
+				throw new SyncException("Error parsing command : invalid sequence number");
+			}
+			command=new ReSyncCommand(from,pageSize);
+		}
 		return(command);
 	}
 	

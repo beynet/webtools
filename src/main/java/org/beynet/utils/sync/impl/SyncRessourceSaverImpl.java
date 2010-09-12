@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.Date;
@@ -38,7 +39,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	}
 
 	@Override
-	public Map<Date,Serializable> getRessource(Date from, int pageSize) {
+	public Map<Date,Serializable> getRessource(long from, int pageSize) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -49,13 +50,20 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 		long dir3 = (sequence & 0x00f00) >> 8;
 		long dir4 = (sequence & 0x000f0) >> 4;
 		long dir5 = sequence & 0x0000f;
-		StringBuffer resultat = new StringBuffer(Long.toHexString(dir1));
+		StringBuffer resultat = new StringBuffer("./");
+		resultat.append(name);
+		resultat.append("/");
+		resultat.append(Long.toHexString(dir1));
 		resultat.append("/");
 		resultat.append(Long.toHexString(dir2));
 		resultat.append("/");
 		resultat.append(Long.toHexString(dir3));
 		resultat.append("/");
 		resultat.append(Long.toHexString(dir4));
+		File dir = new File(resultat.toString());
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
 		resultat.append("/");
 		resultat.append(Long.toHexString(dir5));
 		resultat.append(DATA_EXTENSION);
@@ -76,9 +84,27 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			logger.error("Sequence error");
 			throw new SyncException("Error sequence");
 		}
-		
-		String targetDir = computeDataFilePathFromSequence(sequence);
-		if (logger.isDebugEnabled()) logger.debug("saving into "+targetDir);
+		sequence=localSequence;
+		String targetFileName = computeDataFilePathFromSequence(sequence);
+		if (logger.isDebugEnabled()) logger.debug("saving into "+targetFileName);
+		FileOutputStream fos = null;
+		try {
+			File dest = new File (targetFileName);
+			File temp = new File(targetFileName+NEW_EXTENSION);
+			fos = new FileOutputStream(temp);
+			ObjectOutputStream os = new ObjectOutputStream(fos);
+			os.writeObject(ressource);
+			os.flush();
+			fos.getFD().sync();
+			fos.close();
+			fos=null;
+			temp.renameTo(dest);
+		}
+		finally {
+			if (fos!=null) {
+				fos.close();
+			}
+		}
 		return(localSequence);
 	}
 
@@ -118,6 +144,6 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	private final static String MAP_EXTENSION = ".map";
 	private final static String NEW_EXTENSION = ".new";
 	private final static long MAX_SEQUENCE = 0xfffff;
-	private final static long FIRST_SEQUENCE = 407 ;
+	public  final static long FIRST_SEQUENCE = 407 ;
 	private final static Logger logger = Logger.getLogger(SyncRessourceSaverImpl.class);
 }

@@ -12,7 +12,9 @@ import org.beynet.utils.sync.api.SyncCommand;
 import org.beynet.utils.sync.api.SyncException;
 import org.beynet.utils.sync.api.SyncHost;
 import org.beynet.utils.sync.api.SyncManager;
+import org.beynet.utils.sync.api.SyncRessourceSaver;
 import org.beynet.utils.sync.impl.GetStateCommand;
+import org.beynet.utils.sync.impl.ReSyncCommand;
 import org.beynet.utils.sync.impl.SaveRessourceCommand;
 import org.beynet.utils.sync.impl.SyncRessourceCommand;
 
@@ -50,6 +52,16 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 		return(0);
 	}
 	
+	@Override
+	public void sync(long from,int pageSize) throws SyncException {
+		ReSyncCommand command = new ReSyncCommand(from,pageSize);
+		try {
+			sendCommandAndProcessAnswer(command);
+		}catch(IOException e) {
+			throw new SyncException("Error IO",e);
+		}
+	}
+	
 	/**
 	 * ask to main remote host to sync a ressource
 	 * @param ress
@@ -79,6 +91,10 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 			closeRemoteHostSock();
 			throw e;
 		}		
+	}
+	@Override
+	public SyncRessourceSaver getSaver() {
+		return(null);
 	}
 	
 	@Override

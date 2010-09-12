@@ -26,5 +26,11 @@ public interface SyncManager {
 	 */
 	public void stop();
 	
+	/**
+	 * return manager sync status
+	 * @return
+	 */
+	public SyncManagerState getSyncStatus() ;
+	
 	
 }

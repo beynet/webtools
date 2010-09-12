@@ -16,10 +16,6 @@ public class Test2 {
 			des.addHost(new RemoteTcpSyncHost(3,"localhost", 8890));
 			TcpSyncManager manager = new TcpSyncManager(2000);
 			manager.initialize(des);
-			Thread.sleep(1000*5);
-			manager.syncRessource("essai de ressource");
-			Thread.sleep(1000*5);
-			manager.syncRessource("essai de ressource 2");
 		}
 		catch(Exception e ){
 			e.printStackTrace();

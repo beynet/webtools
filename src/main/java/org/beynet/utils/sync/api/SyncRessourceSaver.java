@@ -15,11 +15,11 @@ public interface SyncRessourceSaver {
 	
 	/**
 	 * return up to pageSize saved ressources from date from
-	 * @param from : begin date
+	 * @param from : begin date (in ms since epoq)
 	 * @param pageSize : max number of requested results
 	 * @return
 	 */
-	public Map<Date,Serializable> getRessource(Date from,int pageSize);
+	public Map<Date,Serializable> getRessource(long from,int pageSize);
 	
 	/**
 	 * return next sequence

@@ -7,12 +7,26 @@ import org.apache.log4j.Logger;
 import org.beynet.utils.sync.api.SyncException;
 import org.beynet.utils.sync.api.SyncHost;
 import org.beynet.utils.sync.api.SyncManager;
+import org.beynet.utils.sync.api.SyncManagerState;
 import org.beynet.utils.sync.api.SyncPoolDescriptor;
+import org.beynet.utils.sync.impl.SyncRessourceSaverImpl;
 
 public class TcpSyncManager implements Runnable,SyncManager {
 	
 	public TcpSyncManager(int interval) {
 		this.interval = interval ;
+		this.syncStatus = SyncManagerState.STARTING ;
+	}
+	
+	
+	
+	private void startLocalHostThread() {
+		if (localHost!=null) {
+			logger.info("Local host found : starting local host thread");
+			((LocalTcpSyncHost)localHost).setManager(this);
+			localHostThread = new Thread(localHost);
+			localHostThread.start();
+		}
 	}
 
 	@Override
@@ -24,18 +38,12 @@ public class TcpSyncManager implements Runnable,SyncManager {
 			}
 		}
 		managerThread = new Thread(this);
-		if (localHost!=null) {
-			logger.info("Local host found : starting local host thread");
-			((LocalTcpSyncHost)localHost).setManager(this);
-			localHostThread = new Thread(localHost);
-			localHostThread.start();
-		}
 		managerThread.start();
 	}
 	
 	@Override
 	public void stop() {
-		
+		syncStatus=SyncManagerState.STOPPING;
 		managerThread.interrupt();
 	}
 
@@ -48,7 +56,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	private  <T extends Serializable> void localSynchronisation(T ressource) throws SyncException {
 		if (logger.isDebugEnabled()) logger.debug("Local synchronisation :"+ressource);
 		if (logger.isDebugEnabled()) logger.debug("saving on local host first");
-		long sequence = 0 ;
+		long sequence = SyncRessourceSaverImpl.FIRST_SEQUENCE ;
 		sequence=localHost.saveRessource(ressource,sequence);
 		if (logger.isDebugEnabled()) logger.debug("now, send save command to remote hosts");
 		for (SyncHost host : descriptor.getHostList() ) {
@@ -56,7 +64,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 				try {
 					host.saveRessource(ressource,sequence);
 				} catch (SyncException e) {
-					logger.error("Unable to send saveRessource command to remot host id="+host.getId(),e);
+					logger.error("Unable to send saveRessource command to remot host id="+host.getId());
 				}
 			}
 		}
@@ -78,6 +86,38 @@ public class TcpSyncManager implements Runnable,SyncManager {
 			 }
 		 }
 	}
+	
+	/**
+	 * retrieve from mainHost all data missed since last start
+	 * @param main
+	 * @throws SyncException
+	 */
+	private void reSyncWithMainHost(SyncHost main) throws SyncException {
+		syncStatus=SyncManagerState.SYNCING ;
+		startLocalHostThread();
+		/* if we are the main host no need to sync */
+		if (!localHost.equals(main)) {
+			while(true) {
+				logger.debug("syncing with main host");
+				main.sync(1258,13);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		syncStatus=SyncManagerState.RUNNING;
+	}
+	
+	/**
+	 * return sync state
+	 * @return
+	 */
+	public SyncManagerState getSyncStatus() {
+		return(syncStatus);
+	}
 
 	/**
 	 * called when a host state has changed
@@ -92,7 +132,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 				}
 			}
 		}
-		localHost.setWeight(localHost.getId());
+		if (syncStatus==SyncManagerState.STARTING) localHost.setWeight(localHost.getId());
 		// no main host found - ie a start and no running remote host
 		// ----------------------------------------------------------
 		if (newMainHost==null) {
@@ -100,9 +140,13 @@ public class TcpSyncManager implements Runnable,SyncManager {
 		}
 		else {
 			if (mainHost==null) {
-				// it's a start we need to synchronise with the main host
+				// it's a start we need to synchronize with the main host
 				// ------------------------------------------------------
-				// TODO - sync with main host
+				try {
+					reSyncWithMainHost(newMainHost);
+				} catch(SyncException e) {
+					logger.error("Sync Error :",e);
+				}
 			}
 			mainHost=newMainHost;
 			// special case : if the local host is the main host
@@ -119,6 +163,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	@Override
 	public void run() {
 		while (true) {
+			if (logger.isDebugEnabled()) logger.debug("Manager state="+syncStatus.toString());
 			boolean checkState = false ;
 			synchronized(this) {
 				// retrieve state of each host
@@ -149,6 +194,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 		localHost.stopChilds();
 	}
 	
+	private SyncManagerState syncStatus ;
 	private int interval;
 	private SyncPoolDescriptor   descriptor ;
 	private LocalTcpSyncHost localHost ;
