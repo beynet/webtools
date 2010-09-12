@@ -13,6 +13,7 @@ import org.beynet.utils.sync.api.SyncException;
 import org.beynet.utils.sync.api.SyncHost;
 import org.beynet.utils.sync.api.SyncManager;
 import org.beynet.utils.sync.impl.GetStateCommand;
+import org.beynet.utils.sync.impl.SaveRessourceCommand;
 import org.beynet.utils.sync.impl.SyncRessourceCommand;
 
 /**
@@ -39,9 +40,14 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 	}
 	
 	@Override
-	public <T extends Serializable> void saveRessource(T ressource) {
-		// TODO Auto-generated method stub
-		
+	public <T extends Serializable> long saveRessource(T ressource,long sequence) throws SyncException {
+		SaveRessourceCommand<T> command = new SaveRessourceCommand<T>(ressource,sequence);
+		try {
+			sendCommandAndProcessAnswer(command);
+		}catch(IOException e) {
+			throw new SyncException("Error IO",e);
+		}
+		return(0);
 	}
 	
 	/**
@@ -118,11 +124,6 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 		}
 	}
 	
-	@Override
-	public Boolean isLocal() {
-		return(Boolean.FALSE);
-	}
-
 	@Override
 	public Integer getWeight() {
 		return(weight);

@@ -36,7 +36,6 @@ import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.impl.ShellCommandResultImpl;
 import org.beynet.utils.tools.Base64;
 import org.beynet.utils.tools.FileUtils;
-import org.beynet.utils.xml.XmlReader;
 import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
 import org.beynet.utils.xml.rss.RssItem;

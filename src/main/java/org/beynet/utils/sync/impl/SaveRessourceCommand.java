@@ -19,8 +19,9 @@ import org.beynet.utils.tools.Base64;
  */
 public class SaveRessourceCommand<T extends Serializable> extends XmlMessageAnalyser implements SyncCommand{
 	
-	public SaveRessourceCommand(T ressource) {
+	public SaveRessourceCommand(T ressource,long sequence) {
 		this.ressource=ressource;
+		this.sequence = sequence ;
 	}
 	
 	@Override
@@ -38,12 +39,12 @@ public class SaveRessourceCommand<T extends Serializable> extends XmlMessageAnal
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected static <T2 extends Serializable> SaveRessourceCommand<T2> makeFromBase64Buffer(StringBuffer content) {
+	protected static <T2 extends Serializable> SaveRessourceCommand<T2> makeFromBase64Buffer(StringBuffer content,long sequence) {
 		try {
 			byte[] result = BBase64.decode(content.toString());
 			ObjectInputStream os = new ObjectInputStream(new ByteArrayInputStream(result));
 			T2 res =  (T2)os.readObject();
-			return(new SaveRessourceCommand<T2>(res));
+			return(new SaveRessourceCommand<T2>(res,sequence));
 		}catch(Exception e) {
 			logger.error("Error decoding buffer",e);
 			return(null);
@@ -53,7 +54,7 @@ public class SaveRessourceCommand<T extends Serializable> extends XmlMessageAnal
 	@Override
 	public StringBuffer execute(SyncHost host) throws SyncException {
 		if (logger.isDebugEnabled()) logger.debug("Executing save command");
-		
+		host.saveRessource(ressource,sequence);
 		StringBuffer response = new StringBuffer("<");
 		response.append(SyncCommand.TAG_RESPONSE);
 		response.append("><");
@@ -74,26 +75,31 @@ public class SaveRessourceCommand<T extends Serializable> extends XmlMessageAnal
 		}
 		StringBuffer command = new StringBuffer();
 		command.append("<");
-		command.append(SyncRessourceCommand.TAG_COMMAND);
+		command.append(SyncCommand.TAG_COMMAND);
 		command.append(">");
 
 		command.append("<");
-		command.append(SyncRessourceCommand.TAG_SAVE);
-		command.append(">");
+		command.append(SyncCommand.TAG_SAVE);
+		command.append(" ");
+		command.append(SyncCommand.ATTRIBUT_SEQUENCE);
+		command.append("='");
+		command.append(sequence);
+		command.append("' >");
 		
 		command.append(ressource);
 		
 		command.append("</");
-		command.append(SyncRessourceCommand.TAG_SAVE);
+		command.append(SyncCommand.TAG_SAVE);
 		command.append(">");
 
 		command.append("</");
-		command.append(SyncRessourceCommand.TAG_COMMAND);
+		command.append(SyncCommand.TAG_COMMAND);
 		command.append(">");
 		return(command);
 	}
 	
 	private T ressource ;
+	private long sequence ;
 	
 	private final static Logger logger = Logger.getLogger(SaveRessourceCommand.class);
 

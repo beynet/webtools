@@ -4,17 +4,16 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.beynet.utils.sync.api.SyncCommand;
 import org.beynet.utils.sync.api.SyncException;
 import org.beynet.utils.sync.api.SyncHost;
 import org.beynet.utils.sync.api.SyncManager;
-import org.beynet.utils.sync.impl.CommandMounter;
+import org.beynet.utils.sync.api.SyncRessourceSaver;
+import org.beynet.utils.sync.impl.SyncRessourceSaverImpl;
 
 /**
  * a local tcp synchost
@@ -32,8 +31,13 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 		}catch (IOException e) {
 			throw new SyncException("Error IO",e);
 		}
-		remote=null;
 		childs = new ArrayList<Thread>();
+		try {
+			saver=new SyncRessourceSaverImpl("DataFile_"+id);
+		} catch(IOException e) {
+			logger.error("unable to construct SyncRessourceSaver :",e);
+			throw new SyncException("IO error",e);
+		}
 	}
 	
 	public void setManager(SyncManager manager) {
@@ -43,19 +47,6 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	@Override
 	public Integer getId() {
 		return(id);
-	}
-	
-	public LocalTcpSyncHost(SyncManager manager,LocalTcpSyncHost parent,Socket s) {
-		this.manager = manager ;
-		mounter = new CommandMounter(manager);
-		remote    = s    ; 
-		this.parent = parent;
-		this.timeout = 1000;
-		try {
-			remote.setSoTimeout(timeout);
-		} catch (SocketException e) {
-			logger.error("Error setting timemout",e);
-		}
 	}
 
 	@Override
@@ -69,11 +60,6 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	private void openServerSocket() throws IOException {
 		localSock = new ServerSocket(port);
 		localSock.setSoTimeout(timeout);
-	}
-	
-	@Override
-	public Boolean isLocal() {
-		return(Boolean.TRUE);
 	}
 	
 	@Override
@@ -116,78 +102,27 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	public void stopChilds() {
 		if (logger.isDebugEnabled()) logger.debug("Waiting for childs to stop");
 		for (Thread t :childs) {
+			if (logger.isDebugEnabled()) logger.debug("Stopping child");
 			t.interrupt();
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 		}
 	}
 	
 	@Override
 	public void run() {
-		if (remote==null) acceptLoop();
-		else answerCommandLoop();
+		acceptLoop();
 	}
 	
 	private void acceptIncomingConnections() throws InterruptedException,IOException {
 		Socket res = localSock.accept();
-		LocalTcpSyncHost host = new LocalTcpSyncHost(manager,this,res);
-		Thread client = new Thread(host);
+		if (Thread.currentThread().isInterrupted()) {
+			res.close();
+			return;
+		}
+		LocalCommandReader commandReader = new LocalCommandReader(manager,this,res);
+		Thread client = new Thread(commandReader);
 		client.start();
 		childs.add(client);
-	}
-	
-	/**
-	 * answer to one specific command
-	 * @param comBytes
-	 */
-	public void answerCommand(byte[] comBytes) throws IOException,SyncException {
-		mounter.reset();
-		SyncCommand command = mounter.getCommand(comBytes);
-		sendCommandOrAnswer(command.execute(parent), remote);
-	}
-	
-	/**
-	 * loop to wait for new command
-	 */
-	private void answerCommandLoop() {
-		try {
-			while(true) {
-				try {
-					byte[] comBytes = readCommand(remote);
-					if (logger.isDebugEnabled()) {
-						String command = new String(comBytes); 
-						logger.debug("Command received "+command);
-					}
-					try {
-						answerCommand(comBytes);
-					}catch(SyncException e) {
-						logger.error("error processing command :",e);
-					}
-				}
-				catch(SocketTimeoutException e) {
-					
-				}
-				catch(IOException e) {
-					logger.error("Error io",e);
-					break;
-				}
-				if (Thread.currentThread().isInterrupted()) {
-					logger.info("interruption");
-					break;
-				}
-			}
-		} finally {
-			try {
-				remote.close();
-			} catch (IOException e) {
-				logger.error("Error closing socket",e);
-			}
-		}
-	}
-	
+	}	
 	
 	@Override
 	public Boolean isUp() {
@@ -195,21 +130,30 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	}
 	
 	@Override
-	public <T extends Serializable> void saveRessource(T ressource) {
-		// TODO Auto-generated method stub
-		
+	public synchronized <T extends Serializable>  long saveRessource(T ressource,long sequence) throws SyncException {
+		if (logger.isDebugEnabled()) logger.debug("Saving ressource : sequence="+sequence);
+		try {
+			return(saver.saveRessource(ressource, sequence));
+		}catch(SyncException e) {
+			// an error there means that there was a sequence error
+			logger.error("Sync exception, stopping manager",e);
+			manager.stop();
+			throw e;
+		}
+		catch(IOException e) {
+			throw new SyncException("Error IO",e);
+		}
 	}
 
-	private SyncManager      manager    ;          
-	private Integer          id         ;
-	private Integer          port       ;
-	private ServerSocket     localSock  ;
-	private LocalTcpSyncHost parent ;
-	private List<Thread>     childs     ;
-	private Socket           remote     ;
-	private Integer          timeout    ;
-	private Integer          weight     ;
-	private CommandMounter   mounter  ;
+	private SyncManager      manager      ;          
+	private Integer          id           ;
+	private Integer          port         ;
+	private ServerSocket     localSock    ;
+	
+	private List<Thread>       childs       ;
+	private Integer            timeout      ;
+	private Integer            weight       ;
+	private SyncRessourceSaver saver ;
 	private final static Logger logger = Logger.getLogger(LocalTcpSyncHost.class);
 	
 }

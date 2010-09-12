@@ -82,21 +82,21 @@ public class SyncRessourceCommand<T extends Serializable> extends XmlMessageAnal
 		}
 		StringBuffer command = new StringBuffer();
 		command.append("<");
-		command.append(SyncRessourceCommand.TAG_COMMAND);
+		command.append(SyncCommand.TAG_COMMAND);
 		command.append(">");
 
 		command.append("<");
-		command.append(SyncRessourceCommand.TAG_SYNC);
+		command.append(SyncCommand.TAG_SYNC);
 		command.append(">");
 		
 		command.append(ressource);
 		
 		command.append("</");
-		command.append(SyncRessourceCommand.TAG_SYNC);
+		command.append(SyncCommand.TAG_SYNC);
 		command.append(">");
 
 		command.append("</");
-		command.append(SyncRessourceCommand.TAG_COMMAND);
+		command.append(SyncCommand.TAG_COMMAND);
 		command.append(">");
 		return(command);
 	}

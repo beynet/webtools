@@ -35,24 +35,30 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	
 	@Override
 	public void stop() {
-		localHostThread.interrupt();
-		try {
-			localHostThread.join();
-		} catch (InterruptedException e) {
-		}
-		localHost.stopChilds();
+		
 		managerThread.interrupt();
-		try {
-			managerThread.join();
-		} catch (InterruptedException e) {
-		}
 	}
 
-	
-	private  <T extends Serializable> void localSynchronisation(T ressource) {
+	/**
+	 * save ressource locally if it succeed send the command to the remote hosts
+	 * @param <T>
+	 * @param ressource
+	 * @throws SyncException
+	 */
+	private  <T extends Serializable> void localSynchronisation(T ressource) throws SyncException {
 		if (logger.isDebugEnabled()) logger.debug("Local synchronisation :"+ressource);
+		if (logger.isDebugEnabled()) logger.debug("saving on local host first");
+		long sequence = 0 ;
+		sequence=localHost.saveRessource(ressource,sequence);
+		if (logger.isDebugEnabled()) logger.debug("now, send save command to remote hosts");
 		for (SyncHost host : descriptor.getHostList() ) {
-			host.saveRessource(ressource);
+			if (!localHost.equals(host)) {
+				try {
+					host.saveRessource(ressource,sequence);
+				} catch (SyncException e) {
+					logger.error("Unable to send saveRessource command to remot host id="+host.getId(),e);
+				}
+			}
 		}
 	}
 	
@@ -139,6 +145,8 @@ public class TcpSyncManager implements Runnable,SyncManager {
 			}
 			
 		}
+		localHostThread.interrupt();
+		localHost.stopChilds();
 	}
 	
 	private int interval;

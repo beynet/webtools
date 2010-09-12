@@ -26,16 +26,17 @@ public interface SyncCommand {
 	 */
 	public void analyseResponse(byte[] response,SyncHost host) throws SyncException ;
 	
-	public static final String TAG_COMMAND      = "command"  ;
-	public static final String TAG_RESPONSE     = "response" ;
-	public static final String TAG_OK	        = "ok" ;
-	public static final String TAG_NOK	        = "nok" ;
-	public static final String TAG_GETSTATE     = "getstate" ;
-	public static final String TAG_SYNC         = "sync"     ;
-	public static final String TAG_SAVE         = "save"     ;
-	public static final String TAG_STATE        = "state"    ;
-	public static final String ATTRIBUT_MESSAGE = "state"    ;
-	public static final String ATTRIBUT_STATE   = "state"    ;
-	public static final String ATTRIBUT_WEIGHT  = "weight"   ;
-	public static final String ATTRIBUT_NAME    = "name"     ;
+	public static final String TAG_COMMAND       = "command"  ;
+	public static final String TAG_RESPONSE      = "response" ;
+	public static final String TAG_OK	         = "ok" ;
+	public static final String TAG_NOK	         = "nok" ;
+	public static final String TAG_GETSTATE      = "getstate" ;
+	public static final String TAG_SYNC          = "sync"     ;
+	public static final String TAG_SAVE          = "save"     ;
+	public static final String TAG_STATE         = "state"    ;
+	public static final String ATTRIBUT_MESSAGE  = "state"    ;
+	public static final String ATTRIBUT_STATE    = "state"    ;
+	public static final String ATTRIBUT_WEIGHT   = "weight"   ;
+	public static final String ATTRIBUT_NAME     = "name"     ;
+	public static final String ATTRIBUT_SEQUENCE = "sequence" ;
 }

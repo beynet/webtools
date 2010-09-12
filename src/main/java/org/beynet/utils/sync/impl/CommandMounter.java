@@ -20,7 +20,13 @@ public class CommandMounter extends XmlMessageAnalyser {
 			command=SyncRessourceCommand.makeFromBase64Buffer(manager,commandContent);
 		}
 		else if (SyncCommand.TAG_SAVE.equals(commandName)) {
-			command=SaveRessourceCommand.makeFromBase64Buffer(commandContent);
+			long sequence = 0  ;
+			try {
+				sequence = Long.parseLong(commandAttributs.get(SyncCommand.ATTRIBUT_SEQUENCE),10);
+			}catch (NumberFormatException e) {
+				throw new SyncException("Error parsing command : invalid sequence number");
+			}
+			command=SaveRessourceCommand.makeFromBase64Buffer(commandContent,sequence);
 		}
 		return(command);
 	}

@@ -22,13 +22,6 @@ public interface SyncHost {
 	 */
 	public Boolean getState()  ;
 	
-//	/**
-//	 * return true if this host is the master host
-//	 * @return
-//	 * @throws SyncException
-//	 */
-//	public Boolean isMasterHost() throws SyncException ;
-//	
 	/**
 	 * true is host is up
 	 * @return
@@ -49,16 +42,13 @@ public interface SyncHost {
 	public void setWeight(Integer weight) ;
 	
 	/**
-	 * return true if host is a local
-	 * @return
-	 */
-	public Boolean isLocal() ;
-	
-	/**
-	 * ask to host to save a ressource
+	 * ask to host to save a ressource - send by the main host
 	 * @param <T>
 	 * @param ressource
+	 * @param sequence
+	 * @return the sequence number of this saving operation
+	 * @throws SyncException
 	 */
-	public <T extends Serializable> void saveRessource(T ressource) ;
+	public <T extends Serializable> long saveRessource(T ressource,long sequence) throws SyncException ;
 
 }

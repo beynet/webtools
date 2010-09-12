@@ -8,9 +8,8 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.beynet.utils.sync.api.SyncException;
-import org.beynet.utils.sync.api.SyncHost;
 
-public abstract class AbstractTcpSyncHost implements SyncHost {
+public abstract class AbstractTcpSyncHost {
 	
 	/**
 	 * send the header before the command

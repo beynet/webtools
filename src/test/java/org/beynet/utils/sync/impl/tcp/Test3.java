@@ -8,7 +8,8 @@ public class Test3 {
 	public static void main(String[] args){
 		try {
 			BasicConfigurator.configure();
-	        Logger.getRootLogger().setLevel(Level.INFO);
+			Logger.getRootLogger().setLevel(Level.INFO);
+	        Logger.getLogger("org.beynet.utils.sync").setLevel(Level.DEBUG);
 			TcpSyncPoolDescriptor des = new TcpSyncPoolDescriptor();
 			des.addHost(new LocalTcpSyncHost(3,8890));
 			des.addHost(new RemoteTcpSyncHost(1,"localhost", 8888));

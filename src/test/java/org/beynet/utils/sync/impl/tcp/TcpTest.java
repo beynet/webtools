@@ -1,14 +1,18 @@
 package org.beynet.utils.sync.impl.tcp;
 
+import java.io.IOException;
+
 import junit.framework.TestCase;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.beynet.utils.sync.api.SyncCommand;
+import org.beynet.utils.sync.api.SyncException;
 import org.beynet.utils.sync.impl.CommandMounter;
 import org.beynet.utils.sync.impl.GetStateCommand;
 import org.beynet.utils.sync.impl.SyncRessourceCommand;
+import org.beynet.utils.sync.impl.SyncRessourceSaverImpl;
 
 public class TcpTest extends TestCase {
 	
@@ -88,6 +92,5 @@ public class TcpTest extends TestCase {
 			e.printStackTrace();
 			assertTrue(false);
 		}
-		
 	}
 }
