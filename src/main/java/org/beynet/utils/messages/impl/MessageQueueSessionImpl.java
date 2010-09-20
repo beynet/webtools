@@ -79,16 +79,18 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	@Transaction(create=true)
 	public MessageQueueConsumer createConsumer(String consumerId) {
 		defineConsumer(consumerId);
-		createdConsumer= (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor,manager,queue,consumerId),null);
-		queue.addConsumer(createdConsumer);
+		createdConsumerNonProxy = new MessageQueueConsumerImpl(accessor,manager,queue,consumerId);
+		createdConsumer= (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(createdConsumerNonProxy,null);
+		queue.addConsumer(createdConsumerNonProxy);
 		return(createdConsumer);
 	}
 	@Override
 	@Transaction(create=true)
 	public MessageQueueConsumer createConsumer(String consumerId,String properties) {
 		defineConsumer(consumerId);
-		createdConsumer = (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor,manager,queue,consumerId,properties),null);
-		queue.addConsumer(createdConsumer);
+		createdConsumerNonProxy = new MessageQueueConsumerImpl(accessor,manager,queue,consumerId,properties) ;
+		createdConsumer = (MessageQueueConsumer)UtilsClassUJBProxy.newInstance(createdConsumerNonProxy,null);
+		queue.addConsumer(createdConsumerNonProxy);
 		return(createdConsumer);
 	}
 
@@ -120,7 +122,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	@Override
 	public void close() {
 		if (createdConsumer!=null) {
-			queue.removeConsumer(createdConsumer);
+			queue.removeConsumer(createdConsumerNonProxy);
 		}
 	}
 
@@ -130,13 +132,14 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		pendingMessage = 0;
 	}
 
-	private MessageQueue               queue          ;
-	private boolean                    transacted     ;
-	private int                        pendingMessage ;
-	private RequestManager             manager        ;
-	private MessageQueueConsumer       createdConsumer;
-	private MessageQueueProducer       createdProducer;
-	private DataBaseAccessor           accessor       ;
+	private MessageQueue               queue                   ;
+	private boolean                    transacted              ;
+	private int                        pendingMessage          ;
+	private RequestManager             manager                 ;
+	private MessageQueueConsumer       createdConsumerNonProxy ;
+	private MessageQueueConsumer       createdConsumer         ;
+	private MessageQueueProducer       createdProducer         ;
+	private DataBaseAccessor           accessor                ;
 	
 	private final Logger logger = Logger.getLogger(MessageQueueSession.class);
 }
