@@ -148,7 +148,7 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 			return(sequence);
 		}
 		try {
-			return(saver.saveRessource(ressource, sequence));
+			return(saver.writeRessource(ressource, sequence));
 		}catch(SyncException e) {
 			// an error there means that there was a sequence error
 			logger.error("Sync exception, stopping manager",e);

@@ -57,7 +57,7 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 		ReSyncCommand command = new ReSyncCommand(from,pageSize);
 		try {
 			sendCommandAndProcessAnswer(command);
-		}catch(IOException e) {
+		} catch(IOException e) {
 			throw new SyncException("Error IO",e);
 		}
 	}

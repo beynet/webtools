@@ -16,7 +16,7 @@ public class ReSyncCommand implements SyncCommand{
 	public void analyseResponse(byte[] response, SyncHost host)
 			throws SyncException {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override

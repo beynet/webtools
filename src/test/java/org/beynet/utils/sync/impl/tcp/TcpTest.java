@@ -19,7 +19,6 @@ public class TcpTest extends TestCase {
         Logger.getRootLogger().setLevel(Level.DEBUG);
     }
 	
-	
 	public void testCommandMounter() {
 		SyncCommand mountedCommand= null ;
 		CommandMounter mounter = new CommandMounter(null);

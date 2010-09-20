@@ -97,14 +97,25 @@ public class TcpSyncManager implements Runnable,SyncManager {
 		startLocalHostThread();
 		/* if we are the main host no need to sync */
 		if (!localHost.equals(main)) {
+			long start=0;
+			try {
+				start=localHost.getSaver().getLastSavedTime();
+			}catch(IOException e) {
+				throw new SyncException("Error IO",e);
+			}
+			logger.debug("syncing with main host from tz=");
+			
 			while(true) {
-				logger.debug("syncing with main host");
-				main.sync(1258,13);
+				main.sync(start,13);
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
+				}
+				try {
+					start=localHost.getSaver().getLastSavedTime();
+				}catch(IOException e) {
+					throw new SyncException("Error IO",e);
 				}
 			}
 		}

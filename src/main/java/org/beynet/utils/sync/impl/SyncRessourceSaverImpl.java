@@ -6,10 +6,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -25,10 +27,11 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 		exist = fMap.exists(); 
 		mapFile = new RandomAccessFile(fMap, "rw");
 		if (!exist) initMapFile();
+		checkMapFile();
 	}
 	
 	/**
-	 * create map file which 
+	 * create map file - this map file will associate each record (from 0 to MAX_SEQUENCE) with a date (date of write)
 	 */
 	private void initMapFile() throws IOException {
 		logger.info("Create Map file");
@@ -36,14 +39,82 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			mapFile.writeLong(0);
 		}
 		mapFile.getFD().sync();
+		lastMapFileOffset = 0 ; 
+		lastSavedTime     = 0;
+	}
+	
+	private void checkMapFile() throws IOException {
+		if (logger.isDebugEnabled()) logger.debug("Reading Map file");
+		mapFile.seek(0);
+		for (long s = 0 ; s <MAX_SEQUENCE;s++) {
+			long current=mapFile.readLong();
+			if (current>lastSavedTime) {
+				lastSavedTime=current;
+				lastMapFileOffset=s;
+			}
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("lastSavedTime = "+new Date(lastSavedTime)+" last offset="+lastMapFileOffset);
+		}
+	}
+	private void updateMapFile(long sequence) throws IOException {
+		lastSavedTime = new Date().getTime();
+		lastMapFileOffset=sequence;
+		if (logger.isDebugEnabled()) logger.debug("Updating Map file");
+		mapFile.seek(sequence*8);
+		mapFile.writeLong(lastSavedTime);
+		mapFile.getFD().sync();
+	}
+	
+
+	@Override
+	public long getLastSavedTime() throws IOException {
+		return lastSavedTime;
+	}
+	
+	
+
+	@Override
+	public <T extends Serializable> T readRessource(long sequence)
+	throws IOException,SyncException {
+		if (logger.isDebugEnabled()) logger.debug("Reading ressource sequence="+sequence);
+		return(_readRessource(sequence));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private <T extends Serializable> T _readRessource(long sequence)
+	throws IOException,SyncException {
+		String targetFileName = computeDataFilePathFromSequence(sequence);
+		ObjectInputStream oIs = new ObjectInputStream(new FileInputStream(targetFileName));
+		try {
+			return (T) (oIs.readObject());
+		} catch (ClassNotFoundException e) {
+			throw new SyncException("Class not found",e);
+		}
 	}
 
 	@Override
-	public Map<Date,Serializable> getRessource(long from, int pageSize) {
-		// TODO Auto-generated method stub
-		return null;
+	public synchronized Map<Date,Serializable> getRessourceList(long from, int pageSize) throws IOException,SyncException {
+		Map<Date,Serializable> result = new HashMap<Date, Serializable>();
+		long offset    = lastMapFileOffset + 1;
+		long dateFound = 0 ;
+		do {
+			offset--;
+			if (offset<0) offset=MAX_SEQUENCE-1;
+			mapFile.seek(8*offset);
+			dateFound=mapFile.readLong();
+		} while (dateFound > from) ;
+		for (int i=0;i<pageSize) {
+			result.put(readRessource(offset));
+		}
+		return(result);
 	}
 	
+	/**
+	 * return path where to store next ressource
+	 * @param sequence
+	 * @return
+	 */
 	private String computeDataFilePathFromSequence(long sequence) {
 		long dir1 = (sequence & 0xf0000 )>> 16;
 		long dir2 = (sequence & 0x0f000) >> 12;
@@ -71,7 +142,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	}
 
 	@Override
-	public <T extends Serializable> long saveRessource(T ressource,
+	public <T extends Serializable> long writeRessource(T ressource,
 			long sequence) throws IOException,SyncException{
 		long localSequence = FIRST_SEQUENCE;
 		try {
@@ -99,6 +170,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			fos.close();
 			fos=null;
 			temp.renameTo(dest);
+			updateMapFile(sequence);
 		}
 		finally {
 			if (fos!=null) {
@@ -108,8 +180,13 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 		return(localSequence);
 	}
 
-	@Override
-	public long getNextSequence() throws IOException {
+	/**
+	 * return next sequence
+	 * @param sequence
+	 * @return
+	 * @throws IOException
+	 */
+	private long getNextSequence() throws IOException {
 		long sequence = FIRST_SEQUENCE; 
 		File seqFile = new File(name+SEQ_EXTENSION);
 		File seqFileNew = new File(name+SEQ_EXTENSION+NEW_EXTENSION);
@@ -136,8 +213,10 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 		}
 	}
 	
-	private String           name ;
-	private RandomAccessFile mapFile ;
+	private String           name              ;
+	private RandomAccessFile mapFile           ;
+	private long             lastMapFileOffset ;
+	private long             lastSavedTime     ;
 
 	private final static String SEQ_EXTENSION = ".seq";
 	private final static String DATA_EXTENSION = ".dat";
