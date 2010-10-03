@@ -25,6 +25,11 @@ public class SaveRessourceCommand<T extends Serializable> extends XmlMessageAnal
 	}
 	
 	@Override
+	public boolean withAnswer() {
+		return(false);
+	}
+	
+	@Override
 	public void analyseResponse(byte[] response, SyncHost host)
 			throws SyncException {
 		parse(response);

@@ -235,7 +235,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 		// checking if this record has not been already registered (when syncing)
 		// ie - a date not null means that we are syncing
 		// ----------------------------------------------------------------------
-		if (lastMapFileOffset==ressource.getSequence() ) {
+		if (lastMapFileOffset==ressource.getSequence() && lastMapFileOffset!=FIRST_SEQUENCE) {
 			if (logger.isDebugEnabled()) logger.debug("already saved");
 			return(localSequence);
 		}

@@ -83,8 +83,10 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 		try {
 			openRemoteHostSock();
 			sendCommandOrAnswer(command.generate(),remoteHostSocket);
-			response = readCommand(remoteHostSocket);
-			command.analyseResponse(response,this);
+			if (command.withAnswer()) {
+				response = readCommand(remoteHostSocket);
+				command.analyseResponse(response,this);
+			}
 		}
 		catch(IOException e) {
 			if (logger.isTraceEnabled()) logger.trace("Error IO",e);

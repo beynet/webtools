@@ -53,6 +53,10 @@ public class SyncRessourceCommand<T extends Serializable> extends XmlMessageAnal
 		}
 	}
 	
+	@Override
+	public boolean withAnswer() {
+		return(true);
+	}
 
 	@Override
 	public StringBuffer execute(SyncHost host) throws SyncException {

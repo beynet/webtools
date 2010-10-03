@@ -6,6 +6,13 @@ package org.beynet.utils.sync.api;
  *
  */
 public interface SyncCommand {
+	
+	/**
+	 * if this command is followed with answer
+	 * @return
+	 */
+	public boolean withAnswer();
+	
 	/**
 	 * generate the xml command to send to the remote host	
 	 * @return the xml buffer

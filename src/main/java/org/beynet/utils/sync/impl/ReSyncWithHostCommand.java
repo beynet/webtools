@@ -109,6 +109,11 @@ public class ReSyncWithHostCommand implements SyncCommand,XmlCallBack{
 			}
 		}
 	}
+	
+	@Override
+	public boolean withAnswer() {
+		return(true);
+	}
 
 	@Override
 	public StringBuffer execute(SyncHost host) throws SyncException {

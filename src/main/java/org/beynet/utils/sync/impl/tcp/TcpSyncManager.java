@@ -136,22 +136,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 				throw new SyncException("IO",e);
 			}
 			startLocalHostThread();
-			System.err.println("!!!!!!!!!!!!!!!!!!!!!!!! ");
-			try {
-				Thread.sleep(11*1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.err.println("!!!!!!!!!!!!!!!!!!!!!!!! ");
 			syncLoop(main);
-			try {
-				Thread.sleep(11*1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.err.println("!!!!!!!!!!!!!!!!!!!!!!!! ");
 			setSyncStatus(SyncManagerState.RUNNING);
 		}
 		else {

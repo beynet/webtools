@@ -44,7 +44,8 @@ public class LocalCommandReader extends AbstractTcpSyncHost implements Runnable 
 	public void answerCommand(byte[] comBytes) throws IOException,SyncException {
 		mounter.reset();
 		SyncCommand command = mounter.getCommand(comBytes);
-		sendCommandOrAnswer(command.execute(parent), remote);
+		StringBuffer answer = command.execute(parent) ; 
+		if (command.withAnswer()) sendCommandOrAnswer(answer, remote);
 	}
 	
 	/**
