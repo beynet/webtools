@@ -13,6 +13,7 @@ import org.beynet.utils.sync.api.SyncException;
 import org.beynet.utils.sync.api.SyncHost;
 import org.beynet.utils.sync.api.SyncManager;
 import org.beynet.utils.sync.api.SyncManagerState;
+import org.beynet.utils.sync.api.SyncRessource;
 import org.beynet.utils.sync.api.SyncRessourceSaver;
 import org.beynet.utils.sync.impl.SyncRessourceSaverImpl;
 
@@ -144,12 +145,28 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	@Override
 	public <T extends Serializable>  long saveRessource(T ressource,long sequence) throws SyncException {
 		if (logger.isDebugEnabled()) logger.debug("Saving ressource : sequence="+sequence);
-		if (manager.getSyncStatus().equals(SyncManagerState.SYNCING)) {
-			if (logger.isDebugEnabled()) logger.debug("Dropping save command - already into sync");
+		SyncManagerState status = manager.getSyncStatus(); 
+		if (logger.isDebugEnabled()) logger.debug("checking state");
+		if (status.equals(SyncManagerState.SYNCING)) {
+			if (logger.isDebugEnabled()) logger.debug("Dropping command during sync");
 			return(sequence);
 		}
+		
 		try {
-			return(saver.writeRessource(ressource, sequence,0));
+			SyncRessource<T> ress = new SyncRessource<T>();
+			ress.setRessource(ressource);
+			ress.setSequence(sequence);
+			ress.setDate(0);
+			if (status.equals(SyncManagerState.SYNCED)) {
+				if (logger.isDebugEnabled()) logger.debug("Buffering save when into SYNCED");
+				return(saver.bufferRessource(ress));
+			}
+			else if (status.equals(SyncManagerState.RUNNING)) {
+				return(saver.writeRessource(ress));
+			}
+			else {
+				throw new SyncException("State NOK");
+			}
 		}catch(SyncException e) {
 			// an error there means that there was a sequence error
 			logger.error("Sync exception, stopping manager",e);

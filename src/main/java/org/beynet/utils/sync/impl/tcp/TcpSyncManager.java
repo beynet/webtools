@@ -16,10 +16,8 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	
 	public TcpSyncManager(int interval) {
 		this.interval = interval ;
-		this.syncStatus = SyncManagerState.STARTING ;
+		setSyncStatus(SyncManagerState.STARTING);
 	}
-	
-	
 	
 	private void startLocalHostThread() {
 		if (localHost!=null) {
@@ -44,7 +42,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	
 	@Override
 	public void stop() {
-		syncStatus=SyncManagerState.STOPPING;
+		setSyncStatus(SyncManagerState.STOPPING);
 		managerThread.interrupt();
 	}
 
@@ -89,45 +87,84 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	}
 	
 	/**
-	 * retrieve from mainHost all data missed since last start
+	 * loop until we receive less results than requested
 	 * @param main
-	 * @throws SyncException
 	 */
-	private void reSyncWithMainHost(SyncHost main) throws SyncException {
-		syncStatus=SyncManagerState.SYNCING ;
-		
-		/* if we are the main host no need to sync */
-		if (!localHost.equals(main)) {
-			long start=0;
-			long lastStart = 0 ;
-			// while main host return answers
-			// ------------------------------
+	private void syncLoop(SyncHost main) throws SyncException {
+		long start=0;
+		long lastStart = 0 ;
+		// while main host return answers
+		// ------------------------------
+		try {
+			start=localHost.getSaver().getLastSavedTime();
+		} catch(IOException e) {
+			throw new SyncException("Error IO",e);
+		}
+		while(true) {
+			if (logger.isDebugEnabled()) logger.debug("syncing with main host from date="+new Date(start));
+			main.sync(start,MAX_PAGE_SIZE,localHost);
+			lastStart=start;
 			try {
 				start=localHost.getSaver().getLastSavedTime();
 			}catch(IOException e) {
 				throw new SyncException("Error IO",e);
 			}
-			while(true) {
-				if (logger.isDebugEnabled()) logger.debug("syncing with main host from date="+new Date(start));
-				main.sync(start,MAX_PAGE_SIZE,localHost);
-				lastStart=start;
-				try {
-					start=localHost.getSaver().getLastSavedTime();
-				}catch(IOException e) {
-					throw new SyncException("Error IO",e);
-				}
-				if (start==lastStart) break;
+			if (start==lastStart) break;
+		}
+	}
+	
+	/**
+	 * retrieve from mainHost all data missed since last start
+	 * @param main
+	 * @throws SyncException
+	 */
+	private void reSyncWithMainHost(SyncHost main) throws SyncException {
+		setSyncStatus(SyncManagerState.SYNCING) ;
+		
+		/* if we are the main host no need to sync */
+		if (!localHost.equals(main)) {
+			// first sync loop in state SYNCING
+			// localhost is not listening incomming commands
+			// ---------------------------------------------
+			syncLoop(main);
+			
+			// state SYNCED : we start to listen and do a last loop
+			setSyncStatus(SyncManagerState.SYNCED);
+			try {
+				localHost.openServerSocket();
+			} catch(IOException e) {
+				throw new SyncException("IO",e);
 			}
+			startLocalHostThread();
+			System.err.println("!!!!!!!!!!!!!!!!!!!!!!!! ");
+			try {
+				Thread.sleep(11*1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.err.println("!!!!!!!!!!!!!!!!!!!!!!!! ");
+			syncLoop(main);
+			try {
+				Thread.sleep(11*1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.err.println("!!!!!!!!!!!!!!!!!!!!!!!! ");
+			setSyncStatus(SyncManagerState.RUNNING);
 		}
-		// change status and start to accept incoming messages
-		// ---------------------------------------------------
-		syncStatus=SyncManagerState.RUNNING;
-		try {
-			localHost.openServerSocket();
-		} catch(IOException e) {
-			throw new SyncException("IO",e);
+		else {
+			// change status and start to accept incoming messages
+			// ---------------------------------------------------
+			setSyncStatus(SyncManagerState.RUNNING);
+			try {
+				localHost.openServerSocket();
+			} catch(IOException e) {
+				throw new SyncException("IO",e);
+			}
+			startLocalHostThread();
 		}
-		startLocalHostThread();
 	}
 	
 	/**
@@ -136,6 +173,10 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	 */
 	public SyncManagerState getSyncStatus() {
 		return(syncStatus);
+	}
+	public void setSyncStatus(SyncManagerState status) {
+		if (logger.isDebugEnabled()) logger.debug("changing status to:"+status.toString());
+		syncStatus=status;
 	}
 
 	/**
@@ -151,7 +192,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 				}
 			}
 		}
-		if (syncStatus==SyncManagerState.STARTING) localHost.setWeight(localHost.getId());
+		if (getSyncStatus()==SyncManagerState.STARTING) localHost.setWeight(localHost.getId());
 		// no main host found - ie a start and no running remote host
 		// ----------------------------------------------------------
 		if (newMainHost==null) {
@@ -182,7 +223,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	@Override
 	public void run() {
 		while (true) {
-			if (logger.isDebugEnabled()) logger.debug("Manager state="+syncStatus.toString());
+			if (logger.isDebugEnabled()) logger.debug("Manager state="+getSyncStatus().toString());
 			boolean checkState = false ;
 			synchronized(this) {
 				// retrieve state of each host

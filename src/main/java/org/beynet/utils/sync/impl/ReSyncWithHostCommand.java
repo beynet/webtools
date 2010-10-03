@@ -15,6 +15,7 @@ import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.sync.api.SyncCommand;
 import org.beynet.utils.sync.api.SyncException;
 import org.beynet.utils.sync.api.SyncHost;
+import org.beynet.utils.sync.api.SyncRessource;
 import org.beynet.utils.tools.BBase64;
 import org.beynet.utils.tools.Base64;
 import org.beynet.utils.xml.XmlCallBack;
@@ -94,13 +95,15 @@ public class ReSyncWithHostCommand implements SyncCommand,XmlCallBack{
 			logger.error("Nb sync tag not eqal to nb seb attr :tag="+nbResult+" attr="+nbResult2);
 			throw new SyncException("inconsistency");
 		}
-		Long lastDate = null ;
+		
 		for (int i=0;i<resultData.size();i++) {
 			Serializable obj = resultData.get(i);
-			Long seq = resultSeq.get(i);
-			lastDate = resultDate.get(i);
+			SyncRessource<Serializable> ress = new SyncRessource<Serializable>();
+			ress.setRessource(obj);
+			ress.setSequence(resultSeq.get(i));
+			ress.setDate(resultDate.get(i));
 			try {
-				localHost.getSaver().writeRessource(obj, seq,lastDate);
+				localHost.getSaver().writeRessource(ress);
 			} catch (IOException e) {
 				throw new SyncException("Error IO",e);
 			}

@@ -10,11 +10,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.sync.api.SyncException;
+import org.beynet.utils.sync.api.SyncRessource;
 import org.beynet.utils.sync.api.SyncRessourceSaver;
 
 public class SyncRessourceSaverImpl implements SyncRessourceSaver {
@@ -33,6 +36,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			lastSavedTime=0;
 		}
 		checkMapFile();
+		buffer = new ArrayList<SyncRessource<? extends Serializable>>();
 	}
 	
 	/**
@@ -172,19 +176,14 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 		resultat.append(DATA_EXTENSION);
 		return(resultat.toString());
 	}
-
 	@Override
-	public synchronized <T extends Serializable> long writeRessource(T ressource,
-			long sequence,long date) throws IOException,SyncException{
+	public synchronized <T extends Serializable> long bufferRessource(SyncRessource<T> ressource) throws IOException,SyncException{
+		buffer.add(ressource);
+		return(0);
+	}
+	
+	private <T extends Serializable> long _writeRessource(SyncRessource<T> ressource)  throws IOException,SyncException {
 		long localSequence = FIRST_SEQUENCE;
-		
-		// checking if this record has not been already registered (when syncing)
-		// ----------------------------------------------------------------------
-		if (lastMapFileOffset==sequence && date!=0) {
-			if (logger.isDebugEnabled()) logger.debug("already saved");
-			return(localSequence);
-		}
-		
 		try {
 			localSequence=getNextSequence();
 		}
@@ -192,15 +191,19 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			throw new SyncException("Error retrieving sequence");
 		}
 		
-		if (sequence!=FIRST_SEQUENCE && localSequence!=sequence) {
-			logger.error("Sequence error : localSequence="+localSequence+" remote sequence="+sequence);
+		if (ressource.getSequence()!=FIRST_SEQUENCE && localSequence!=ressource.getSequence()) {
+			logger.error("Sequence error : localSequence="+localSequence+" remote sequence="+ressource.getSequence());
 			throw new SyncException("Error sequence");
 		}
 		
-		sequence=localSequence;
-		if (logger.isDebugEnabled()) logger.debug("Saving ressource into sequence="+sequence);
+		// using next sequence
+		// -------------------
+		ressource.setSequence(localSequence);
+		
+		if (logger.isDebugEnabled()) logger.debug("Saving ressource into sequence="+ressource.getSequence());
 		//computing next file next from the sequence
-		String targetFileName = computeDataFilePathFromSequence(sequence);
+		// ------------------------------------------
+		String targetFileName = computeDataFilePathFromSequence(ressource.getSequence());
 		if (logger.isDebugEnabled()) logger.debug("saving into "+targetFileName);
 		FileOutputStream fos = null;
 		try {
@@ -209,13 +212,13 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			File temp = new File(targetFileName+NEW_EXTENSION);
 			fos = new FileOutputStream(temp);
 			ObjectOutputStream os = new ObjectOutputStream(fos);
-			os.writeObject(ressource);
+			os.writeObject(ressource.getRessource());
 			os.flush();
 			fos.getFD().sync();
 			fos.close();
 			fos=null;
 			temp.renameTo(dest);
-			updateMapFile(sequence,date);
+			updateMapFile(ressource.getSequence(),ressource.getDate());
 		}
 		finally {
 			if (fos!=null) {
@@ -223,6 +226,34 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			}
 		}
 		return(localSequence);
+	}
+
+	@Override
+	public synchronized <T extends Serializable> long writeRessource(SyncRessource<T> ressource) throws IOException,SyncException{
+		long localSequence = FIRST_SEQUENCE;
+		
+		// checking if this record has not been already registered (when syncing)
+		// ie - a date not null means that we are syncing
+		// ----------------------------------------------------------------------
+		if (lastMapFileOffset==ressource.getSequence() ) {
+			if (logger.isDebugEnabled()) logger.debug("already saved");
+			return(localSequence);
+		}
+		// flushing buffer
+		// ---------------
+		if (buffer.size()!=0 && ressource.getDate()==0) {
+			for (SyncRessource<? extends Serializable> ress : buffer) {
+				if (ress.getSequence()>lastMapFileOffset) {
+					if (logger.isDebugEnabled()) logger.debug(" !!!!!!!!  !!!!!!! Writing buffer item");
+					_writeRessource(ress);
+				}
+				else {
+					if (logger.isDebugEnabled()) logger.debug(" !!!!!!!!  !!!!!!! dropping buffer item");
+				}
+			}
+			buffer.clear();
+		}
+		return(_writeRessource(ressource));
 	}
 
 	/**
@@ -262,6 +293,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	private RandomAccessFile mapFile           ;
 	private long             lastMapFileOffset ;
 	private long             lastSavedTime     ;
+	private List<SyncRessource<? extends Serializable>> buffer ;
 
 	private final static String SEQ_EXTENSION = ".seq";
 	private final static String DATA_EXTENSION = ".dat";

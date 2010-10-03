@@ -10,7 +10,19 @@ public interface SyncRessourceSaver {
 	 * @param <T>
 	 * @param ressource
 	 */
-	public <T extends Serializable> long writeRessource(T ressource,long sequence,long date) throws SyncException,IOException;
+	public <T extends Serializable> long writeRessource(SyncRessource<T> ressource) throws SyncException,IOException;
+	
+	/**
+	 * buffer a ressource
+	 * @param <T>
+	 * @param ressource
+	 * @param sequence
+	 * @param date
+	 * @return
+	 * @throws SyncException
+	 * @throws IOException
+	 */
+	public <T extends Serializable> long bufferRessource(SyncRessource<T> ressource) throws SyncException,IOException;
 	
 	/**
 	 * read ressource stored at sequence
