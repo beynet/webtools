@@ -12,7 +12,7 @@ import org.beynet.utils.sync.api.SyncManager;
 import org.beynet.utils.sync.impl.CommandMounter;
 
 /**
- * in this read command comming from remote host(s) are read and processed
+ * in this tread commands coming from remote host(s) are read and processed
  * @author beynet
  *
  */

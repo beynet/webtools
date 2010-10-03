@@ -40,6 +40,7 @@ public interface SyncCommand {
 	public static final String ATTRIBUT_WEIGHT   = "weight"   ;
 	public static final String ATTRIBUT_NAME     = "name"     ;
 	public static final String ATTRIBUT_SEQUENCE = "sequence" ;
+	public static final String ATTRIBUT_DATE     = "date" ;
 	public static final String ATTRIBUT_FROM     = "from"     ;
 	public static final String ATTRIBUT_PAGESIZE = "pagesize" ;
 }

@@ -14,7 +14,7 @@ import org.beynet.utils.sync.api.SyncHost;
 import org.beynet.utils.sync.api.SyncManager;
 import org.beynet.utils.sync.api.SyncRessourceSaver;
 import org.beynet.utils.sync.impl.GetStateCommand;
-import org.beynet.utils.sync.impl.ReSyncCommand;
+import org.beynet.utils.sync.impl.ReSyncWithHostCommand;
 import org.beynet.utils.sync.impl.SaveRessourceCommand;
 import org.beynet.utils.sync.impl.SyncRessourceCommand;
 
@@ -53,8 +53,8 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 	}
 	
 	@Override
-	public void sync(long from,int pageSize) throws SyncException {
-		ReSyncCommand command = new ReSyncCommand(from,pageSize);
+	public void sync(long from,int pageSize,SyncHost localHost) throws SyncException {
+		ReSyncWithHostCommand command = new ReSyncWithHostCommand(from,pageSize,localHost);
 		try {
 			sendCommandAndProcessAnswer(command);
 		} catch(IOException e) {
@@ -87,7 +87,7 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 			command.analyseResponse(response,this);
 		}
 		catch(IOException e) {
-			if (logger.isDebugEnabled()) logger.trace("Error IO",e);
+			if (logger.isTraceEnabled()) logger.trace("Error IO",e);
 			closeRemoteHostSock();
 			throw e;
 		}		

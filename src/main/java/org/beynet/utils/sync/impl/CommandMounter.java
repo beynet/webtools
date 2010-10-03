@@ -37,7 +37,7 @@ public class CommandMounter extends XmlMessageAnalyser {
 			}catch (NumberFormatException e) {
 				throw new SyncException("Error parsing command : invalid sequence number");
 			}
-			command=new ReSyncCommand(from,pageSize);
+			command=new ReSyncWithHostCommand(from,pageSize,null);
 		}
 		return(command);
 	}

@@ -20,9 +20,9 @@ import org.beynet.utils.tools.Base64;
 import org.beynet.utils.xml.XmlCallBack;
 import org.beynet.utils.xml.XmlReader;
 
-public class ReSyncCommand implements SyncCommand,XmlCallBack{
+public class ReSyncWithHostCommand implements SyncCommand,XmlCallBack{
 	
-	public ReSyncCommand(long from,int pageSize,SyncHost localHost) {
+	public ReSyncWithHostCommand(long from,int pageSize,SyncHost localHost) {
 		this.from = from ; 
 		this.pageSize = pageSize ;
 		this.localHost=localHost;

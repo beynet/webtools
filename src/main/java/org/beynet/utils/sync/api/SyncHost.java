@@ -58,10 +58,11 @@ public interface SyncHost {
 	public SyncRessourceSaver getSaver();
 	
 	/**
-	 * sync with remote host
+	 * sync with ask to remote host to sync
 	 * @param from
 	 * @param pageSize
+	 * @param localHost the local host that will be synced
 	 */
-	public void sync(long from,int pageSize) throws SyncException ;
+	public void sync(long from,int pageSize,SyncHost host) throws SyncException ;
 
 }

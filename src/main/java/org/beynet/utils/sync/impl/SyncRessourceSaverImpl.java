@@ -11,7 +11,6 @@ import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -26,7 +25,13 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 		File fMap = new File(name+MAP_EXTENSION);
 		exist = fMap.exists(); 
 		mapFile = new RandomAccessFile(fMap, "rw");
-		if (!exist) initMapFile();
+		if (!exist) {
+			initMapFile();
+		}
+		else {
+			lastMapFileOffset=0;
+			lastSavedTime=0;
+		}
 		checkMapFile();
 	}
 	
@@ -35,7 +40,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	 */
 	private void initMapFile() throws IOException {
 		logger.info("Create Map file");
-		for (long s = 0 ; s <MAX_SEQUENCE;s++) {
+		for (long s = 0 ; s <=MAX_SEQUENCE;s++) {
 			mapFile.writeLong(0);
 		}
 		mapFile.getFD().sync();
@@ -45,8 +50,8 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	
 	private void checkMapFile() throws IOException {
 		if (logger.isDebugEnabled()) logger.debug("Reading Map file");
-		mapFile.seek(0);
-		for (long s = 0 ; s <MAX_SEQUENCE;s++) {
+		mapFile.seek(FIRST_SEQUENCE*8);
+		for (long s = FIRST_SEQUENCE ; s <=MAX_SEQUENCE;s++) {
 			long current=mapFile.readLong();
 			if (current>lastSavedTime) {
 				lastSavedTime=current;
@@ -57,8 +62,12 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			logger.debug("lastSavedTime = "+new Date(lastSavedTime)+" last offset="+lastMapFileOffset);
 		}
 	}
-	private void updateMapFile(long sequence) throws IOException {
-		lastSavedTime = new Date().getTime();
+	private void updateMapFile(long sequence,long date) throws IOException {
+		if (date==0) {
+			lastSavedTime = new Date().getTime();
+		} else {
+			lastSavedTime=date;
+		}
 		lastMapFileOffset=sequence;
 		if (logger.isDebugEnabled()) logger.debug("Updating Map file");
 		mapFile.seek(sequence*8);
@@ -66,6 +75,15 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 		mapFile.getFD().sync();
 	}
 	
+	/**
+	 * return date of ressource at offset = sequence
+	 * @param sequence
+	 * @throws IOException
+	 */
+	private Long getRessourceDate(long sequence) throws IOException {
+		mapFile.seek(sequence*8);
+		return(mapFile.readLong());
+	}
 
 	@Override
 	public long getLastSavedTime() throws IOException {
@@ -75,7 +93,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	
 
 	@Override
-	public <T extends Serializable> T readRessource(long sequence)
+	public synchronized <T extends Serializable> T readRessource(long sequence)
 	throws IOException,SyncException {
 		if (logger.isDebugEnabled()) logger.debug("Reading ressource sequence="+sequence);
 		return(_readRessource(sequence));
@@ -90,24 +108,38 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			return (T) (oIs.readObject());
 		} catch (ClassNotFoundException e) {
 			throw new SyncException("Class not found",e);
+		} finally {
+			if (oIs!=null) oIs.close();
 		}
 	}
 
 	@Override
-	public synchronized Map<Date,Serializable> getRessourceList(long from, int pageSize) throws IOException,SyncException {
-		Map<Date,Serializable> result = new HashMap<Date, Serializable>();
-		long offset    = lastMapFileOffset + 1;
+	public synchronized void getRessourceList(long from,int pageSize,Map<Long,Serializable> resultsData,Map<Long,Long> resultsDate) throws IOException,SyncException {
+		long offset    = lastMapFileOffset+1;
 		long dateFound = 0 ;
 		do {
+			long currentDate = 0 ;
 			offset--;
-			if (offset<0) offset=MAX_SEQUENCE-1;
+			if (offset<FIRST_SEQUENCE) {
+				if (logger.isDebugEnabled()) logger.debug("Reach begin of file, start at the end");
+				offset=MAX_SEQUENCE;
+			}
 			mapFile.seek(8*offset);
-			dateFound=mapFile.readLong();
+			currentDate=mapFile.readLong();
+			if (logger.isDebugEnabled()) logger.debug("Date found:"+new Date(currentDate));
+			if (currentDate==0) {
+				offset++;
+				if (offset==MAX_SEQUENCE+1) offset=FIRST_SEQUENCE;
+				break;
+			}
+			dateFound=currentDate;
 		} while (dateFound > from) ;
-		for (int i=0;i<pageSize) {
-			result.put(readRessource(offset));
+		for (int i=0;i<pageSize;i++) {
+			resultsData.put(offset,_readRessource(offset));
+			resultsDate.put(offset,getRessourceDate(offset));
+			offset++;
+			if (offset>lastMapFileOffset) break;
 		}
-		return(result);
 	}
 	
 	/**
@@ -142,25 +174,38 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	}
 
 	@Override
-	public <T extends Serializable> long writeRessource(T ressource,
-			long sequence) throws IOException,SyncException{
+	public synchronized <T extends Serializable> long writeRessource(T ressource,
+			long sequence,long date) throws IOException,SyncException{
 		long localSequence = FIRST_SEQUENCE;
+		
+		// checking if this record has not been already registered (when syncing)
+		// ----------------------------------------------------------------------
+		if (lastMapFileOffset==sequence && date!=0) {
+			if (logger.isDebugEnabled()) logger.debug("already saved");
+			return(localSequence);
+		}
+		
 		try {
 			localSequence=getNextSequence();
 		}
 		catch(IOException e) {
 			throw new SyncException("Error retrieving sequence");
 		}
+		
 		if (sequence!=FIRST_SEQUENCE && localSequence!=sequence) {
-			logger.error("Sequence error");
+			logger.error("Sequence error : localSequence="+localSequence+" remote sequence="+sequence);
 			throw new SyncException("Error sequence");
 		}
+		
 		sequence=localSequence;
+		if (logger.isDebugEnabled()) logger.debug("Saving ressource into sequence="+sequence);
+		//computing next file next from the sequence
 		String targetFileName = computeDataFilePathFromSequence(sequence);
 		if (logger.isDebugEnabled()) logger.debug("saving into "+targetFileName);
 		FileOutputStream fos = null;
 		try {
 			File dest = new File (targetFileName);
+			//saving first into temporary file
 			File temp = new File(targetFileName+NEW_EXTENSION);
 			fos = new FileOutputStream(temp);
 			ObjectOutputStream os = new ObjectOutputStream(fos);
@@ -170,7 +215,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			fos.close();
 			fos=null;
 			temp.renameTo(dest);
-			updateMapFile(sequence);
+			updateMapFile(sequence,date);
 		}
 		finally {
 			if (fos!=null) {

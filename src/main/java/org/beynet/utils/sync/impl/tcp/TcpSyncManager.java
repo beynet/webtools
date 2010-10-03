@@ -2,6 +2,7 @@ package org.beynet.utils.sync.impl.tcp;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.sync.api.SyncException;
@@ -94,32 +95,39 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	 */
 	private void reSyncWithMainHost(SyncHost main) throws SyncException {
 		syncStatus=SyncManagerState.SYNCING ;
-		startLocalHostThread();
+		
 		/* if we are the main host no need to sync */
 		if (!localHost.equals(main)) {
 			long start=0;
+			long lastStart = 0 ;
+			// while main host return answers
+			// ------------------------------
 			try {
 				start=localHost.getSaver().getLastSavedTime();
 			}catch(IOException e) {
 				throw new SyncException("Error IO",e);
 			}
-			logger.debug("syncing with main host from tz=");
-			
 			while(true) {
-				main.sync(start,13);
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				if (logger.isDebugEnabled()) logger.debug("syncing with main host from date="+new Date(start));
+				main.sync(start,MAX_PAGE_SIZE,localHost);
+				lastStart=start;
 				try {
 					start=localHost.getSaver().getLastSavedTime();
 				}catch(IOException e) {
 					throw new SyncException("Error IO",e);
 				}
+				if (start==lastStart) break;
 			}
 		}
+		// change status and start to accept incoming messages
+		// ---------------------------------------------------
 		syncStatus=SyncManagerState.RUNNING;
+		try {
+			localHost.openServerSocket();
+		} catch(IOException e) {
+			throw new SyncException("IO",e);
+		}
+		startLocalHostThread();
 	}
 	
 	/**
@@ -213,4 +221,5 @@ public class TcpSyncManager implements Runnable,SyncManager {
 	private Thread localHostThread;
 	private SyncHost mainHost ;
 	private final static Logger logger = Logger.getLogger(TcpSyncManager.class);
+	private final static int MAX_PAGE_SIZE = 100 ;
 }

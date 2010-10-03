@@ -2,7 +2,6 @@ package org.beynet.utils.sync.api;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Map;
 
 public interface SyncRessourceSaver {
@@ -11,7 +10,7 @@ public interface SyncRessourceSaver {
 	 * @param <T>
 	 * @param ressource
 	 */
-	public <T extends Serializable> long writeRessource(T ressource,long sequence) throws SyncException,IOException;
+	public <T extends Serializable> long writeRessource(T ressource,long sequence,long date) throws SyncException,IOException;
 	
 	/**
 	 * read ressource stored at sequence
@@ -24,11 +23,15 @@ public interface SyncRessourceSaver {
 	
 	/**
 	 * return up to pageSize saved ressources from date from
-	 * @param from : begin date (in ms since epoq)
-	 * @param pageSize : max number of requested results
+	 * @param from
+	 * @param pageSize
+	 * @param resultsData
+	 * @param resultsDate
 	 * @return
+	 * @throws IOException
+	 * @throws SyncException
 	 */
-	public Map<Date,Serializable> getRessourceList(long from,int pageSize) throws IOException,SyncException ;
+	public void getRessourceList(long from,int pageSize,Map<Long,Serializable> resultsData,Map<Long,Long> resultsDate) throws IOException,SyncException ;
 	
 	/**
 	 * return last time a ressource was saved

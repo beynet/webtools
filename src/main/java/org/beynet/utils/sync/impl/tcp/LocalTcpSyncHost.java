@@ -27,11 +27,6 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 		this.port  = port ;
 		this.timeout = 1000;
 		setWeight(0);
-		try {
-			openServerSocket();
-		}catch (IOException e) {
-			throw new SyncException("Error IO",e);
-		}
 		childs = new ArrayList<Thread>();
 		try {
 			saver=new SyncRessourceSaverImpl("DataFile_"+id);
@@ -47,8 +42,10 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	}
 	
 	@Override
-	public void sync(long from,int pageSize) {
-		
+	/* */
+	public void sync(long from,int pageSize,SyncHost local) {
+		// will nether be implemented - the sync command must be invoqued on a remote host
+		throw new RuntimeException("Not implemented");
 	}
 	
 	public void setManager(SyncManager manager) {
@@ -68,7 +65,7 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	/**
 	 * start local server socket
 	 */
-	private void openServerSocket() throws IOException {
+	protected void openServerSocket() throws IOException {
 		localSock = new ServerSocket(port);
 		localSock.setSoTimeout(timeout);
 	}
@@ -122,7 +119,11 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	public void run() {
 		acceptLoop();
 	}
-	
+	/**
+	 * accept a new connection and start a thread to answer to incoming commands
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
 	private void acceptIncomingConnections() throws InterruptedException,IOException {
 		Socket res = localSock.accept();
 		if (Thread.currentThread().isInterrupted()) {
@@ -148,7 +149,7 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 			return(sequence);
 		}
 		try {
-			return(saver.writeRessource(ressource, sequence));
+			return(saver.writeRessource(ressource, sequence,0));
 		}catch(SyncException e) {
 			// an error there means that there was a sequence error
 			logger.error("Sync exception, stopping manager",e);
