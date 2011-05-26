@@ -41,23 +41,36 @@ public class TestEventIo extends TestCase {
 			public void onEvent(Event e) {
 				if (e instanceof FileChangeEvent) {
 					FileChangeEvent evt = (FileChangeEvent)e;
-					logger.info("On event :"+evt.getEvent());
+					logger.info("On event :"+Integer.toHexString(evt.getEvent()));
 				}
 			}
 			
 		};
 		
+		Future<Object> res = executor.submit(fChange);
+		try {
+			Thread.sleep(1*1000);
+		} catch (InterruptedException e) {
+		}
 		try {
 			fChange.addWatchedDirectory("/tmp");
+			fChange.addWatchedDirectory("/var");
 			fChange.addListener(new FileChangeListener());
 		} catch (Exception e) {
 			e.printStackTrace();
 			assertTrue(false);
 		}
-		Future<Object> res = executor.submit(fChange);
 		try {
-			Thread.sleep(15*1000);
+			Thread.sleep(2*1000);
 		} catch (InterruptedException e) {
+		}
+		try {
+			fChange.removeWatchedDirectory("/var");
+			fChange.addWatchedDirectory("/tmp");
+			fChange.addListener(new FileChangeListener());
+		} catch (Exception e) {
+			e.printStackTrace();
+			assertTrue(false);
 		}
 		
 		logger.debug("stopping test!");

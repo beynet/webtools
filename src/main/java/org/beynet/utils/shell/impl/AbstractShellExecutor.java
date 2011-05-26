@@ -22,6 +22,12 @@ public abstract class AbstractShellExecutor implements ShellExecutor {
 		this.rmiPort = rmiPort;
 		try {
 			logger.info("Creating rmi rgistry at port "+rmiPort);
+			registry = LocateRegistry.getRegistry(rmiPort);
+			try {
+				if (registry!=null) UnicastRemoteObject.unexportObject(registry,true);
+			}catch(Exception e) {
+				
+			}
 			registry = LocateRegistry.createRegistry(rmiPort);
 			ShellExecutor _executorStub =(ShellExecutor)UnicastRemoteObject.exportObject(this,rmiPort);
 			registry.rebind("ShellExecutor", _executorStub);

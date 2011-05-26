@@ -1,0 +1,214 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0181D44E138CEA4E007B84AD /* notifications.c in Sources */ = {isa = PBXBuildFile; fileRef = 0181D44C138CEA4E007B84AD /* notifications.c */; };
+		0181D44F138CEA4E007B84AD /* notifications.h in Headers */ = {isa = PBXBuildFile; fileRef = 0181D44D138CEA4E007B84AD /* notifications.h */; };
+		0181D453138CF451007B84AD /* JavaVM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0181D452138CF451007B84AD /* JavaVM.framework */; };
+		0181D455138CF5BD007B84AD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0181D454138CF5BD007B84AD /* CoreServices.framework */; };
+		0181D458138CF977007B84AD /* callback.c in Sources */ = {isa = PBXBuildFile; fileRef = 0181D456138CF977007B84AD /* callback.c */; };
+		0181D459138CF977007B84AD /* callback.h in Headers */ = {isa = PBXBuildFile; fileRef = 0181D457138CF977007B84AD /* callback.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0181D445138C4FB7007B84AD /* libwebtools.jnilib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libwebtools.jnilib; sourceTree = BUILT_PRODUCTS_DIR; };
+		0181D44C138CEA4E007B84AD /* notifications.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = notifications.c; sourceTree = "<group>"; };
+		0181D44D138CEA4E007B84AD /* notifications.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = notifications.h; sourceTree = "<group>"; };
+		0181D452138CF451007B84AD /* JavaVM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaVM.framework; path = System/Library/Frameworks/JavaVM.framework; sourceTree = SDKROOT; };
+		0181D454138CF5BD007B84AD /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		0181D456138CF977007B84AD /* callback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = callback.c; sourceTree = "<group>"; };
+		0181D457138CF977007B84AD /* callback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = callback.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0181D442138C4FB7007B84AD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0181D455138CF5BD007B84AD /* CoreServices.framework in Frameworks */,
+				0181D453138CF451007B84AD /* JavaVM.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0181D43A138C4FB7007B84AD = {
+			isa = PBXGroup;
+			children = (
+				0181D456138CF977007B84AD /* callback.c */,
+				0181D457138CF977007B84AD /* callback.h */,
+				0181D454138CF5BD007B84AD /* CoreServices.framework */,
+				0181D452138CF451007B84AD /* JavaVM.framework */,
+				0181D44C138CEA4E007B84AD /* notifications.c */,
+				0181D44D138CEA4E007B84AD /* notifications.h */,
+				0181D446138C4FB7007B84AD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		0181D446138C4FB7007B84AD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0181D445138C4FB7007B84AD /* libwebtools.jnilib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		0181D443138C4FB7007B84AD /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0181D44F138CEA4E007B84AD /* notifications.h in Headers */,
+				0181D459138CF977007B84AD /* callback.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		0181D444138C4FB7007B84AD /* webtools */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0181D449138C4FB7007B84AD /* Build configuration list for PBXNativeTarget "webtools" */;
+			buildPhases = (
+				0181D441138C4FB7007B84AD /* Sources */,
+				0181D442138C4FB7007B84AD /* Frameworks */,
+				0181D443138C4FB7007B84AD /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = webtools;
+			productName = webtools;
+			productReference = 0181D445138C4FB7007B84AD /* libwebtools.jnilib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0181D43C138C4FB7007B84AD /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 0181D43F138C4FB7007B84AD /* Build configuration list for PBXProject "webtools" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 0181D43A138C4FB7007B84AD;
+			productRefGroup = 0181D446138C4FB7007B84AD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0181D444138C4FB7007B84AD /* webtools */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0181D441138C4FB7007B84AD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0181D44E138CEA4E007B84AD /* notifications.c in Sources */,
+				0181D458138CF977007B84AD /* callback.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		0181D447138C4FB7007B84AD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				jni = "-I/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers/";
+			};
+			name = Debug;
+		};
+		0181D448138C4FB7007B84AD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+				jni = "-I/System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers/";
+			};
+			name = Release;
+		};
+		0181D44A138C4FB7007B84AD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				jni = "";
+			};
+			name = Debug;
+		};
+		0181D44B138C4FB7007B84AD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = jnilib;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				jni = "";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0181D43F138C4FB7007B84AD /* Build configuration list for PBXProject "webtools" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0181D447138C4FB7007B84AD /* Debug */,
+				0181D448138C4FB7007B84AD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0181D449138C4FB7007B84AD /* Build configuration list for PBXNativeTarget "webtools" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0181D44A138C4FB7007B84AD /* Debug */,
+				0181D44B138C4FB7007B84AD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0181D43C138C4FB7007B84AD /* Project object */;
+}

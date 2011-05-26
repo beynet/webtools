@@ -116,8 +116,8 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		natSelect(inotifyFd.getFd(),waitTimeout);
 	}
 
-	@SuppressWarnings("unused")
 	private void onEvent(int eventId,int watchId,String associatedFilePath) {
+		if (logger.isDebugEnabled()) logger.debug("On event for watchid="+watchId);
 		File watched = directoryWatched.get(new Integer(watchId));
 		File associatedFile = null ;
 		if (watched!=null) {
@@ -136,7 +136,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 * @throws InterruptedException
 	 */
 	public void addWatchedDirectory(String path) throws UtilsException,InterruptedException{
-		logger.debug("start to add watch dir "+path);
+		if (logger.isDebugEnabled()) logger.debug("start to add watch dir "+path);
 		File f = new File(path);
 		filesWatchedSem.P();
 		try {
@@ -164,6 +164,9 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 				int watchId = natAddDirectory(inotifyFd.getFd(), path);
 				if (watchId==-1) {
 					throw new UtilsException(UtilsExceptions.Error_Param,"Could not watch directory:"+path);
+				}
+				else {
+					logger.debug("watch id="+watchId+" for "+path);
 				}
 				directoryWatched.put(new Integer(watchId), f);
 				watchedIds.put(f.getAbsolutePath(), new Integer(watchId));
@@ -275,6 +278,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 
 
 	static {
+		System.out.println(System.getProperty("java.library.path"));
 		System.loadLibrary("Webtools");
 	}
 
