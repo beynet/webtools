@@ -260,7 +260,7 @@ void compareSnapShots(WatchedDirectoryList* current) {
             TRACE("File %s has been removed\n",old->name);
             /* calling instance callback */
             /* ------------------------- */
-            (*env)->CallVoidMethod(env, obj, mid,0x00000200,current->offset,(*env)->NewStringUTF(env,old->name));
+            (*env)->CallVoidMethod(env, obj, mid,IN_DELETE,current->offset,(*env)->NewStringUTF(env,old->name));
         }
         else {
             TreeFileInfo* found = *pfound;
@@ -268,7 +268,7 @@ void compareSnapShots(WatchedDirectoryList* current) {
                 TRACE("File %s has been modified\n",old->name);
                 /* calling instance callback */
                 /* ------------------------- */
-                (*env)->CallVoidMethod(env, obj, mid,0x00000002,current->offset,(*env)->NewStringUTF(env,old->name));
+                (*env)->CallVoidMethod(env, obj, mid,IN_CLOSE_WRITE,current->offset,(*env)->NewStringUTF(env,old->name));
             }
         }
     }
@@ -282,7 +282,7 @@ void compareSnapShots(WatchedDirectoryList* current) {
             TRACE("File %s has been added\n",new->name);
             /* calling instance callback */
             /* ------------------------- */
-            (*env)->CallVoidMethod(env, obj, mid,0x00000100,current->offset,(*env)->NewStringUTF(env,new->name));
+            (*env)->CallVoidMethod(env, obj, mid,IN_CLOSE_WRITE,current->offset,(*env)->NewStringUTF(env,new->name));
         }
     }
     
