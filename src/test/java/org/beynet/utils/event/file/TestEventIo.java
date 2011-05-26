@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.beynet.utils.event.Event;
 import org.beynet.utils.event.EventListener;
 import org.beynet.utils.event.file.FileChangeHandler;
+import org.beynet.utils.exception.UtilsException;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -32,7 +33,7 @@ public class TestEventIo extends TestCase {
 	}
 
 
-	public void testInotify() {
+	public void testInotify() throws InterruptedException, UtilsException {
 		ExecutorService executor = Executors.newFixedThreadPool(1) ;
 		FileChangeHandler fChange = new FileChangeHandler(5);
 		class FileChangeListener implements EventListener {
@@ -48,33 +49,16 @@ public class TestEventIo extends TestCase {
 		};
 		
 		Future<Object> res = executor.submit(fChange);
-		try {
-			Thread.sleep(1*1000);
-		} catch (InterruptedException e) {
-		}
-		try {
-			fChange.addWatchedDirectory("/tmp");
+		fChange.addListener(new FileChangeListener());
+		for (int i=0;i<100;i++) {
+			if ( ( (i-1)%10==0 && (i-1)!=0 ) || i==0 ) fChange.addWatchedDirectory("/tmp");
 			fChange.addWatchedDirectory("/var");
-			fChange.addListener(new FileChangeListener());
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertTrue(false);
-		}
-		try {
 			Thread.sleep(2*1000);
-		} catch (InterruptedException e) {
-		}
-		try {
 			fChange.removeWatchedDirectory("/var");
-			fChange.addWatchedDirectory("/tmp");
-			fChange.addListener(new FileChangeListener());
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertTrue(false);
+			if (i%10==0 && i!=0) fChange.removeWatchedDirectory("/tmp");
 		}
 		
 		logger.debug("stopping test!");
-//		fChange.stop();
 		executor.shutdownNow();
 		try {
 			res.get();
@@ -83,10 +67,6 @@ public class TestEventIo extends TestCase {
 			assertTrue(false);
 		}
 		logger.debug("stopped!");
-		try {
-			Thread.sleep(15*1000);
-		} catch (InterruptedException e) {
-		}
 	}
 
 	private Logger logger=Logger.getLogger(TestEventIo.class);

@@ -43,4 +43,8 @@ jint removeWatchedDirectory(jint watched);
  */
 void mainLoop() ;
 
+/*
+ *
+ * Define the jni context to be able to call java object storing notification
+ */
 void setJNIContext(JNIEnv * envi, jobject obji,jmethodID midi) ;

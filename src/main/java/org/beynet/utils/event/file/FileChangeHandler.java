@@ -33,7 +33,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	
 	private void init(int waitTimeout) {
 		stop=false ;
-		inotifyFd = new Fd(natInit());
+		notificationSystemFd = new Fd(natInit());
 		directoryWatched = new HashMap<Integer, File>();
 		watchedIds       = new HashMap<String, Integer>();
 		pendingEvents= new ArrayList<FileChangeEvent>();
@@ -113,7 +113,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 */
 	protected void waitForChange() {
 		if (logger.isDebugEnabled()) logger.debug("calling native method directoryWatched");
-		natSelect(inotifyFd.getFd(),waitTimeout);
+		natSelect(notificationSystemFd.getFd(),waitTimeout);
 	}
 
 	private void onEvent(int eventId,int watchId,String associatedFilePath) {
@@ -161,7 +161,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 			if (stop==true) return;
 			for (File f : directoryToAdd) {
 				String path = f.getAbsolutePath();
-				int watchId = natAddDirectory(inotifyFd.getFd(), path);
+				int watchId = natAddDirectory(notificationSystemFd.getFd(), path);
 				if (watchId==-1) {
 					throw new UtilsException(UtilsExceptions.Error_Param,"Could not watch directory:"+path);
 				}
@@ -185,6 +185,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	 * @throws InterruptedException
 	 */
 	public void removeWatchedDirectory(String path) throws UtilsException,InterruptedException{
+		if (logger.isDebugEnabled()) logger.debug("Removing watched dir "+path);
 		File f = new File(path);
 		filesWatchedSem.P();
 		try {
@@ -194,24 +195,28 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 		}
 	}
 	/**
-	 * remove all file from directoryToRemove list to inotify
+	 * remove all file from directoryToRemove list from notification system
 	 * @throws UtilsException
 	 * @throws InterruptedException
 	 */
-	private void removeDirectoriesToInitofy() throws UtilsException,InterruptedException{
+	private void reallyRemoveDirectoriesFromNotificationSystem() throws InterruptedException{
 		filesWatchedSem.P();
 		try {
 			// Handler is stopped
 			if (stop==true) return;
 			for (File f:directoryToRemove) {
 				String path = f.getAbsolutePath();
+				if (logger.isDebugEnabled()) logger.debug("Removing "+path+" from notification system");
 				Integer watchId = watchedIds.get(f.getAbsolutePath());
 				if (watchId!=null) {
-					int result = natRemoveDirectory(inotifyFd.getFd(), watchId);
+					int result = natRemoveDirectory(notificationSystemFd.getFd(), watchId);
+					if (logger.isDebugEnabled()) logger.debug("directory "+path+" removed result="+result);
 					if (result==-1) {
-						throw new UtilsException(UtilsExceptions.Error_Param,"Could not remove watched directory:"+path);
+						logger.error("Could not remove watched directory:"+path+" from notification system");
 					}
+					logger.debug("cleaning watchedIds");
 					watchedIds.remove(f.getAbsolutePath());
+					logger.debug("cleaning directoryWatched");
 					directoryWatched.remove(new Integer(watchId));
 				}
 				else {
@@ -220,11 +225,12 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 			}
 		} finally {
 			filesWatchedSem.V();
+			directoryToRemove.clear();
 		}
 	}
 	
 	/**
-	 * process events detected
+	 * process events comming from notification system
 	 */
 	void processEvents() throws InterruptedException,UtilsException{
 //		filesWatchedSem.P();
@@ -250,7 +256,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 	public Object call() throws Exception {
 		if (logger.isDebugEnabled()) logger.debug("entering loop");
 		
-		if (inotifyFd.getFd()==-1) {
+		if (notificationSystemFd.getFd()==-1) {
 			throw new UtilsException(UtilsExceptions.Error_Io,"Error when initializing");
 		}
 		try {
@@ -259,10 +265,13 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 					waitForChange();
 					processEvents();
 					addNewDirectoriesToInotify();
-					removeDirectoriesToInitofy();
+					reallyRemoveDirectoriesFromNotificationSystem();
 				} catch (InterruptedException e) {
 					if (logger.isDebugEnabled()) logger.debug("InterruptedException -> stopping");
 					stop=true;
+				}
+				catch (Exception e) {
+					logger.error("Unexpected end of thread",e);
 				}
 				if (Thread.currentThread().isInterrupted()) {
 					if (logger.isDebugEnabled()) logger.debug("Interruption detected -> stopping");
@@ -270,7 +279,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 				}
 			}
 		} finally {
-			inotifyFd.close();
+			notificationSystemFd.close();
 		}
 		if (logger.isDebugEnabled()) logger.debug("end of loop");
 		return(null);
@@ -284,18 +293,18 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 
 	/* instance fields */
 	/* --------------- */
-	private boolean					stop				;
-	private Fd						inotifyFd			;
-	private Map<Integer,File>		directoryWatched	;
-	private List<File>				directoryToAdd		;
-	private List<File>				directoryToRemove	;
-	private Map<String,Integer>		watchedIds			;
-	private List<FileChangeEvent>	pendingEvents		;
-	private int						waitTimeout			;
-	private Semaphore				filesWatchedSem		; // used to protect access to pendingEvents and directoryWatched
+	private boolean					stop				 ;
+	private Fd						notificationSystemFd ;
+	private Map<Integer,File>		directoryWatched	 ;
+	private List<File>				directoryToAdd		 ;
+	private List<File>				directoryToRemove	 ;
+	private Map<String,Integer>		watchedIds			 ;
+	private List<FileChangeEvent>	pendingEvents		 ;
+	private int						waitTimeout			 ;
+	private Semaphore				filesWatchedSem		 ; // used to protect access to pendingEvents and directoryWatched
 	
-	private List<EventListener>     listeners           ;
-	private Semaphore				listenersSem		; // used to protect access to listeners
+	private List<EventListener>     listeners            ;
+	private Semaphore				listenersSem		 ; // used to protect access to listeners
 	private static final Logger logger = Logger.getLogger(FileChangeHandler.class);
 
 	

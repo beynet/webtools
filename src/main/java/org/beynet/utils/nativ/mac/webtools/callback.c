@@ -56,13 +56,23 @@ static pthread_mutex_t watchedDirectoriesMutex = PTHREAD_MUTEX_INITIALIZER;
 /* static used to store main CFRunLoopRef */
 static CFRunLoopRef mainThreadRunLoopRef = NULL;
 
+static JNIEnv * env;
+static jobject obj;
+static jmethodID mid;
+
 /**
  * start the list
  */
-static void _initiateWatchedDictectoriesList() {
+static WatchedDirectoryList* _initiateWatchedDictectoriesList() {
+    WatchedDirectoryList* result = malloc(sizeof(WatchedDirectoryList));
     directories = malloc(sizeof(WatchedDirectoryList));
     directories->previous=directories->next=directories->free=NULL;
     directories->offset = 0 ;
+    result->previous = directories;
+    result->next = NULL ;
+    result->offset = 1 ;
+    directories->next = result ;
+    return(result);
 }
 
 /**
@@ -88,9 +98,10 @@ static void _insertNewEmptyWatchedDirectory(WatchedDirectoryList* new) {
  */
 static WatchedDirectoryList* _getNewEmptyWatchedDirectory() {
     WatchedDirectoryList* result = NULL ;
-    
+    TRACE("Searching Free block\n");
     /* a free block is found */
     if (directories->free!=NULL) {
+        TRACE("Free block found\n");
         result=directories->free;
         directories->free=result->next;
         if (directories->free!=NULL) directories->free->previous=NULL;
@@ -113,8 +124,7 @@ static WatchedDirectoryList* createNewWatchedDirectory(const char* directory) {
     pthread_mutex_lock(&watchedDirectoriesMutex);
     WatchedDirectoryList* newDir = NULL ;
     if (directories==NULL) {
-        _initiateWatchedDictectoriesList();
-        newDir = directories;
+        newDir =_initiateWatchedDictectoriesList();
     }
     else {
         newDir = _getNewEmptyWatchedDirectory();
@@ -145,7 +155,7 @@ char* createFileName(const char* dirName,char* fileName,int fileNameSize) {
 int snapshotDirectory(WatchedDirectoryList* directory) {
     int j = 0 ;
     directory->snapShotTree = NULL ;
-    TRACE("takin snap\n");
+    TRACE("taking snap\n");
     struct dirent **result ;
     directory->snapShotElementCount = scandir(directory->dirName, &result, NULL,alphasort);
     directory->snapShotList = calloc(directory->snapShotElementCount,sizeof(TreeFileInfo*));
@@ -167,7 +177,7 @@ int snapshotDirectory(WatchedDirectoryList* directory) {
     }
     free(result);
     directory->snapShotElementCount = j;
-    TRACE("end of takin snap\n");
+    TRACE("end of taking snap\n");
     return(0);
 }
 
@@ -175,6 +185,7 @@ int snapshotDirectory(WatchedDirectoryList* directory) {
  * create a new stream watching event on the fs
  */
 int32_t addWatchedDirectory(const char* directory) {
+    TRACE("Adding directory %s\n",directory);
     CFStringRef mypath = CFStringCreateWithCString(NULL,directory,kCFStringEncodingUTF8);
     CFArrayRef pathsToWatch = CFArrayCreate(NULL, (const void **)&mypath, 1, NULL);
     CFAbsoluteTime latency = 1.0; /* Latency in seconds */
@@ -183,7 +194,8 @@ int32_t addWatchedDirectory(const char* directory) {
     if (newDir==NULL) return(-1);
     FSEventStreamContext context ;
     context.info = newDir ;
-    context.retain=context.retain=NULL;
+    context.retain=NULL;
+    context.release=NULL;
     context.copyDescription = NULL ;
     context.version = 0 ;
     /* Create the stream, passing in a callback */
@@ -210,13 +222,24 @@ void mainLoop() {
     TRACE("End of main loop\n");
 }
 
-static JNIEnv * env;
-static jobject obj;
-static jmethodID mid;
+
 void setJNIContext(JNIEnv * envi, jobject obji,jmethodID midi) {
     env=envi;
     obj=obji;
     mid=midi;
+}
+
+/**
+ * free all memory taken by a snapshot
+ */
+void freeSnapShot(void* snapShotTree,TreeFileInfo** snapShotList,int size) {
+    for (int i=0;i<size;i++) {
+        tdelete(snapShotList[i], &snapShotTree, mystrcmp);
+        free(snapShotList[i]->name);
+        free(snapShotList[i]);
+    }
+    
+    free(snapShotList);
 }
 
 /**
@@ -265,16 +288,10 @@ void compareSnapShots(WatchedDirectoryList* current) {
     
     // free memory taken by previous snapshot
     // --------------------------------------
-    for (int i=0;i<previousSize;i++) {
-        tdelete(previousSnapShotList[i], &previousSnapShotTree, mystrcmp);
-        free(previousSnapShotList[i]->name);
-        free(previousSnapShotList[i]);
-    }
-    
-    free(previousSnapShotList);
-    
-    
+    freeSnapShot(previousSnapShotTree, previousSnapShotList, previousSize);
 }
+
+
 
 /**
  *
@@ -289,19 +306,21 @@ int removeWatchedDirectory(jint watched){
     if (current!=NULL) {
         TRACE("Removing dir %s\n",current->dirName);
         if(current->next!=NULL) current->next->previous=current->previous;
-        if (current->previous==NULL) {
-            //removing first block
-            current->next->free=current->free;
-            directories=current->next;
-        } else {
-            current->previous->next=current->next;
-        }
+        current->previous->next=current->next;
         free(current->dirName);
+        freeSnapShot(current->snapShotTree, current->snapShotList, current->snapShotElementCount);
+        FSEventStreamStop(current->stream);
+        FSEventStreamInvalidate(current->stream);
+        FSEventStreamRelease(current->stream);
+        TRACE("Stream released\n");
         current->previous=NULL;
         current->next=directories->free;
+        directories->free=current;
         if (current->next!=NULL) current->next->previous=current;
+        status=0;
     }
     pthread_mutex_unlock(&watchedDirectoriesMutex);
+    TRACE("Block removed\n");
     return(status);
 }
 

@@ -17,7 +17,7 @@
  */
 JNIEXPORT jint JNICALL Java_org_beynet_utils_io_Fd_natClose
 (JNIEnv *env, jobject obj,jint fd) {
-    return(close(fd));
+    return(0);
 }
 
 /*
@@ -27,13 +27,12 @@ JNIEXPORT jint JNICALL Java_org_beynet_utils_io_Fd_natClose
  */
 JNIEXPORT jint JNICALL Java_org_beynet_utils_io_Fd_natFsync
 (JNIEnv *env, jobject obj,jint fd) {
-    return(fsync(fd));
+    return(0);
 }
 
 JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natInit
 (JNIEnv * env, jobject obj) {
-    /* creating kqueue fd */
-    
+    /* creating pseudo notification system fd to be like in linux system */
     return(1);
 }
 
@@ -51,7 +50,7 @@ JNIEXPORT jint JNICALL Java_org_beynet_utils_event_file_FileChangeHandler_natAdd
     }
     res=addWatchedDirectory(str);
     (*env)->ReleaseStringUTFChars(env, path, str);
-    TRACE("watch id =%d",res);
+    TRACE("watch id =%d\n",res);
     return(res);
 }
 
