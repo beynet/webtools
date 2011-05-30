@@ -43,6 +43,13 @@
   		<type>jar</type>
   		<scope>provided</scope>
   	</dependency>
+  	<dependency>
+  		<groupId>postgresql</groupId>
+  		<artifactId>postgresql</artifactId>
+  		<version>9.0-801.jdbc4</version>
+  		<type>jar</type>
+  		<scope>provided</scope>
+  	</dependency>
   </dependencies>
   <build>
     <plugins>
