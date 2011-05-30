@@ -96,11 +96,12 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	
 	
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public synchronized <T extends Serializable> T readRessource(long sequence)
 	throws IOException,SyncException {
 		if (logger.isDebugEnabled()) logger.debug("Reading ressource sequence="+sequence);
-		return(_readRessource(sequence));
+		return((T)_readRessource(sequence));
 	}
 	
 	@SuppressWarnings("unchecked")
