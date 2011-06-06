@@ -45,7 +45,7 @@ public class TestEventIo extends TestCase {
 					logger.info("On event :"+Integer.toHexString(evt.getEvent()));
 				}
 			}
-			
+			 
 		};
 		
 		Future<Object> res = executor.submit(fChange);

@@ -287,7 +287,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 
 
 	static {
-		System.out.println(System.getProperty("java.library.path"));
+		System.out.println("java.library.path:"+System.getProperty("java.library.path"));
 		System.loadLibrary("Webtools");
 	}
 
