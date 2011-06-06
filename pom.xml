@@ -51,6 +51,24 @@
   		<scope>provided</scope>
   	</dependency>
   </dependencies>
+  
+  <repositories>
+		<repository>
+			<id>central</id>
+			<url>http://repo1.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>public-jboss</id>
+			<url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+		</repository>
+		<repository> <!-- for javaee:javaee-api -->
+			<id>java.net</id>
+			<name>java.net</name>
+			<url>http://download.java.net/maven/2/</url>
+		</repository>
+	</repositories>
+  
+  
   <build>
     <plugins>
       
@@ -64,7 +82,6 @@
           <target>1.6</target>
         </configuration>
       </plugin>
-      
       
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
