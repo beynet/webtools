@@ -65,7 +65,7 @@ public class ConstructorImpl implements Constructor {
 	 * @return
 	 */
 	private String getClassNameFromFile(File current) {
-		String classesPattern = "classes/" ;
+		String classesPattern = "classes"+File.separator ;
 		String path = current.getPath();
 		int offset = path.indexOf(classesPattern) ;
 		String className = path.substring(offset+classesPattern.length(), path.length());

@@ -95,7 +95,7 @@ public class RssFileV1 extends RssFileCommon implements RssFile {
 	
 	
 	protected void _write(OutputStream os) throws UtilsException {
-		StringBuffer tmp = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		StringBuilder tmp = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		tmp.append("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
 		tmp.append(" xmlns=\"http://purl.org/rss/1.0/\"\n");
 		tmp.append(" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" \n");
@@ -115,7 +115,7 @@ public class RssFileV1 extends RssFileCommon implements RssFile {
 		tmp.append("      <items>\n");
 		tmp.append("        <rdf:Seq>");
 		try {
-			os.write(tmp.toString().getBytes());
+			os.write(tmp.toString().getBytes("UTF-8"));
 		} catch (IOException e) {
 			throw new UtilsException(UtilsExceptions.Error_Io,e);
 		}
@@ -136,17 +136,17 @@ public class RssFileV1 extends RssFileCommon implements RssFile {
 				item.setCacheChannel(itemValue);
 			}
 			try {
-				os.write(itemValue.toString().getBytes());
+				os.write(itemValue.toString().getBytes("UTF-8"));
 			} catch (IOException e) {
 				throw new UtilsException(UtilsExceptions.Error_Io,e);
 			}
 		}
-		tmp=new StringBuffer();
+		tmp=new StringBuilder();
 		tmp.append(" 	</rdf:Seq>\n");
 		tmp.append("      </items>\n");
 		tmp.append("   </channel>\n");
 		try {
-			os.write(tmp.toString().getBytes());
+			os.write(tmp.toString().getBytes("UTF-8"));
 		} catch (IOException e) {
 			throw new UtilsException(UtilsExceptions.Error_Io,e);
 		}
@@ -154,7 +154,7 @@ public class RssFileV1 extends RssFileCommon implements RssFile {
 			it.writeToStream(os, getUrlBase());
 		}
 		try {
-			os.write("</rdf:RDF>".getBytes());
+			os.write("</rdf:RDF>".getBytes("UTF-8"));
 		} catch (IOException e) {
 			throw new UtilsException(UtilsExceptions.Error_Io,e);
 		}

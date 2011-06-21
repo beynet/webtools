@@ -66,9 +66,9 @@ public class RssItemV1 extends RssItemCommon implements RssItem {
 		String tmp1="		   <item rdf:about=\""+urlBase+"/"+getPath()+"\" >\n";
 		String tmp2="		   </item>\n";
     	try {
-    		os.write(tmp1.getBytes());
-			os.write(getCache().toString().getBytes());
-			os.write(tmp2.getBytes());
+    		os.write(tmp1.getBytes("UTF-8"));
+			os.write(getCache().toString().getBytes("UTF-8"));
+			os.write(tmp2.getBytes("UTF-8"));
 		} catch (IOException e) {
 			throw new UtilsException(UtilsExceptions.Error_Io,e);
 		}
