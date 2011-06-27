@@ -87,7 +87,7 @@ public class RssFileV1 extends RssFileCommon implements RssFile {
     		StringWriter sw = new StringWriter();
     		e.printStackTrace(new PrintWriter(sw));
     		logger.error(sw.getBuffer());
-    		return null;
+    		return new ArrayList<String>();
     	}
     	return(callBack._documents);
 	}
