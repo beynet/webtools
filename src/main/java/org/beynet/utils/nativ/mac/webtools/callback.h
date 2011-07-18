@@ -8,7 +8,7 @@
 #include <CoreServices/CoreServices.h>
 #include <JavaVM/jni.h>
 
-#define TRACING
+
 
 #ifdef TRACING
 #define TRACE(...) fprintf(stderr,__VA_ARGS__)
