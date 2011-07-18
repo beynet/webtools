@@ -99,6 +99,8 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     		/* searching same method as m on object obj */
     		/* ---------------------------------------- */
     		for (Method m3 : methods) {
+    		    // search method with same name
+    		    // -----------------------------
     			if (m3.getName().equals(method.getName())) {
     				Class<? extends Object> [] lstClass = m3.getParameterTypes();
     				if (lstClass.length==0 && args==null) {
@@ -106,11 +108,16 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     					break;
     				}
     				if (lstClass.length!=args.length) continue;
+    				boolean match =true ;
     				for (int i=0;i<lstClass.length;i++) {
+    				    // compare parameters list
+    				    // -----------------------
     					if (lstClass[i].isInstance(args[i])==false) {
-    						continue;
+    						match = false ;
+    						break;
     					}
     				}
+    				if (match==false) continue ;
     				m2=m3;
     				break;
     			}
