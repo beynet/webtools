@@ -94,6 +94,7 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     	Object result;
     	Method m2=null;
+    	Class<? extends Object> [] paramsExpected = method.getParameterTypes();
     	try {
     		Method[] methods = obj.getClass().getMethods();
     		/* searching same method as m on object obj */
@@ -102,17 +103,18 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     		    // search method with same name
     		    // -----------------------------
     			if (m3.getName().equals(method.getName())) {
-    				Class<? extends Object> [] lstClass = m3.getParameterTypes();
-    				if (lstClass.length==0 && args==null) {
+    				Class<? extends Object> [] paramFounds = m3.getParameterTypes();
+    				
+    				if (paramFounds.length==0 && args==null) {
     					m2=m3;
     					break;
     				}
-    				if (lstClass.length!=args.length) continue;
-    				boolean match =true ;
-    				for (int i=0;i<lstClass.length;i++) {
+    				if (paramFounds.length!=paramsExpected.length) continue;
+    				boolean match = true ;
+    				for (int i=0;i<paramFounds.length;i++) {
     				    // compare parameters list
     				    // -----------------------
-    					if (lstClass[i].isInstance(args[i])==false) {
+    					if (!paramsExpected[i].equals(paramFounds[i]) && paramFounds[i].isInstance(paramsExpected[i])==false) {
     						match = false ;
     						break;
     					}
@@ -121,6 +123,9 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     				m2=m3;
     				break;
     			}
+    		}
+    		if (m2==null) {
+    		    throw new RuntimeException("unable to found corresponding method for "+method.getName()+" on target class");
     		}
     		method=m2;
     		Transaction transaction = method.getAnnotation(Transaction.class);
@@ -172,7 +177,7 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     	} catch (Exception e) {
     		logger.error("unexpected invocation exception",e);
     		throw new RuntimeException("unexpected invocation exception: <" +
-    				e.getMessage()+">");
+    				e.getMessage()+">",e);
     	} finally {
     		
     	}
