@@ -6,7 +6,8 @@ import org.beynet.utils.exception.UtilsException;
 
 public interface RequestManager {
 	/**
-	 * save obj
+	 * save obj - if obj associated table have a uniq id, if a sequence is associated with this id and if obj.id<=0
+	 * then the sequence will be used to generate a value
 	 * @param <T>
 	 * @param obj
 	 * @throws UtilsException
