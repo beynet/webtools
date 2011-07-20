@@ -8,6 +8,7 @@
 
 #include "callback.h"
 #include <dirent.h>
+#include <libgen.h>
 #include <unistd.h>
 #include <search.h>
 #include <pthread.h>
@@ -260,7 +261,7 @@ void compareSnapShots(WatchedDirectoryList* current) {
             TRACE("File %s has been removed\n",old->name);
             /* calling instance callback */
             /* ------------------------- */
-            (*env)->CallVoidMethod(env, obj, mid,IN_DELETE,current->offset,(*env)->NewStringUTF(env,old->name));
+            (*env)->CallVoidMethod(env, obj, mid,IN_DELETE,current->offset,(*env)->NewStringUTF(env,basename(old->name)));
         }
         else {
             TreeFileInfo* found = *pfound;
@@ -268,7 +269,7 @@ void compareSnapShots(WatchedDirectoryList* current) {
                 TRACE("File %s has been modified\n",old->name);
                 /* calling instance callback */
                 /* ------------------------- */
-                (*env)->CallVoidMethod(env, obj, mid,IN_CLOSE_WRITE,current->offset,(*env)->NewStringUTF(env,old->name));
+                (*env)->CallVoidMethod(env, obj, mid,IN_CLOSE_WRITE,current->offset,(*env)->NewStringUTF(env,basename(old->name)));
             }
         }
     }
@@ -282,7 +283,7 @@ void compareSnapShots(WatchedDirectoryList* current) {
             TRACE("File %s has been added\n",new->name);
             /* calling instance callback */
             /* ------------------------- */
-            (*env)->CallVoidMethod(env, obj, mid,IN_CLOSE_WRITE,current->offset,(*env)->NewStringUTF(env,new->name));
+            (*env)->CallVoidMethod(env, obj, mid,IN_CLOSE_WRITE,current->offset,(*env)->NewStringUTF(env,basename(new->name)));
         }
     }
     
