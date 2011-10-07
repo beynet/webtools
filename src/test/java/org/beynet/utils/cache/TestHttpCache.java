@@ -13,9 +13,9 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 public class TestHttpCache extends TestCase {
-    /*public void testFetchTest() throws MalformedURLException, IOException, URISyntaxException {
-        HttpCache.setCacheFile("/tmp/yan.dat");
-        Map<String, Object> stats = HttpCache.fetchRessourceWithStat(new URI("http://blade.par.afp.com/test.yan"),10000);
+    public void testFetchTest() throws MalformedURLException, IOException, URISyntaxException {
+        HttpCache cache = new HttpCache("/tmp/yan.dat");
+        Map<String, Object> stats = cache.fetchRessourceWithStat(new URI("http://blade.par.afp.com/test.yan"),10000);
         byte[] res = (byte[]) stats.get(HttpCache.RESOURCE) ;
         String charset = (String) stats.get(HttpCache.CHARSET);
         System.out.println(new String(res));
@@ -24,5 +24,5 @@ public class TestHttpCache extends TestCase {
     static {
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.TRACE);
-    }*/
+    }
 }

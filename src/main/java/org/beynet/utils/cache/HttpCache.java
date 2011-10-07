@@ -1,6 +1,7 @@
 package org.beynet.utils.cache;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,8 +30,18 @@ import org.apache.log4j.Logger;
  */
 public class HttpCache {
 
+    
+    public HttpCache(String cacheFile) {
+        File cache = new File(cacheFile);
+        this.cacheFile = cacheFile ;
+        uriToRessource = new HashMap<URI, HttpCachedResource>();
+        if (cache.exists()) {
+            readCacheFile();
+        }
+    }
+    
 
-    private static byte[] readChunkedStream(InputStream is) throws IOException {
+    private byte[] readChunkedStream(InputStream is) throws IOException {
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
         int size = 1; 
         while(size>=0) {
@@ -50,7 +61,7 @@ public class HttpCache {
      * @return
      * @throws IOException
      */
-    private static byte[] readStream(int toRead,InputStream is) throws IOException {
+    private byte[] readStream(int toRead,InputStream is) throws IOException {
         byte[] r = new byte[toRead];
         int readed = 0;
         while (readed!=toRead) {
@@ -74,7 +85,7 @@ public class HttpCache {
      * @return the http status
      * @throws IOException
      */
-    private static int doFetch(URL url,URI uri, int timeout, HttpCachedResource resourceInCache, Date operation) throws IOException {
+    private int doFetch(URL url,URI uri, int timeout, HttpCachedResource resourceInCache, Date operation) throws IOException {
         if (logger.isDebugEnabled()) logger.debug("fetching "+uri.toString());
         URLConnection connection = null;
         boolean chunked = false ;
@@ -156,7 +167,7 @@ public class HttpCache {
      * @return 
      * @throws IOException
      */
-    public static Map<String, Object> fetchRessourceWithStat(URI uri,int timeout) throws IOException, MalformedURLException  {
+    public Map<String, Object> fetchRessourceWithStat(URI uri,int timeout) throws IOException, MalformedURLException  {
         Map<String,Object> result = new HashMap<String, Object>();
         URL url = uri.toURL();
         
@@ -204,7 +215,7 @@ public class HttpCache {
      * set the cache file
      * @param filePath
      */
-    public static void setCacheFile(String filePath) {
+    public void setCacheFile(String filePath) {
         logger.info("Changing cache file to "+filePath);
         cacheFile=filePath;
         readCacheFile();
@@ -213,7 +224,7 @@ public class HttpCache {
     /**
      * 
      */
-    public static String getCacheFile() {
+    public String getCacheFile() {
         return(cacheFile);
     }
 
@@ -222,7 +233,7 @@ public class HttpCache {
      * @param uri
      * @param newRes
      */
-    private static void addToCache(URI uri,HttpCachedResource newRes) {
+    private void addToCache(URI uri,HttpCachedResource newRes) {
         HttpCachedResource c = uriToRessource.get(uri);
         if (c!=null && c!=newRes) {
             uriToRessource.remove(uri);
@@ -233,7 +244,7 @@ public class HttpCache {
     /**
      * save the map in the associated cache file
      */
-    private static void saveCache() {
+    private void saveCache() {
         if (getCacheFile()!=null) {
             FileOutputStream fo = null ;
             try {
@@ -257,7 +268,7 @@ public class HttpCache {
     /**
      * clear the cache : 
      */
-    public static void clearCache() {
+    public void clearCache() {
         rwLock.writeLock().lock();
         try {
             uriToRessource = new HashMap<URI, HttpCachedResource>();
@@ -268,12 +279,11 @@ public class HttpCache {
     }
 
     @SuppressWarnings("unchecked")
-    private static void readCacheFile() {
+    private void readCacheFile() {
         ObjectInputStream ois = null ;
         try {
             ois = new ObjectInputStream(new FileInputStream(getCacheFile()));
             uriToRessource = (Map<URI, HttpCachedResource>)ois.readObject();
-
         } catch(Exception e) {
             uriToRessource = new HashMap<URI, HttpCachedResource>();
         } finally {
@@ -289,13 +299,13 @@ public class HttpCache {
 
     
 
-    private static Map<URI, HttpCachedResource>   uriToRessource   = new HashMap<URI, HttpCachedResource>();
-    private static final Logger logger = Logger.getLogger(HttpCache.class);
+    private Map<URI, HttpCachedResource>   uriToRessource   = null ;
+    private String cacheFile = null ;
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
     public static final String RESOURCE = "resource";
     public static final String HIT = "hit";
     public static final String CHARSET = "charset";
-    private static String cacheFile = null ;
-    private static final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    public final static Pattern CHARSET_PATTERN = Pattern.compile(".*charset=([^\\s;]*)([\\s]*;.*|$)",Pattern.CASE_INSENSITIVE);
-
+    public static final Pattern CHARSET_PATTERN = Pattern.compile(".*charset=([^\\s;]*)([\\s]*;.*|$)",Pattern.CASE_INSENSITIVE);
+    private static final Logger logger = Logger.getLogger(HttpCache.class);
 }
