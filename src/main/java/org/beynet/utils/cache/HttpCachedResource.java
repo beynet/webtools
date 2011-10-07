@@ -1,16 +1,24 @@
 package org.beynet.utils.cache;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class HttpCachedResource implements Serializable {
+        
+    
+    public HttpCachedResource() {
+        resource = null;
+        charset = null ;
+        date = 0 ;
+        etag = null;
+    }
+    
         /**
-         * 
-         */
-        private static final long serialVersionUID = -3611823986696292535L;
-        public Date   date      ;
+     * 
+     */
+    private static final long serialVersionUID = -8254909188920010209L;
+        public long date      ;
         public String etag      ;
-        public byte[] ressource ;
+        public byte[] resource ;
         public String charset   ;
 
 }

@@ -43,6 +43,13 @@ public class HttpCache {
         return(bo.toByteArray());
     }
 
+    /**
+     * read a resource when expected resource size is known
+     * @param toRead
+     * @param is
+     * @return
+     * @throws IOException
+     */
     private static byte[] readStream(int toRead,InputStream is) throws IOException {
         byte[] r = new byte[toRead];
         int readed = 0;
@@ -62,16 +69,18 @@ public class HttpCache {
      * @param url : url representation of the resource
      * @param uri : uri representation of the resource
      * @param timeout
-     * @param HttpCachedResourceFound : actual representation of the resource in the cache
+     * @param resourceInCache : actual representation of the resource in the cache
      * @param operation : now date
-     * @return
+     * @return the http status
      * @throws IOException
      */
-    private static HttpCachedResource doFetch(URL url,URI uri, int timeout, HttpCachedResource HttpCachedResourceFound, Date operation) throws IOException {
+    private static int doFetch(URL url,URI uri, int timeout, HttpCachedResource resourceInCache, Date operation) throws IOException {
         if (logger.isDebugEnabled()) logger.debug("fetching "+uri.toString());
         URLConnection connection = null;
         boolean chunked = false ;
         String charset = null;
+        String etag = null;
+        long dateOfModif = 0 ;
         connection = url.openConnection();
         HttpURLConnection httpCon = null ;
         connection.setConnectTimeout(timeout);
@@ -86,16 +95,14 @@ public class HttpCache {
 
         // if ressource is already in the cache we try to refresh it
         // ---------------------------------------------------------
-        if (HttpCachedResourceFound!=null) {
-            if (httpCon != null) {
-                if (HttpCachedResourceFound.etag!=null) {
-                    if (logger.isDebugEnabled()) logger.debug("Using If-None-Match");
-                    httpCon.addRequestProperty("If-None-Match", HttpCachedResourceFound.etag);
-                }
-                else {
-                    if (logger.isDebugEnabled()) logger.debug("Using If-Modified-Since");
-                    httpCon.setIfModifiedSince(HttpCachedResourceFound.date.getTime());
-                }
+        if (httpCon != null) {
+            if (resourceInCache.etag!=null) {
+                if (logger.isDebugEnabled()) logger.debug("Using If-None-Match");
+                httpCon.addRequestProperty("If-None-Match", resourceInCache.etag);
+            }
+            else if (resourceInCache.date!=0) {
+                if (logger.isDebugEnabled()) logger.debug("Using If-Modified-Since");
+                httpCon.setIfModifiedSince(resourceInCache.date);
             }
         }
         connection.connect();
@@ -103,17 +110,12 @@ public class HttpCache {
         // ---------------------------------------
         if (httpCon!=null && httpCon.getResponseCode()==HttpURLConnection.HTTP_NOT_MODIFIED) {
             if (logger.isDebugEnabled()) logger.debug("ressource "+uri.toString()+" not modified");
-            HttpCachedResource newRes = new HttpCachedResource();
-            newRes.date = operation ;
-            newRes.etag = connection.getHeaderField("ETag") ;
-            newRes.ressource = HttpCachedResourceFound.ressource;
-            newRes.charset = HttpCachedResourceFound.charset;
-            return(newRes);
+            return(HttpURLConnection.HTTP_NOT_MODIFIED);
         }
         else if (httpCon!=null && httpCon.getResponseCode()!=HttpURLConnection.HTTP_OK) {
             String message = "resource "+uri.toString()+" not fetchable http status code ="+httpCon.getResponseCode();
             if (logger.isDebugEnabled()) logger.debug(message);
-            throw new IOException(message);
+            return(httpCon.getResponseCode());
         }
         else {
             if (logger.isDebugEnabled()) logger.debug("reading fetched resource "+uri.toString()+" ...");
@@ -123,23 +125,24 @@ public class HttpCache {
                     Matcher matcher = CHARSET_PATTERN.matcher(httpCon.getHeaderField("Content-Type"));
                     if (matcher.matches()) charset=matcher.group(1);
                 }
+                dateOfModif = httpCon.getLastModified();
+                etag       = connection.getHeaderField("ETag") ;
                 if ("chunked".equalsIgnoreCase(httpCon.getHeaderField("Transfer-Encoding"))) {
                     chunked = true ;
                 }
             }
         }
-        HttpCachedResource newRes = new HttpCachedResource();
         if (chunked==true) {
-            newRes.ressource = readChunkedStream(connection.getInputStream()) ;
+            resourceInCache.resource = readChunkedStream(connection.getInputStream()) ;
         }
         else {
-            newRes.ressource = readStream(connection.getContentLength(),connection.getInputStream());
+            resourceInCache.resource = readStream(connection.getContentLength(),connection.getInputStream());
         }
-        newRes.charset = charset;
-        newRes.date = new Date();
-        newRes.etag = connection.getHeaderField("ETag") ;
-        if (logger.isTraceEnabled()) logger.trace("Etag found for resource "+uri+"="+newRes.etag);
-        return(newRes);
+        resourceInCache.charset = charset;
+        resourceInCache.date = dateOfModif;
+        resourceInCache.etag = etag ;
+        if (logger.isTraceEnabled()) logger.trace("Etag found for resource "+uri+"="+resourceInCache.etag);
+        return(200);
     }
 
     /**
@@ -152,7 +155,6 @@ public class HttpCache {
      * @param timeout
      * @return 
      * @throws IOException
-     * @throws XMLException : if url is not convertible to an URI
      */
     public static Map<String, Object> fetchRessourceWithStat(URI uri,int timeout) throws IOException, MalformedURLException  {
         Map<String,Object> result = new HashMap<String, Object>();
@@ -165,50 +167,37 @@ public class HttpCache {
         // check if the resource is already into the cache
         // and not obsolete
         // ------------------------------------------------
+        rwLock.readLock().lock();
         try {           
-            rwLock.readLock().lock();
             cachedResourceFound=uriToRessource.get(uri);
         } finally {
             rwLock.readLock().unlock();
         }
 
 
-        // fetch ressource
-        // ---------------
-        HttpCachedResource newRessourceFound=null;
-        try {
-            newRessourceFound=doFetch(url, uri, timeout, cachedResourceFound, operation);
-        } catch(IOException e) {
-            if (logger.isTraceEnabled()) logger.trace("io error when fetching ressource",e);
-            // if we failed to retrieve the resource we return
-            // what we have in the cache or the exception
-            // -------------------------------------------------
-            if (cachedResourceFound!=null) {
-                newRessourceFound = new HttpCachedResource();
-                newRessourceFound.date = operation ;
-                newRessourceFound.etag = cachedResourceFound.etag;
-                newRessourceFound.ressource = cachedResourceFound.ressource;
-            }
-            else {
-                throw e;
-            }
+        if (cachedResourceFound == null) {
+            cachedResourceFound = new HttpCachedResource();
         }
-
-
-        // lock in write mode to add the resource
-        // ---------------------------------------
-        try {
+        
+        int response = doFetch(url, uri, timeout, cachedResourceFound, operation);
+        if (response!=304 && response!=200) throw new IOException("unexpected response from server status code ="+response);
+        if (response==304) result.put(HIT, Boolean.TRUE);
+        result.put(RESOURCE, cachedResourceFound.resource);
+        result.put(CHARSET, cachedResourceFound.charset);
+        
+        // we update the cache if the response was fetched
+        // -----------------------------------------------
+        if (response==200) {
+            // lock in write mode to add the resource
+            // ---------------------------------------
             rwLock.writeLock().lock();
-            addToCache(uri, newRessourceFound);
-            result.put(HIT, Boolean.TRUE);
-            result.put(RESOURCE, newRessourceFound.ressource);
-            result.put(CHARSET, newRessourceFound.charset);
-            return(result);
-
-        } finally {
-            rwLock.writeLock().unlock();
+            try {
+                addToCache(uri, cachedResourceFound);
+            } finally {
+                rwLock.writeLock().unlock();
+            }
         }
-
+        return(result);
     }
 
     /**
