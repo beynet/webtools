@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
  */
 public class HttpCache {
 
-    
+
     public HttpCache(String cacheFile) {
         File cache = new File(cacheFile);
         this.cacheFile = cacheFile ;
@@ -39,7 +39,7 @@ public class HttpCache {
             readCacheFile();
         }
     }
-    
+
 
     private byte[] readChunkedStream(InputStream is) throws IOException {
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
@@ -157,6 +157,32 @@ public class HttpCache {
     }
 
     /**
+     * return the resource in the cache - or null
+     * @param uri
+     * @return
+     */
+    public Map<String,Object> getResourceInCache(URI uri) {
+        HttpCachedResource cachedResourceFound=null;
+        // check if the resource is already into the cache
+        // and not obsolete
+        // ------------------------------------------------
+        rwLock.readLock().lock();
+        try {           
+            cachedResourceFound=uriToRessource.get(uri);
+            if (cachedResourceFound!=null) {
+                Map<String,Object> result = new HashMap<String, Object>();
+                result.put(HIT, Boolean.TRUE);
+                result.put(RESOURCE, cachedResourceFound.resource);
+                result.put(CHARSET, cachedResourceFound.charset);
+                return(result);
+            }
+            return(null);
+        } finally {
+            rwLock.readLock().unlock();
+        }
+    }
+
+    /**
      * return map as :
      *  <ul>
      *  <li>"RESOURCE" -> byte[]  : the cached resource</li>
@@ -167,10 +193,10 @@ public class HttpCache {
      * @return 
      * @throws IOException
      */
-    public Map<String, Object> fetchRessourceWithStat(URI uri,int timeout) throws IOException, MalformedURLException  {
+    public Map<String, Object> fetchResourceWithStat(URI uri,int timeout) throws IOException, MalformedURLException  {
         Map<String,Object> result = new HashMap<String, Object>();
         URL url = uri.toURL();
-        
+
 
         HttpCachedResource cachedResourceFound=null;
         Date operation = new Date();
@@ -189,13 +215,13 @@ public class HttpCache {
         if (cachedResourceFound == null) {
             cachedResourceFound = new HttpCachedResource();
         }
-        
+
         int response = doFetch(url, uri, timeout, cachedResourceFound, operation);
         if (response!=304 && response!=200) throw new IOException("unexpected response from server status code ="+response);
         if (response==304) result.put(HIT, Boolean.TRUE);
         result.put(RESOURCE, cachedResourceFound.resource);
         result.put(CHARSET, cachedResourceFound.charset);
-        
+
         // we update the cache if the response was fetched
         // -----------------------------------------------
         if (response==200) {
@@ -297,7 +323,7 @@ public class HttpCache {
 
 
 
-    
+
 
     private Map<URI, HttpCachedResource>   uriToRessource   = null ;
     private String cacheFile = null ;
