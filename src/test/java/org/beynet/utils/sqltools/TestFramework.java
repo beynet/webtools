@@ -26,7 +26,7 @@ public class TestFramework extends TestCase {
 		try {
 			TestSqlBean bean1 = new TestSqlBean();
 			TestSqlBean bean2 = new TestSqlBean();
-			bean1.setId(0);
+			bean1.setId(0L);
 			bean1.setName("TEST");
 			testUJB.save(bean1);
 			bean2.setId(bean1.getId());

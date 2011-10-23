@@ -16,14 +16,14 @@ import org.beynet.utils.sqltools.interfaces.RequestFactory;
 @SqlTable("MessageQueue")
 public class MessageQueueBean {
 	public MessageQueueBean() {
-		this.messageId = 0 ;
+		this.messageId = 0L ;
 		this.message = null ;
 	}
 	
-	public Integer getMessageId() {
+	public Long getMessageId() {
 		return(messageId);
 	}
-	public void setMessageId(Integer messageId) {
+	public void setMessageId(Long messageId) {
 		this.messageId = messageId;
 	}
 	
@@ -49,8 +49,8 @@ public class MessageQueueBean {
 	}
 	
 	
-	@SqlField(getSequenceName="queue_sequence",isTableUniqueId=true,sqlFieldName=MessageQueueBean.FIELD_ID,fieldType = Integer.class)
-	private Integer messageId        ;
+	@SqlField(getSequenceName="queue_sequence",isTableUniqueId=true,sqlFieldName=MessageQueueBean.FIELD_ID,fieldType = Long.class)
+	private Long messageId        ;
 
 	@SqlField(sqlFieldName=MessageQueueBean.FIELD_QUEUEID,fieldType = String.class)
 	private String  queueName ;

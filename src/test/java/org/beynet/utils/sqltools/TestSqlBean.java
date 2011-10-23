@@ -7,10 +7,10 @@ public class TestSqlBean {
 		
 	}
 	
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	public String getName() {
@@ -21,8 +21,8 @@ public class TestSqlBean {
 		this.name = name;
 	}
 	
-	@SqlField(getSequenceName=TABLE_NAME+"_id_seq",isTableUniqueId=true,sqlFieldName=TestSqlBean.FIELD_ID,fieldType=Integer.class)
-	private Integer id ;
+	@SqlField(getSequenceName=TABLE_NAME+"_id_seq",isTableUniqueId=true,sqlFieldName=TestSqlBean.FIELD_ID,fieldType=Long.class)
+	private Long id ;
 	
 	@SqlField(sqlFieldName=TestSqlBean.FIELD_NOM,fieldType=String.class)
 	private String  name ;

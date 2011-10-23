@@ -54,7 +54,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		}
 	}
 	
-	private MessageQueueBean loadBean(Integer from) throws UtilsException {
+	private MessageQueueBean loadBean(Long from) throws UtilsException {
 		MessageQueueBean result = new MessageQueueBean();
 		StringBuffer query = new StringBuffer("select * from MessageQueue where ");
 		query.append(MessageQueueBean.FIELD_CONSUMERID);
@@ -81,8 +81,8 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		MessageQueueBean mqBean =new MessageQueueBean();
 		
 		Message message = null ;
-		while (mqBean.getMessageId().equals(0)) {
-			Integer from = 0;
+		while (mqBean.getMessageId().equals(new Long(0))) {
+			Long from = 0L;
 			try {
 				while (true) {
 					mqBean = loadBean(from);
@@ -95,13 +95,13 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 						from = mqBean.getMessageId();
 						if (logger.isDebugEnabled()) logger.debug("Message does not match properties");
 						manager.delete(mqBean);
-						mqBean.setMessageId(0);
+						mqBean.setMessageId(0L);
 					}
 				}
 			} catch(UtilsException e) {
 
 			}
-			if (!mqBean.getMessageId().equals(0)) {
+			if (!mqBean.getMessageId().equals(new Long(0))) {
 				break;
 			}
 			if (logger.isDebugEnabled()) logger.debug("waiting for new message");
