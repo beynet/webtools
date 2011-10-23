@@ -13,7 +13,7 @@ import org.beynet.utils.sqltools.interfaces.RequestManager;
 
 public class RequestManagerImpl implements RequestManager {
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public RequestManagerImpl() {
 		_requestFactories = new HashMap<Class, RequestFactory>();
 		accessor=null;
@@ -27,7 +27,7 @@ public class RequestManagerImpl implements RequestManager {
 	 * @param obj
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private RequestFactory getAssociatedFactory(Class cl) {
 		RequestFactory requestFactorie =null ;
 		synchronized(_requestFactories) {
@@ -157,6 +157,6 @@ public class RequestManagerImpl implements RequestManager {
 	@SuppressWarnings("unused")
 	private String accessorName;
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "rawtypes" })
 	private Map<Class, RequestFactory> _requestFactories ;
 }

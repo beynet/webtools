@@ -86,7 +86,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				// is current field table uniq id ?
 				// --------------------------------
 				if (f.isTableUniqueId()) {
-					if (f.fieldType().toString().equals(Integer.class.toString())) {
+					if (f.fieldType().toString().equals(Long.class.toString())) {
 						uniqIdField = tmpFields[i] ;
 						uniqIdGetMethod = get ;
 						uniqIdSetMethod = set ;
@@ -156,7 +156,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			query.append(sqlField.sqlFieldName());
 			query.append(" ");
 			if (sqlField.equals(uniqIdAnnot)) {
-				query.append("integer NOT NULL UNIQUE DEFAULT ");
+				query.append("bigint NOT NULL UNIQUE DEFAULT ");
 				if (!"".equals(uniqIdSequence)) {
 					query.append(" nextval('");
 					query.append(uniqIdSequence);
@@ -205,7 +205,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	 * @throws SQLException
 	 */
 	public void load(T sqlBean,Connection connection) throws SQLException {
-		Integer id = getUniqIdValue(sqlBean);
+		Long id = getUniqIdValue(sqlBean);
 		if (id != null) {
 			String request = makeConsultFromIdQuery(sqlBean.getClass(),id);
 			load(sqlBean,connection,request);
@@ -334,14 +334,14 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	 * @throws  
 	 */
 	public void save(T sqlBean,Connection connection) throws SQLException {
-		Integer nextIdVal    = null ;
-		Integer currentIdVal = getUniqIdValue(sqlBean);
+		Long nextIdVal    = null ;
+		Long currentIdVal = getUniqIdValue(sqlBean);
 		
 		/* if a sequence is associated with uniq id        */
 		/* we ask for a new id value (only if it is a new  */
 		/* recor - ie if currentIdVal<=0                   */
 		/* ----------------------------------------------- */
-		if (uniqIdSequence!=null && uniqIdSequence.length()>0 && currentIdVal.intValue()<=0) {
+		if (uniqIdSequence!=null && uniqIdSequence.length()>0 && currentIdVal.longValue()<=0) {
 			String request = "select nextval('"+uniqIdSequence+"');";
 			Statement stmt =  null;
 			ResultSet rs = null;
@@ -351,7 +351,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				stmt.execute(request);
 				rs = stmt.getResultSet();
 				if (rs!=null && rs.next()) {
-					nextIdVal = rs.getInt("nextval");
+					nextIdVal = rs.getLong("nextval");
 					if (logger.isDebugEnabled()) logger.debug("Ok bean loaded");
 					rs.close();
 					rs=null;
@@ -377,7 +377,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			stmt.executeUpdate();
 			// if it was a create statement
 			// we update uniq id field
-			if (currentIdVal!=null && currentIdVal.intValue()<=0) {
+			if (currentIdVal!=null && currentIdVal.longValue()<=0) {
 				if (uniqIdSequence!=null && uniqIdSequence.length()>0) {
 					if (logger.isDebugEnabled()) logger.debug("New id created = "+nextIdVal+" for class "+sqlBean.getClass());
 					uniqIdSetMethod.invoke(sqlBean, nextIdVal);
@@ -386,7 +386,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 					ResultSet rs = stmt.getGeneratedKeys(); 
 					//ResultSet rs = stmt.getResultSet();
 					if (rs!=null && rs.next()) {
-						Integer n = new Integer(rs.getInt(1));
+						Long n = new Long(rs.getLong(1));
 						if (logger.isDebugEnabled()) logger.debug("New id created = "+n+" for class "+sqlBean.getClass());
 						uniqIdSetMethod.invoke(sqlBean, n);
 						rs.close();
@@ -433,7 +433,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		
 		// first we check if table has one unique id
 		if (uniqIdField!=null) {
-			Integer val = getUniqIdValue(sqlBean);
+			Long val = getUniqIdValue(sqlBean);
 			if (stmt==null) {
 				StringBuffer query = new StringBuffer("delete from ");
 				query.append(tableName);
@@ -446,7 +446,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 					((RequestFactorySession)connection).setDeleteBeanPreparedStatement(beanClass, stmt);
 				}
 			}
-			stmt.setInt(1, val.intValue());
+			stmt.setLong(1, val.longValue());
 			stmt.execute();
 		}
 		else {
@@ -511,14 +511,14 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	 * @return
 	 * @throws SQLException
 	 */
-	private PreparedStatement makeSaveQuery(Connection connection,T sqlBean,Integer nextIdVal) throws SQLException {
+	private PreparedStatement makeSaveQuery(Connection connection,T sqlBean,Long nextIdVal) throws SQLException {
 		checkSqlTableAnnotation(sqlBean.getClass());
 		boolean newRecord = true ;
 		// first we check if table has one unique id
 		// else we throw an exception
 		
-		Integer val = getUniqIdValue(sqlBean);
-		if (val==null || val.intValue()<=0) {
+		Long val = getUniqIdValue(sqlBean);
+		if (val==null || val.longValue()<=0) {
 			if (logger.isDebugEnabled()) logger.debug("sqlBean is a new record");
 		}
 		else {
@@ -573,7 +573,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	 * @return
 	 * @throws SQLException
 	 */
-	private String makeConsultFromIdQuery(Class<?> cl,Integer val) throws SQLException {
+	private String makeConsultFromIdQuery(Class<?> cl,Long val) throws SQLException {
 		if (uniqIdField==null) {
 			throw new SQLException("Field Unique Id not found");
 		}
@@ -698,7 +698,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	 * @return
 	 * @throws SQLException
 	 */
-	private PreparedStatement create(Connection connection,T sqlBean,Integer nextIdVal) throws SQLException {
+	private PreparedStatement create(Connection connection,T sqlBean,Long nextIdVal) throws SQLException {
 		PreparedStatement stmt=null;
 		
 		String request ;
@@ -723,7 +723,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			Method get  = getMethods.get(i);
 			if (fields.get(i)==uniqIdField) {
 				if (uniqIdSequence!=null && uniqIdSequence.length()>0) {
-					stmt.setInt(k,nextIdVal);
+					stmt.setLong(k,nextIdVal);
 				} else {
 					stmt.setString(k, "DEFAULT");
 				}
@@ -788,11 +788,11 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		}
 	}
 	
-	private Integer getUniqIdValue(T sqlBean) throws SQLException {
+	private Long getUniqIdValue(T sqlBean) throws SQLException {
 		//Integer val = (Integer)uniqIdField.get(sqlBean);
 		if (uniqIdField==null) return(null);
 		try {
-			Integer val = (Integer)uniqIdGetMethod.invoke(sqlBean, (Object[])null);
+			Long val = (Long)uniqIdGetMethod.invoke(sqlBean, (Object[])null);
 			return(val);
 		}
 		catch (IllegalArgumentException e) {
