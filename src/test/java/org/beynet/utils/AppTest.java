@@ -101,94 +101,6 @@ public class AppTest
     	}
     }
     
-    public void testXml() {
-    	 class NamespaceContextImpl implements NamespaceContext {
-    		public String uri;
-
-    		public String prefix;
-
-    		@SuppressWarnings("unused")
-			public NamespaceContextImpl(){}
-
-    		public NamespaceContextImpl(String prefix, String uri){
-    			this.uri=uri;
-    			this.prefix=prefix;
-    		}
-
-    		public String getNamespaceURI(String prefix){
-    			return uri;
-    		}
-    		@SuppressWarnings("unused")
-			public void setNamespaceURI(String uri){
-    			this.uri=uri;
-    		}
-
-    		public String getPrefix(String uri){
-    			return prefix;
-    		}
-    		@SuppressWarnings("unused")
-			public void setPrefix(String prefix){
-    			this.prefix=prefix;
-    		}
-
-    		@SuppressWarnings("unchecked")
-			public Iterator getPrefixes(String uri){return null;}
-
-    	}
-    	 
-    	 
-    	// parsing document
-     	DocumentBuilderFactory dbf =
-             DocumentBuilderFactory.newInstance();
-
-         DocumentBuilder db = null ;
- 		try {
- 			db = dbf.newDocumentBuilder();
- 		} catch (ParserConfigurationException e) {
- 			e.printStackTrace();
- 			assertTrue(false);
- 		}
- 		Document doc = null ;
-         try {
- 			 doc = db.parse(new File("/home/beynet/xafp-in.xafp.xml"));
- 		} catch (Exception e) {
- 			e.printStackTrace();
- 			assertTrue(false);
- 		}
-    	
-    	
-    	// 1. Instantiate an XPathFactory.
-    	javax.xml.xpath.XPathFactory factory = 
-    		javax.xml.xpath.XPathFactory.newInstance();
-
-    	// 2. Use the XPathFactory to create a new XPath object
-    	javax.xml.xpath.XPath xpath = factory.newXPath();
-
-    	// 3. Compile an XPath string into an XPathExpression
-    	javax.xml.xpath.XPathExpression expression=null ;
-    	try {
-    		xpath.setNamespaceContext(new NamespaceContextImpl("xml","http://www.w3.org/XML/1998/namespace"));
-    		expression = xpath.compile("/Xafp/Item/Labels");
-    	} catch (XPathExpressionException e) {
-    		e.printStackTrace();
-    		assertTrue(false);
-		}
-    	
-    	  
-    	  // 4. Evaluate the XPath expression on an input document
-		try {
-			org.w3c.dom.NodeList resultat = (org.w3c.dom.NodeList) expression.evaluate(doc,XPathConstants.NODESET);
-			for (int i=0;i<resultat.getLength();i++) {
-				org.w3c.dom.Node n = resultat.item(i);
-				System.out.println(n.getTextContent());
-			}
-			
-		}catch(Exception e) {
-			e.printStackTrace();
-			assertTrue(false);
-		}
-    }
-    
     RssItem makeItemV1(int offset) throws UtilsException {
     	RssItem it1 = new RssItemV1();
     	it1.setAuthor("Yannick Beynet");
@@ -334,45 +246,7 @@ public class AppTest
     
     
     
-    public void testVSMB() {
-    	/*String sqlUrl = "jdbc:postgresql://localhost/test?user=beynet&password=sec2DBUser" ;
-    	String sqlDriverName = "org.postgresql.Driver" ;
-    	
-    	
-    	VSMBServerTcpBean bTest = new VSMBServerTcpBean();
-        bTest.setPort(8091);
-        bTest.setMaxClientByThread(10);
-        bTest.setServiceAdress("*");
-        bTest.setDebugDataBaseClassName(sqlDriverName);
-        bTest.setDebugDataBaseUrl(sqlUrl);
-    	bTest.setQueueName("VSMBTest");
-    	Thread t = new Thread(bTest);
-    	t.start();
-    	
-    	
-    	try {
-    		Thread.sleep(10*1000);
-    	} catch (InterruptedException e) {
-    		assertTrue(false);
-		}
-    	for (int i=0;i<10;i++) {
-    		VSMBMessageTcpTest test = new VSMBMessageTcpTest("essai de message "+i+"\r\n");
-    		try {
-    			bTest.addMessage(test);
-    		} catch (UtilsException e) {
-    			e.printStackTrace();
-    			assertTrue(false);
-    		}
-    	}
-    	t.interrupt();
-    	
-    	while (t.isAlive()) {
-    		try {
-    			t.join();
-    		} catch (InterruptedException e) {
-    		}
-    	}*/
-    }
+    
     
 
     /**

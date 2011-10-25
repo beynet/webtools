@@ -9,7 +9,9 @@ import org.beynet.utils.sync.api.SyncCommand;
 import org.beynet.utils.sync.impl.CommandMounter;
 import org.beynet.utils.sync.impl.GetStateCommand;
 import org.beynet.utils.sync.impl.SyncRessourceCommand;
+import org.junit.Ignore;
 
+@Ignore
 public class TcpTest extends TestCase {
 	
 	public TcpTest( String testName )

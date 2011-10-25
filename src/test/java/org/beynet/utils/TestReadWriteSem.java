@@ -84,7 +84,7 @@ public class TestReadWriteSem extends TestCase {
 		reader2.start();
 		writer.start();
 		try {
-			Thread.sleep(1000*20);
+			Thread.sleep(1000*5);
 		}catch(Exception e) {
 			writer.interrupt();
 			reader1.interrupt();

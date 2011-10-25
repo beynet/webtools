@@ -6,14 +6,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
+import org.junit.Test;
 
-public class TestHttpCache extends TestCase {
-    public void testFetchTest() throws MalformedURLException, IOException, URISyntaxException {
+@Ignore
+public class TestHttpCache {
+    @Test
+    public void fetchTest() throws MalformedURLException, IOException, URISyntaxException {
         HttpCache cache = new HttpCache("/tmp/yan.dat");
         Map<String, Object> stats = cache.fetchResourceWithStat(new URI("http://blade.par.afp.com/test.yan"),10000);
         byte[] res = (byte[]) stats.get(HttpCache.RESOURCE) ;

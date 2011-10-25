@@ -53,7 +53,7 @@ public class TestEventIo extends TestCase {
 		for (int i=0;i<100;i++) {
 			if ( ( (i-1)%10==0 && (i-1)!=0 ) || i==0 ) fChange.addWatchedDirectory("/tmp");
 			fChange.addWatchedDirectory("/var");
-			Thread.sleep(2*1000);
+			Thread.sleep(2*100);
 			fChange.removeWatchedDirectory("/var");
 			if (i%10==0 && i!=0) fChange.removeWatchedDirectory("/tmp");
 		}
