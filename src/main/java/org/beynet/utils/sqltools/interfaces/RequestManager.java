@@ -34,7 +34,7 @@ public interface RequestManager {
 	 * load obj
 	 * @param <T>
 	 * @param obj
-	 * @throws UtilsException
+	 * @throws UtilsException : if the requested object is not found
 	 */
 	public <T> void load(T obj) throws UtilsException    ;
 	

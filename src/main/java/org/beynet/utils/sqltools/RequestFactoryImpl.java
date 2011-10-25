@@ -179,6 +179,9 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			else if (sqlField.fieldType().equals(Long.class)) {
 				query.append(" bigint NOT NULL");
 			}
+			else if (sqlField.fieldType().equals(Boolean.class)) {
+                query.append(" boolean NOT NULL");
+            }
 			else if (sqlField.fieldType().equals(Blob.class)) {
 				query.append(" bytea NOT NULL");
 			}
@@ -266,7 +269,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			SqlField f = field.getAnnotation(SqlField.class);
 			if (logger.isDebugEnabled()) logger.debug("loading field sqlname="+f.sqlFieldName()+" var name="+field.getName());
 			try {
-				set.invoke(sqlBean, rs.getObject(f.sqlFieldName()));				
+				set.invoke(sqlBean, rs.getObject(f.sqlFieldName()));
 			}
 			catch (IllegalAccessException e) {
 				throw new SQLException(e);
