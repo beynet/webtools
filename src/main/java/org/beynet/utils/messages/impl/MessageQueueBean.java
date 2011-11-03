@@ -16,7 +16,7 @@ import org.beynet.utils.sqltools.interfaces.RequestFactory;
 @SqlTable("MessageQueue")
 public class MessageQueueBean {
 	public MessageQueueBean() {
-		this.messageId = 0L ;
+		this.messageId = Long.valueOf(0L) ;
 		this.message = null ;
 	}
 	

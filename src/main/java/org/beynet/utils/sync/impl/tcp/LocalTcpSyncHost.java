@@ -26,8 +26,8 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	public LocalTcpSyncHost(Integer id,Integer port) throws SyncException {
 		this.id = id ;
 		this.port  = port ;
-		this.timeout = 1000;
-		setWeight(0);
+		this.timeout = Integer.valueOf(1000);
+		setWeight(Integer.valueOf(0));
 		childs = new ArrayList<Thread>();
 		try {
 			saver=new SyncRessourceSaverImpl("DataFile_"+id);
@@ -67,8 +67,8 @@ public class LocalTcpSyncHost extends AbstractTcpSyncHost implements SyncHost,Ru
 	 * start local server socket
 	 */
 	protected void openServerSocket() throws IOException {
-		localSock = new ServerSocket(port);
-		localSock.setSoTimeout(timeout);
+		localSock = new ServerSocket(port.intValue());
+		localSock.setSoTimeout(timeout.intValue());
 	}
 	
 	@Override

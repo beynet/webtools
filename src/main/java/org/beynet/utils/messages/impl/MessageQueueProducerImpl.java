@@ -60,7 +60,7 @@ public class MessageQueueProducerImpl implements MessageQueueProducer {
 		// ------------------------------------
 		for (String consumerId : consumers) {
 			messageBean.setConsumerId(consumerId);
-			messageBean.setMessageId(0L);
+			messageBean.setMessageId(Long.valueOf(0L));
 			manager.persist(messageBean);
 		}
 		if (logger.isDebugEnabled()) logger.debug("sending notification");

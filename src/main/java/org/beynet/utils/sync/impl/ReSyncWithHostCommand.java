@@ -61,8 +61,8 @@ public class ReSyncWithHostCommand implements SyncCommand,XmlCallBack{
 	public void onNewTagAttributs(List<String> parents, String tagName,
 			Map<String, String> tagValues) throws UtilsException {
 		if (SyncCommand.TAG_SYNC.equals(tagName)) {
-			currentSyncSeq = Long.parseLong(tagValues.get(SyncCommand.ATTRIBUT_SEQUENCE), 10);
-			currentSyncDate = Long.parseLong(tagValues.get(SyncCommand.ATTRIBUT_DATE), 10);
+			currentSyncSeq = Long.valueOf(tagValues.get(SyncCommand.ATTRIBUT_SEQUENCE), 10);
+			currentSyncDate = Long.valueOf(tagValues.get(SyncCommand.ATTRIBUT_DATE), 10);
 		}
 	}
 	
@@ -100,8 +100,8 @@ public class ReSyncWithHostCommand implements SyncCommand,XmlCallBack{
 			Serializable obj = resultData.get(i);
 			SyncRessource<Serializable> ress = new SyncRessource<Serializable>();
 			ress.setRessource(obj);
-			ress.setSequence(resultSeq.get(i));
-			ress.setDate(resultDate.get(i));
+			ress.setSequence(resultSeq.get(i).longValue());
+			ress.setDate(resultDate.get(i).longValue());
 			try {
 				localHost.getSaver().writeRessource(ress);
 			} catch (IOException e) {

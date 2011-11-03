@@ -171,8 +171,8 @@ public class TcpSyncManager implements Runnable,SyncManager {
 		SyncHost newMainHost = null ;
 		for (SyncHost host : descriptor.getHostList() ) {
 			logger.info("Host id=<"+host.getId()+"> weight="+host.getWeight());
-			if (host.getWeight()!=0) {
-				if (newMainHost==null || host.getWeight()>newMainHost.getWeight()) {
+			if (host.getWeight().intValue()!=0) {
+				if (newMainHost==null || host.getWeight().intValue()>newMainHost.getWeight().intValue()) {
 					newMainHost=host;
 				}
 			}
@@ -197,7 +197,7 @@ public class TcpSyncManager implements Runnable,SyncManager {
 			// special case : if the local host is the main host
 			// -------------------------------------------------
 			if (mainHost.equals(localHost)) {
-				localHost.setWeight(100+localHost.getId());
+				localHost.setWeight(Integer.valueOf(100+localHost.getId().intValue()));
 			}
 			
 			logger.info("host "+mainHost.getId()+" is the main host ("+mainHost.getWeight()+")");

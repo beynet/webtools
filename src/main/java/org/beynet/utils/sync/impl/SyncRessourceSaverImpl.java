@@ -86,7 +86,7 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 	 */
 	private Long getRessourceDate(long sequence) throws IOException {
 		mapFile.seek(sequence*8);
-		return(mapFile.readLong());
+		return(Long.valueOf(mapFile.readLong()));
 	}
 
 	@Override
@@ -140,8 +140,8 @@ public class SyncRessourceSaverImpl implements SyncRessourceSaver {
 			dateFound=currentDate;
 		} while (dateFound > from) ;
 		for (int i=0;i<pageSize;i++) {
-			resultsData.put(offset,_readRessource(offset));
-			resultsDate.put(offset,getRessourceDate(offset));
+			resultsData.put(Long.valueOf(offset),_readRessource(offset));
+			resultsDate.put(Long.valueOf(offset),getRessourceDate(offset));
 			offset++;
 			if (offset>lastMapFileOffset) break;
 		}

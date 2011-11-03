@@ -354,7 +354,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				stmt.execute(request);
 				rs = stmt.getResultSet();
 				if (rs!=null && rs.next()) {
-					nextIdVal = rs.getLong("nextval");
+					nextIdVal = Long.valueOf(rs.getLong("nextval"));
 					if (logger.isDebugEnabled()) logger.debug("Ok bean loaded");
 					rs.close();
 					rs=null;
@@ -726,7 +726,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			Method get  = getMethods.get(i);
 			if (fields.get(i)==uniqIdField) {
 				if (uniqIdSequence!=null && uniqIdSequence.length()>0) {
-					stmt.setLong(k,nextIdVal);
+					stmt.setLong(k,nextIdVal.longValue());
 				} else {
 					stmt.setString(k, "DEFAULT");
 				}
@@ -759,14 +759,14 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	public Integer count(String request, Connection connection) throws SQLException {
 		Statement stmt =  null;
 		ResultSet rs = null;
-		Integer res = 0;
+		Integer res = Integer.valueOf(0);
 		if (logger.isDebugEnabled()) logger.debug(request);
 		try {
 			stmt =  connection.createStatement();
 			stmt.execute(request);
 			rs = stmt.getResultSet();
 			if (rs!=null && rs.next()) {
-				res = rs.getInt(1);
+				res = Integer.valueOf(rs.getInt(1));
 				rs.close();
 				rs=null;
 			}

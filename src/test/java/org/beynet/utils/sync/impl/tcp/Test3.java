@@ -11,9 +11,9 @@ public class Test3 {
 			Logger.getRootLogger().setLevel(Level.INFO);
 	        Logger.getLogger("org.beynet.utils.sync").setLevel(Level.DEBUG);
 			TcpSyncPoolDescriptor des = new TcpSyncPoolDescriptor();
-			des.addHost(new LocalTcpSyncHost(3,8890));
-			des.addHost(new RemoteTcpSyncHost(1,"localhost", 8888));
-			des.addHost(new RemoteTcpSyncHost(2,"localhost", 8889));
+			des.addHost(new LocalTcpSyncHost(Integer.valueOf(3),Integer.valueOf(8890)));
+			des.addHost(new RemoteTcpSyncHost(Integer.valueOf(1),"localhost", Integer.valueOf(8888)));
+			des.addHost(new RemoteTcpSyncHost(Integer.valueOf(2),"localhost", Integer.valueOf(8889)));
 			TcpSyncManager manager = new TcpSyncManager(2000);
 			manager.initialize(des);
 		}

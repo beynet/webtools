@@ -32,8 +32,8 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 			throw new SyncException("Error resolving host",e);
 		}
 		this.port  = port ;
-		this.timeout = 100;
-		setWeight(0);
+		this.timeout = Integer.valueOf(100);
+		setWeight(Integer.valueOf(0));
 	}
 	
 	@Override
@@ -116,7 +116,7 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 	 */
 	private void closeRemoteHostSock() {
 		if (remoteHostSocket==null) return;
-		setWeight(0);
+		setWeight(Integer.valueOf(0));
 		try {
 			remoteHostSocket.close();
 		} catch (IOException e1) {
@@ -135,7 +135,7 @@ public class RemoteTcpSyncHost extends AbstractTcpSyncHost implements SyncHost {
 		try {
 			if (logger.isDebugEnabled()) logger.debug("Try to contact remote host ");
 			remoteHostSocket = new Socket();
-			remoteHostSocket.connect(new InetSocketAddress(address, port.intValue()),timeout);
+			remoteHostSocket.connect(new InetSocketAddress(address, port.intValue()),timeout.intValue());
 		} catch (IOException e) {
 			closeRemoteHostSock();
 			throw e;

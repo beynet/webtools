@@ -82,7 +82,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		
 		Message message = null ;
 		while (mqBean.getMessageId().equals(new Long(0))) {
-			Long from = 0L;
+			Long from = Long.valueOf(0L);
 			try {
 				while (true) {
 					mqBean = loadBean(from);
@@ -95,7 +95,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 						from = mqBean.getMessageId();
 						if (logger.isDebugEnabled()) logger.debug("Message does not match properties");
 						manager.delete(mqBean);
-						mqBean.setMessageId(0L);
+						mqBean.setMessageId(Long.valueOf(0L));
 					}
 				}
 			} catch(UtilsException e) {

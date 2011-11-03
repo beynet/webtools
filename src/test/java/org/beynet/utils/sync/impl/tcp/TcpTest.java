@@ -50,12 +50,12 @@ public class TcpTest extends TestCase {
 	public void testThreads() {
 		try {
 			
-			Integer newWeight = 1238 ;
-			LocalTcpSyncHost local = new LocalTcpSyncHost(1,8888);
+			Integer newWeight = Integer.valueOf(1238) ;
+			LocalTcpSyncHost local = new LocalTcpSyncHost(Integer.valueOf(1),Integer.valueOf(8888));
 			Thread l = new Thread(local);
 			l.start();
 			local.setWeight(newWeight);
-			RemoteTcpSyncHost remote = new RemoteTcpSyncHost(1,"localhost", 8888);
+			RemoteTcpSyncHost remote = new RemoteTcpSyncHost(Integer.valueOf(1),"localhost", Integer.valueOf(8888));
 			remote.getState();
 			System.out.println("weight="+remote.getWeight());
 			assertTrue(newWeight.equals(remote.getWeight()));
@@ -78,8 +78,8 @@ public class TcpTest extends TestCase {
 		
 		try {
 			TcpSyncPoolDescriptor des = new TcpSyncPoolDescriptor();
-			des.addHost(new LocalTcpSyncHost(1,8888));
-			des.addHost(new RemoteTcpSyncHost(1,"localhost", 8888));
+			des.addHost(new LocalTcpSyncHost(Integer.valueOf(1),Integer.valueOf(8888)));
+			des.addHost(new RemoteTcpSyncHost(Integer.valueOf(1),"localhost", Integer.valueOf(8888)));
 			assertTrue(des.getHostList().size()==2);
 			TcpSyncManager manager = new TcpSyncManager(2000);
 			manager.initialize(des);

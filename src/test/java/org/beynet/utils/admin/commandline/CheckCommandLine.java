@@ -33,34 +33,34 @@ public class CheckCommandLine {
         String [] line = {"--opt1","val1","--opt4","--opt5","1234","--opt2","val2"};
         cmd.analyseCommandLine(line);
         
-        assertThat(opt1.isOptionFound(), is(true));
+        assertThat(Boolean.valueOf(opt1.isOptionFound()), is(Boolean.TRUE));
         assertThat(opt1.getValue(), is((Object)"val1"));
         
-        assertThat(opt2.isOptionFound(), is(true));
+        assertThat(Boolean.valueOf(opt2.isOptionFound()), is(Boolean.TRUE));
         assertThat(opt2.getValue(), is((Object)"val2"));
         
-        assertThat(opt3.isOptionFound(), is(false));
+        assertThat(Boolean.valueOf(opt3.isOptionFound()), is(Boolean.FALSE));
         
-        assertThat(opt4.isOptionFound(), is(true));
+        assertThat(Boolean.valueOf(opt4.isOptionFound()), is(Boolean.TRUE));
         
-        assertThat(opt5.isOptionFound(), is(true));
+        assertThat(Boolean.valueOf(opt5.isOptionFound()), is(Boolean.TRUE));
         assertThat(opt5.getValue(), is((Object)new Integer(1234)));
         
         String [] line2 = {"--opt2","val1","--opt3","--opt1","val2","--opt5","1977",};
         
         cmd.analyseCommandLine(line2);
         
-        assertThat(opt1.isOptionFound(), is(true));
+        assertThat(Boolean.valueOf(opt1.isOptionFound()), is(Boolean.TRUE));
         assertThat(opt1.getValue(), is((Object)"val2"));
         
-        assertThat(opt2.isOptionFound(), is(true));
+        assertThat(Boolean.valueOf(opt2.isOptionFound()), is(Boolean.TRUE));
         assertThat(opt2.getValue(), is((Object)"val1"));
         
-        assertThat(opt3.isOptionFound(), is(true));
+        assertThat(Boolean.valueOf(opt3.isOptionFound()), is(Boolean.TRUE));
         
-        assertThat(opt4.isOptionFound(), is(false));
+        assertThat(Boolean.valueOf(opt4.isOptionFound()), is(Boolean.FALSE));
         
-        assertThat(opt5.isOptionFound(), is(true));
+        assertThat(Boolean.valueOf(opt5.isOptionFound()), is(Boolean.TRUE));
         assertThat(opt5.getValue(), is((Object)new Integer(1977)));
         
         

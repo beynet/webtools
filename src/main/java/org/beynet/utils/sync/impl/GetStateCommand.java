@@ -15,7 +15,7 @@ import org.beynet.utils.xml.XmlReader;
 public class GetStateCommand implements SyncCommand,XmlCallBack {
 	
 	public GetStateCommand() {
-		setWeight(0);
+		setWeight(Integer.valueOf(0));
 	}
 	
 	protected void setWeight(Integer weight) {
@@ -44,7 +44,7 @@ public class GetStateCommand implements SyncCommand,XmlCallBack {
 			}
 			if (tagValues.get(SyncCommand.ATTRIBUT_WEIGHT)!=null) {
 				try {
-					setWeight(Integer.parseInt(tagValues.get(SyncCommand.ATTRIBUT_WEIGHT), 10));
+					setWeight(Integer.valueOf(Integer.parseInt(tagValues.get(SyncCommand.ATTRIBUT_WEIGHT), 10)));
 				} catch(NumberFormatException e) {
 
 				}

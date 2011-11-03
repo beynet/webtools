@@ -209,7 +209,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 				if (logger.isDebugEnabled()) logger.debug("Removing "+path+" from notification system");
 				Integer watchId = watchedIds.get(f.getAbsolutePath());
 				if (watchId!=null) {
-					int result = natRemoveDirectory(notificationSystemFd.getFd(), watchId);
+					int result = natRemoveDirectory(notificationSystemFd.getFd(), watchId.intValue());
 					if (logger.isDebugEnabled()) logger.debug("directory "+path+" removed result="+result);
 					if (result==-1) {
 						logger.error("Could not remove watched directory:"+path+" from notification system");
@@ -217,7 +217,7 @@ public class FileChangeHandler implements EventHandler,Callable<Object> {
 					logger.debug("cleaning watchedIds");
 					watchedIds.remove(f.getAbsolutePath());
 					logger.debug("cleaning directoryWatched");
-					directoryWatched.remove(new Integer(watchId));
+					directoryWatched.remove(watchId);
 				}
 				else {
 					logger.warn("Directory "+f.getAbsolutePath()+" is not a watched directory");

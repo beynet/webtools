@@ -23,9 +23,9 @@ public class LocalCommandReader extends AbstractTcpSyncHost implements Runnable 
 		mounter = new CommandMounter(manager);
 		remote    = s    ; 
 		this.parent = parent;
-		this.timeout = 1000;
+		this.timeout = Integer.valueOf(1000);
 		try {
-			remote.setSoTimeout(timeout);
+			remote.setSoTimeout(timeout.intValue());
 		} catch (SocketException e) {
 			logger.error("Error setting timemout",e);
 		}

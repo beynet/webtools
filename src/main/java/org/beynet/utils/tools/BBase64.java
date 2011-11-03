@@ -899,7 +899,7 @@ public class BBase64
 
         if( off + len > source.length  ){
             throw new IllegalArgumentException(
-            String.format( "Cannot have offset of %d and length of %d with array of length %d", off,len,source.length));
+            String.format( "Cannot have offset of %d and length of %d with array of length %d", Integer.valueOf(off),Integer.valueOf(len),Integer.valueOf(source.length)));
         }   // end if: off < 0
 
 
@@ -1040,11 +1040,11 @@ public class BBase64
         }   // end if
         if( srcOffset < 0 || srcOffset + 3 >= source.length ){
             throw new IllegalArgumentException( String.format(
-            "Source array with length %d cannot have offset of %d and still process four bytes.", source.length, srcOffset ) );
+            "Source array with length %d cannot have offset of %d and still process four bytes.", Integer.valueOf(source.length), Integer.valueOf(srcOffset) ) );
         }   // end if
         if( destOffset < 0 || destOffset +2 >= destination.length ){
             throw new IllegalArgumentException( String.format(
-            "Destination array with length %d cannot have offset of %d and still store three bytes.", destination.length, destOffset ) );
+            "Destination array with length %d cannot have offset of %d and still store three bytes.", Integer.valueOf(destination.length), Integer.valueOf(destOffset) ) );
         }   // end if
         
         
@@ -1154,7 +1154,7 @@ public class BBase64
         }   // end if
         if( off < 0 || off + len > source.length ){
             throw new IllegalArgumentException( String.format(
-            "Source array with length %d cannot have offset of %d and process %d bytes.", source.length, off, len ) );
+            "Source array with length %d cannot have offset of %d and process %d bytes.", Integer.valueOf(source.length), Integer.valueOf(off), Integer.valueOf(len) ) );
         }   // end if
         
         if( len == 0 ){
@@ -1199,7 +1199,7 @@ public class BBase64
             else {
                 // There's a bad input character in the BBase64 stream.
                 throw new java.io.IOException( String.format(
-                "Bad BBase64 input character decimal %d in array position %d", ((int)source[i])&0xFF, i ) );
+                "Bad BBase64 input character decimal %d in array position %d", Integer.valueOf(((int)source[i])&0xFF), Integer.valueOf(i) ) );
             }   // end else: 
         }   // each input character
                                    
@@ -1359,7 +1359,7 @@ public class BBase64
                     @Override
                     public Class<?> resolveClass(java.io.ObjectStreamClass streamClass)
                     throws java.io.IOException, ClassNotFoundException {
-                        Class c = Class.forName(streamClass.getName(), false, loader);
+                        Class<?> c = Class.forName(streamClass.getName(), false, loader);
                         if( c == null ){
                             return super.resolveClass(streamClass);
                         } else {
