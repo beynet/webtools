@@ -6,4 +6,6 @@ package org.beynet.utils.sqltools.admin;
  */
 public interface SqlToolsConnectionFactoryMBean {
 	public int getActiveTransactions() ;
+	
+	public final static String MBEAN_NAME = "org.beynet.utils.sqltools.admin:name=SqlToolsConnectionFactoryMBean";
 }

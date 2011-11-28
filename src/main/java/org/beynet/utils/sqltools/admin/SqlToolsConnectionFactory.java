@@ -28,7 +28,7 @@ public class SqlToolsConnectionFactory implements
 				
 				// enregistrement du MBean Document
 				// ---------------------------------
-				obj1 = new ObjectName("org.beynet.utils.sqltools.admin:name=SqlToolsConnectionFactoryMBean");
+				obj1 = new ObjectName(MBEAN_NAME);
 				mbs.registerMBean(_instance, obj1);
 			}
 			catch(Exception e) {

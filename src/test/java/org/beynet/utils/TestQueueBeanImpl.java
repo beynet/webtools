@@ -16,7 +16,7 @@ public class TestQueueBeanImpl implements TestQueueBean {
 	
 	@Override
 	@Transaction
-	public void readMessage(String consumerId,boolean commit) {
+	public void readMessage(String consumerId,boolean withoutError) {
 		logger.debug("reading message "+consumerId);
 		MessageQueueSession session = queue.createSession(true);
 		MessageQueueConsumer consumer = session.createConsumer(consumerId);
@@ -33,7 +33,7 @@ public class TestQueueBeanImpl implements TestQueueBean {
 		catch (UtilsException e) {
 			e.printStackTrace();
 		}
-		if (commit==false) {
+		if (withoutError==false) {
 			logger.debug("no commit");
 			throw new RuntimeException("no commit");
 		}
@@ -42,7 +42,7 @@ public class TestQueueBeanImpl implements TestQueueBean {
 
 	@Override
 	@Transaction
-	public void writeMessage(String strMessage, boolean commit) {
+	public void writeMessage(String strMessage, boolean withoutError) {
 		logger.debug("writing message");
 		MessageQueueSession session = queue.createSession(true);
 		MessageQueueProducer producer = session.createProducer();
@@ -61,7 +61,7 @@ public class TestQueueBeanImpl implements TestQueueBean {
 		} catch (UtilsException e) {
 			throw new UtilsRuntimeException(e.getError(),e);
 		}
-		if (commit==false) throw new RuntimeException("no commit");
+		if (withoutError==false) throw new RuntimeException("no commit");
 		logger.debug("message writed");
 	}
 	

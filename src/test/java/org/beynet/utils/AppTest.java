@@ -7,15 +7,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -29,9 +21,6 @@ import org.beynet.utils.cache.impl.ByteOrFileCacheItem;
 import org.beynet.utils.cache.impl.SimpleCache;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.ConstructorFactory;
-import org.beynet.utils.framework.SessionFactory;
-import org.beynet.utils.framework.UJB;
-import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.shell.ShellCommandResult;
 import org.beynet.utils.shell.impl.ShellCommandResultImpl;
 import org.beynet.utils.tools.Base64;
@@ -40,7 +29,6 @@ import org.beynet.utils.xml.rss.RssFile;
 import org.beynet.utils.xml.rss.RssFileV1;
 import org.beynet.utils.xml.rss.RssItem;
 import org.beynet.utils.xml.rss.RssItemV1;
-import org.w3c.dom.Document;
 
 /**
  * Unit test for simple App.
@@ -139,115 +127,6 @@ public class AppTest
     	
     }
     
-    public void testQueue() {
-    	
-    	Thread t0,t1,t2,t3;
-    	t0=new Thread(new ThreadProducer(queue));
-    	t1=new Thread(new ThreadProducer(queue));
-    	t2= new Thread(new ThreadConsumer(queue,"cs1","url=test ,  test=machin"));
-    	t3= new Thread(new ThreadConsumer(queue,"cs2","url=test ,  test=machin"));
-    	try {
-    		t2.start();
-        	t3.start();
-        	t0.start();
-    		t1.start();
-			t1.join();
-			t2.join();
-	    	t3.join();
-	    	t0.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-    }
-    
-    private class ThreadConsumer implements Runnable {
-    	
-		public ThreadConsumer(MessageQueue queue,String id,String properties) {
-//    		this.queue= queue ;
-//    		this.properties = properties;
-    		this.id = id ;
-    	}
-    	@Override
-    	public void run() {
-    		System.err.println(id+" Starting consummer");
-    		logger.debug(id+" Starting consummer");
-    		try {
-
-    			try {
-    				Thread.sleep((int)(400*Math.random()));
-    			} catch (InterruptedException e1) {
-    			}
-    			int totalReaded = 0 ;
-    			/**
-    			 * each producer will send MAX_ITER -1 messages
-    			 * but we will skipp two messages
-    			 */
-    			for (int i=0; i< MAX_ITER*2 ; i++) {
-    				try {
-    					System.err.println("------------"+id+" sleeping - iteration "+i+"total readed="+totalReaded);
-    					Thread.sleep((int)(100*Math.random()));
-    					System.err.println(id+" awake");
-    				} catch (InterruptedException e) {
-    					e.printStackTrace();
-    				}
-    				boolean commit = (i==8 || i==16)?false:true;
-    				if (commit==false) {
-    					logger.debug("false !!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    				}
-    				try {
-    					testQueue.readMessage(id, commit);
-    					totalReaded++;
-    				}catch(RuntimeException e) {
-
-    				}
-    			}
-    			System.err.println(id+" End of consummer");
-    		} finally {
-    			SessionFactory.instance().removeSession();
-    		}
-    	}
-    	String id;
-    }
-    
-    private class ThreadProducer implements Runnable { 
-    	ThreadProducer(MessageQueue queue) {
-//			this.queue = queue ;
-    		
-		}
-		@Override
-		public void run() {
-			try {
-				try {
-					Thread.sleep(1000*1);
-					Thread.sleep((int)(400*Math.random()));
-				} catch (InterruptedException e1) {
-				}
-				for (int i=0; i< MAX_ITER+1; i++) {
-
-					try {
-						Thread.sleep((int)(400*Math.random()));
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					String strMessage= "This is message number "+i;
-					boolean commit = ((i%10)==0)?false:true;
-					try {
-						testQueue.writeMessage(strMessage, commit);
-					} catch(RuntimeException e) {
-						
-					}
-				}
-			} finally {
-				SessionFactory.instance().removeSession();
-			}
-		}
-	}
-    
-    
-    
-    
-    
 
     /**
      * @return the suite of tests being tested
@@ -345,14 +224,5 @@ public class AppTest
     {
         assertTrue( true );
     }
-   
     
-    @UJB(name="queuetest")
-    private MessageQueue queue;
-    @UJB(name="testqueuebean")
-    TestQueueBean testQueue ;
-    
-    private final static int MAX_ITER = 15 ;
-    
-    private Logger logger = Logger.getLogger(AppTest.class);
 }
