@@ -12,6 +12,7 @@ import org.beynet.utils.framework.UJB;
 import org.beynet.utils.framework.UtilsClassUJBProxy;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
+import org.beynet.utils.messages.api.MessageQueueBean;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.sqltools.DataBaseAccessor;
@@ -21,11 +22,11 @@ import org.beynet.utils.sqltools.interfaces.RequestManager;
 
 public class MessageQueueImpl implements MessageQueue {
 	
-	@SuppressWarnings("unused")
+	/*@SuppressWarnings("unused")
 	private void init(String queueName,DataBaseAccessor accessor) {
 		this.queueName    = queueName ;
 		this.accessor = accessor;
-	}
+	}*/
 	public MessageQueueImpl() {
 		this.consumers    = new ArrayList<MessageQueueConsumer> ();
 	}

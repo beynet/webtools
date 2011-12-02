@@ -1,4 +1,4 @@
-package org.beynet.utils.messages.impl;
+package org.beynet.utils.messages.api;
 
 import java.sql.Blob;
 

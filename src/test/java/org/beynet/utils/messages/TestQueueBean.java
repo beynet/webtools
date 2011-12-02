@@ -1,4 +1,4 @@
-package org.beynet.utils;
+package org.beynet.utils.messages;
 
 public interface TestQueueBean {
      public void writeMessage(String message,boolean withoutError);

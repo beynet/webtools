@@ -1,4 +1,4 @@
-package org.beynet.utils.messages;
+package org.beynet.utils.messages.scale;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
@@ -123,19 +123,13 @@ public class QueueTesting {
         }
     }
 
-    @Test
-    public void addMessageToQueue() {
-        String id ="unitaire";
-        testQueue.writeMessage("message test unitaire", true);
-        testQueue.readMessage(id, true);
-    }
     
     
     private final static int MAX_ITER = 15 ;
 //    @UJB(name="queuetest")
 //    private MessageQueue queue;
-    @UJB(name="testqueuebean")
-    TestQueueBean testQueue ;
+    @UJB(name="testscalablequeuebean")
+    TestScalableQueueBean testQueue ;
 
     private final static Logger logger = Logger.getLogger(QueueTesting.class);
 }

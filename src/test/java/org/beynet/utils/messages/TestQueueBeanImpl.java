@@ -1,4 +1,4 @@
-package org.beynet.utils;
+package org.beynet.utils.messages;
 
 import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
