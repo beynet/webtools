@@ -16,7 +16,7 @@ public class TestScalableQueueBeanImpl implements TestScalableQueueBean {
 	
 	@Override
 	@Transaction
-	public void readMessage(String consumerId,boolean withoutError) {
+	public void readMessage(String consumerId,boolean withoutError) throws InterruptedException {
 		logger.debug("reading message "+consumerId);
 		MessageQueueSession session = queue.createSession(true);
 		MessageQueueConsumer consumer = session.createConsumer(consumerId);
@@ -25,10 +25,7 @@ public class TestScalableQueueBeanImpl implements TestScalableQueueBean {
 			Message message = consumer.readMessage();
 			String strMessage = (String) message.getObject();
 			logger.debug(strMessage+ " read into queue");
-			System.err.println(consumerId+" Message ("+strMessage+") readed into queue");
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
+			System.err.println(Thread.currentThread().getName()+" "+consumerId+" Message ("+strMessage+") readed into queue commit="+withoutError);
 		}
 		catch (UtilsException e) {
 			e.printStackTrace();

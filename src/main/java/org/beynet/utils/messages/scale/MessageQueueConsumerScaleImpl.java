@@ -18,7 +18,6 @@ import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.sqltools.DataBaseAccessor;
 import org.beynet.utils.sqltools.Transaction;
 import org.beynet.utils.sqltools.interfaces.RequestManager;
-import org.beynet.utils.tools.Semaphore;
 
 public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
 
@@ -68,7 +67,6 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
         this.manager = manager ;
         this.queue = queue;
         this.consumerId = consumerId ;
-        pending = new Semaphore(0);
         this.properties = new HashMap<String, String>();
     }
     
@@ -104,11 +102,12 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
             if (logger.isDebugEnabled()) logger.debug("waiting for new message");
             SessionFactory.instance().getCurrentSession().commit();
             SessionFactory.instance().getCurrentSession().releaseConnection(accessor);
-            pending.P();
+            Thread.sleep(1000);
             if (logger.isDebugEnabled()) logger.debug("awake !");
         }
         // delete message read from queue
         manager.delete(mqBean);
+        logger.debug("Queue : "+queue.getQueueName()+" returning message read (id consumer="+consumerId+")");
         return(message);
     }
     
@@ -134,7 +133,7 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
     
     private MessageQueueBean loadBean(Long from) throws UtilsException {
         MessageQueueBean result = new MessageQueueBean();
-        StringBuffer query = new StringBuffer("select * from MessageQueue where ");
+        StringBuilder query = new StringBuilder("select * from MessageQueue where ");
         query.append(MessageQueueBean.FIELD_CONSUMERID);
         query.append(" = '");
         query.append(consumerId);
@@ -148,7 +147,7 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
         query.append(from);
         query.append(" order by ");
         query.append(MessageQueueBean.FIELD_ID);
-        query.append(" limit 1 for update");
+        query.append(" asc limit 1 for update");
         manager.load(result,query.toString());
         return(result);
     }
@@ -166,7 +165,6 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
     private MessageQueue           queue      ;
     private DataBaseAccessor       accessor   ;
     private RequestManager         manager    ;
-    private Semaphore              pending    ;
     private String                 consumerId ;
     private Logger                 logger = Logger.getLogger(MessageQueueConsumerScaleImpl.class);
     private Map<String,String>     properties  ;

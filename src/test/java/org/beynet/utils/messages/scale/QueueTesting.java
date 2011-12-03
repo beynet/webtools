@@ -15,7 +15,7 @@ public class QueueTesting {
     public QueueTesting() {
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.DEBUG);
-        Logger.getLogger("org.beynet.utils.messages").setLevel(Level.DEBUG);
+//        Logger.getLogger("org.beynet.utils.messages").setLevel(Level.DEBUG);
         ConstructorFactory.instance(".").configure(this);
     }
     
@@ -41,23 +41,26 @@ public class QueueTesting {
                  * each producer will send MAX_ITER -1 messages
                  * but we will skipp two messages
                  */
-                for (int i=0; i< MAX_ITER*2 ; i++) {
+                int j=0;
+                while(true) {
+                    j++;
                     try {
-                        System.err.println("------------"+id+" sleeping - iteration "+i+"total readed="+totalReaded);
+                        System.err.println("------------"+id+" sleeping - iteration "+j+"total readed="+totalReaded);
                         Thread.sleep((int)(100*Math.random()));
                         System.err.println(id+" awake");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    boolean commit = (i==8 || i==16)?false:true;
+                    boolean commit = ((j%5)==0)?false:true;
                     if (commit==false) {
                         logger.debug("false !!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                     }
+                    
                     try {
                         testQueue.readMessage(id, commit);
-                        totalReaded++;
-                    }catch(RuntimeException e) {
-
+                    } catch(InterruptedException e) {
+                        break;
+                    } catch(RuntimeException e) {
                     }
                 }
                 System.err.println(id+" End of consummer");
@@ -106,18 +109,23 @@ public class QueueTesting {
 
         Thread t0,t1,t2,t3;
         t0=new Thread(new ThreadProducer());
-        t1=new Thread(new ThreadProducer());
+        t1= new Thread(new ThreadConsumer("cs1","url=test ,  test=machin"));
         t2= new Thread(new ThreadConsumer("cs1","url=test ,  test=machin"));
         t3= new Thread(new ThreadConsumer("cs2","url=test ,  test=machin"));
         try {
+            t1.start();
             t2.start();
             t3.start();
             t0.start();
-            t1.start();
+            t0.join();
+            Thread.sleep(3000);
+            t1.interrupt();
+            t2.interrupt();
+            t3.interrupt();
             t1.join();
             t2.join();
             t3.join();
-            t0.join();
+            
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -125,7 +133,7 @@ public class QueueTesting {
 
     
     
-    private final static int MAX_ITER = 15 ;
+    private final static int MAX_ITER = 100 ;
 //    @UJB(name="queuetest")
 //    private MessageQueue queue;
     @UJB(name="testscalablequeuebean")

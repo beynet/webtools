@@ -1,5 +1,6 @@
 package org.beynet.utils.messages.scale;
 
+import org.apache.log4j.Logger;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.Constructor;
 import org.beynet.utils.framework.UtilsClassUJBProxy;
@@ -7,7 +8,6 @@ import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
-import org.beynet.utils.messages.impl.MessageQueueConsumerImpl;
 import org.beynet.utils.messages.impl.MessageQueueConsumersBean;
 import org.beynet.utils.sqltools.DataBaseAccessor;
 import org.beynet.utils.sqltools.Transaction;
@@ -18,14 +18,12 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
     private RequestManager manager;
     private MessageQueue queue;
     private DataBaseAccessor accessor;
-    private boolean transacted;
 
     public MessageQueueSessionScaleImpl(DataBaseAccessor accessor, RequestManager manager, Constructor root,
             String queueName, boolean transacted) {
         this.accessor = accessor;
         this.queue = (MessageQueue) root.getService(queueName);
         this.manager = manager;
-        this.transacted = transacted;
     }
 
     @Override
@@ -102,7 +100,7 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
      */
     public MessageQueueConsumer createConsumer(String consumerId) {
         defineConsumer(consumerId);
-        return ((MessageQueueConsumer) UtilsClassUJBProxy.newInstance(new MessageQueueConsumerImpl(accessor, manager,
+        return ((MessageQueueConsumer) UtilsClassUJBProxy.newInstance(new MessageQueueConsumerScaleImpl(accessor, manager,
                 queue, consumerId), null));
     }
 
@@ -110,13 +108,24 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
     @Transaction(create = true)
     public MessageQueueConsumer createConsumer(String consumerId, String properties) {
         defineConsumer(consumerId);
-        return (new MessageQueueConsumerImpl(accessor, manager, queue, consumerId, properties));
+        return (new MessageQueueConsumerScaleImpl(accessor, manager, queue, consumerId, properties));
     }
 
     @Override
     public void deleteConsumer(String consumerId) {
-        // TODO Auto-generated method stub
-
+        MessageQueueConsumersBean b ;
+        try {
+            b=loadConsumer(consumerId);
+        }
+        catch(UtilsException e) {
+            logger.warn("consumer "+consumerId+" does not exist");
+            return;
+        }
+        try {
+            manager.delete(b);
+        } catch (UtilsException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -124,5 +133,5 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
         // TODO Auto-generated method stub
 
     }
-
+    private final Logger logger = Logger.getLogger(MessageQueueSessionScaleImpl.class);
 }
