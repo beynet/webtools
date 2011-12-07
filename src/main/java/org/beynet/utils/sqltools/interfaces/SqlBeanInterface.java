@@ -2,6 +2,8 @@ package org.beynet.utils.sqltools.interfaces;
 
 import java.sql.SQLException;
 
+import org.beynet.utils.exception.NoResultException;
+
 
 public interface SqlBeanInterface {
 	
@@ -31,7 +33,7 @@ public interface SqlBeanInterface {
 	 * @param transactionConnection
 	 * @throws SQLException
 	 */
-	public void load(SqlSession session) throws SQLException;
+	public void load(SqlSession session) throws SQLException,NoResultException;
 	
 	/**
 	 * load current bean from database with request
@@ -40,7 +42,7 @@ public interface SqlBeanInterface {
 	 * @param request
 	 * @throws SQLException
 	 */
-	public void load(SqlSession session,String request) throws SQLException;
+	public void load(SqlSession session,String request) throws SQLException,NoResultException;
 	
 	/**
 	 * return number of results inside request

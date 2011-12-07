@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
 import org.beynet.utils.sqltools.interfaces.RequestFactorySession;
 
@@ -207,7 +208,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	 * @param connection
 	 * @throws SQLException
 	 */
-	public void load(T sqlBean,Connection connection) throws SQLException {
+	public void load(T sqlBean,Connection connection) throws SQLException,NoResultException {
 		Long id = getUniqIdValue(sqlBean);
 		if (id != null) {
 			String request = makeConsultFromIdQuery(sqlBean.getClass(),id);
@@ -225,7 +226,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 	 * @param request
 	 * @throws SQLException
 	 */
-	public void load(T sqlBean,Connection connection,String request) throws SQLException{
+	public void load(T sqlBean,Connection connection,String request) throws SQLException,NoResultException{
 		Statement stmt =  null;
 		ResultSet rs = null;
 		if (logger.isDebugEnabled()) logger.debug(request);
@@ -241,7 +242,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				rs=null;
 			}
 			else {
-				throw new SQLException(NO_RESULT);
+				throw new NoResultException();
 			}
 		}
 		finally {
@@ -300,7 +301,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			stmt.execute(request);
 			rs = stmt.getResultSet();
 			if (rs==null) {
-				throw new SQLException(NO_RESULT);
+				return;
 			}
 			
 			

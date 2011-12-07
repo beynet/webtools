@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.beynet.utils.exception.NoResultException;
+
 public interface RequestFactory<T> {
 	
 	/**
@@ -19,7 +21,7 @@ public interface RequestFactory<T> {
 	 * @param connection
 	 * @throws SQLException
 	 */
-	public void load(T sqlBean,Connection connection) throws SQLException ;
+	public void load(T sqlBean,Connection connection) throws SQLException,NoResultException ;
 	
 	
 	/**
@@ -40,7 +42,7 @@ public interface RequestFactory<T> {
 	 * @param request
 	 * @throws SQLException
 	 */
-	public void load(T sqlBean,Connection connection,String request) throws SQLException ;
+	public void load(T sqlBean,Connection connection,String request) throws SQLException,NoResultException ;
 	
 	/**
 	 * create/update current bean into database

@@ -2,6 +2,7 @@ package org.beynet.utils.sqltools.interfaces;
 
 import java.util.List;
 
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.exception.UtilsException;
 
 public interface RequestManager {
@@ -36,7 +37,7 @@ public interface RequestManager {
 	 * @param obj
 	 * @throws UtilsException : if the requested object is not found
 	 */
-	public <T> void load(T obj) throws UtilsException    ;
+	public <T> void load(T obj) throws UtilsException,NoResultException    ;
 	
 	/**
 	 * create the table
@@ -46,7 +47,7 @@ public interface RequestManager {
 	 */
 	public <T> void createTable(Class<T> cl) throws UtilsException ;
 	
-	public <T> void load(T obj,String request) throws UtilsException    ;
+	public <T> void load(T obj,String request) throws UtilsException,NoResultException    ;
 	
 	/**
 	 * load a list of T with request

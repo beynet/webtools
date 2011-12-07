@@ -1,4 +1,4 @@
-package org.beynet.utils.messages.impl;
+package org.beynet.utils.messages.api;
 
 import org.beynet.utils.sqltools.RequestFactoryImpl;
 import org.beynet.utils.sqltools.SqlField;
@@ -11,7 +11,7 @@ import org.beynet.utils.sqltools.interfaces.RequestFactory;
  * @author beynet
  *
  */
-@SqlTable("MessageQueueConsumers")
+@SqlTable(MessageQueueConsumersBean.TABLE_NAME)
 public class MessageQueueConsumersBean  {
 	
 	public MessageQueueConsumersBean() {
@@ -40,5 +40,7 @@ public class MessageQueueConsumersBean  {
 	
 	public final static String FIELD_QUEUEID    = "queueid"    ;
 	public final static String FILED_CONSUMERID = "consumerid" ;
+	public final static String TABLE_NAME ="MessageQueueConsumers";
+
 	protected static RequestFactory<MessageQueueConsumersBean> requestFactory =new RequestFactoryAdmin<MessageQueueConsumersBean>(new RequestFactoryImpl<MessageQueueConsumersBean>(MessageQueueConsumersBean.class));
 }

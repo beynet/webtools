@@ -1,27 +1,29 @@
 package org.beynet.utils.sqltools;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.ConstructorFactory;
 import org.beynet.utils.framework.Session;
 import org.beynet.utils.framework.SessionFactory;
 import org.beynet.utils.framework.UJB;
+import org.junit.Test;
 
-public class TestFramework extends TestCase {
+public class TestFramework {
 
-	public TestFramework( String testName ) {
-	        super( testName );
+	public TestFramework( ) {
 	        BasicConfigurator.configure();
 	        Logger.getRootLogger().setLevel(Level.DEBUG);
 	        testUJB = (UJBTest)ConstructorFactory.instance(".").getService("testujb");
 	        testUJB.createTables();
 	}
-	
-	public void testSqlBean() {
+	@Test
+	public void sqlBean() throws NoResultException, UtilsException {
 		Session session = SessionFactory.instance().createSession();
 		try {
 			TestSqlBean bean1 = new TestSqlBean();
@@ -40,13 +42,9 @@ public class TestFramework extends TestCase {
 			try {
 				testUJB.load(bean2);
 				assertTrue(false);
-			} catch(UtilsException e) {
+			} catch(NoResultException e) {
 				
 			}
-		}
-		catch(UtilsException e) {
-			e.printStackTrace();
-			assertTrue(false);
 		}
 		finally {
 			if (session!=null) {

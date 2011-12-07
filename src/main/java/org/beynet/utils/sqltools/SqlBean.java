@@ -3,6 +3,7 @@ package org.beynet.utils.sqltools;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
 import org.beynet.utils.sqltools.interfaces.SqlBeanInterface;
 import org.beynet.utils.sqltools.interfaces.SqlSession;
@@ -45,14 +46,14 @@ public class SqlBean implements SqlBeanInterface {
 
 	@Override
 	public void load(SqlSession session)
-			throws SQLException {
+			throws SQLException,NoResultException {
 		checkAnnotation();
 		if (session==null || session.getCurrentConnection()==null) throw new SQLException(NO_CONNECTION);
 		_requestFactory.load(this, session.getCurrentConnection());
 	}
 	
 	@Override
-	public void load(SqlSession session,String request) throws SQLException {
+	public void load(SqlSession session,String request) throws SQLException,NoResultException {
 		checkAnnotation();
 		if (session==null || session.getCurrentConnection()==null) throw new SQLException("null connection");
 		_requestFactory.load(this,session.getCurrentConnection(),request);

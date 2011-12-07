@@ -133,7 +133,7 @@ public class QueueTesting {
 
     
     
-    private final static int MAX_ITER = 100 ;
+    private final static int MAX_ITER = 30 ;
 //    @UJB(name="queuetest")
 //    private MessageQueue queue;
     @UJB(name="testscalablequeuebean")

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
@@ -102,7 +103,7 @@ public class RequestManagerImpl implements RequestManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> void load(T obj,String request) throws UtilsException {
+	public <T> void load(T obj,String request) throws UtilsException,NoResultException {
 		RequestFactory<T> requestFactorie =(RequestFactory<T>)getAssociatedFactory(obj.getClass());
 		try {
 			requestFactorie.load(obj,  accessor.getConnection(),request);
@@ -126,7 +127,7 @@ public class RequestManagerImpl implements RequestManager {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> void load(T obj) throws UtilsException {
+	public <T> void load(T obj) throws UtilsException,NoResultException {
 		RequestFactory<T> requestFactorie =(RequestFactory<T>)getAssociatedFactory(obj.getClass());
 		try {
 			requestFactorie.load(obj,  accessor.getConnection());

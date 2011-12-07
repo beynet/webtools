@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.framework.SessionFactory;
@@ -93,7 +94,7 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
                         mqBean.setMessageId(Long.valueOf(0L));
                     }
                 }
-            } catch(UtilsException e) {
+            } catch(NoResultException e) {
 
             }
             if (!mqBean.getMessageId().equals(new Long(0))) {
@@ -131,7 +132,7 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
         }
     }
     
-    private MessageQueueBean loadBean(Long from) throws UtilsException {
+    private MessageQueueBean loadBean(Long from) throws NoResultException {
         MessageQueueBean result = new MessageQueueBean();
         StringBuilder query = new StringBuilder("select * from MessageQueue where ");
         query.append(MessageQueueBean.FIELD_CONSUMERID);
@@ -148,7 +149,11 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
         query.append(" order by ");
         query.append(MessageQueueBean.FIELD_ID);
         query.append(" asc limit 1 for update");
-        manager.load(result,query.toString());
+        try {
+            manager.load(result,query.toString());
+        } catch (UtilsException e) {
+            throw new RuntimeException(e);
+        }
         return(result);
     }
 

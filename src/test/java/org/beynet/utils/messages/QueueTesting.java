@@ -6,9 +6,10 @@ import org.apache.log4j.Logger;
 import org.beynet.utils.framework.ConstructorFactory;
 import org.beynet.utils.framework.SessionFactory;
 import org.beynet.utils.framework.UJB;
+import org.junit.Ignore;
 import org.junit.Test;
 
-
+@Ignore
 public class QueueTesting {
     
     

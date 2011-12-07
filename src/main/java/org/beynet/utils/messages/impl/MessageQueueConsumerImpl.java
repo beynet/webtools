@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.framework.SessionFactory;
@@ -55,7 +56,7 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		}
 	}
 	
-	private MessageQueueBean loadBean(Long from) throws UtilsException {
+	private MessageQueueBean loadBean(Long from) throws UtilsException,NoResultException {
 		MessageQueueBean result = new MessageQueueBean();
 		StringBuffer query = new StringBuffer("select * from MessageQueue where ");
 		query.append(MessageQueueBean.FIELD_CONSUMERID);
@@ -99,8 +100,8 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 						mqBean.setMessageId(Long.valueOf(0L));
 					}
 				}
-			} catch(UtilsException e) {
-
+			} catch(NoResultException e) {
+			    
 			}
 			if (!mqBean.getMessageId().equals(new Long(0))) {
 				break;

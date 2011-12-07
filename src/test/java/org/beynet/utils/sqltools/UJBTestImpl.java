@@ -1,6 +1,7 @@
 package org.beynet.utils.sqltools;
 
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.Interceptors;
 import org.beynet.utils.framework.UJB;
@@ -42,7 +43,7 @@ public class UJBTestImpl implements UJBTest {
 	
 	@Transaction
 	@Override
-	public void load(TestSqlBean bean) throws UtilsException {
+	public void load(TestSqlBean bean) throws UtilsException,NoResultException {
 		logger.debug("loading");
 		manager.load(bean);
 	}

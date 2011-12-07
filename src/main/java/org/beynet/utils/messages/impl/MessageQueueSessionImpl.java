@@ -1,11 +1,13 @@
 package org.beynet.utils.messages.impl;
 
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.Constructor;
 import org.beynet.utils.framework.UtilsClassUJBProxy;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
+import org.beynet.utils.messages.api.MessageQueueConsumersBean;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.sqltools.DataBaseAccessor;
@@ -21,7 +23,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		this.transacted=transacted;
 	}
 	
-	protected MessageQueueConsumersBean loadConsumer(String consumerId) throws UtilsException {
+	protected MessageQueueConsumersBean loadConsumer(String consumerId) throws NoResultException {
 		MessageQueueConsumersBean consumer = new MessageQueueConsumersBean();
 		StringBuffer request = new StringBuffer("select * from MessageQueueConsumers where ");
 		request.append(MessageQueueConsumersBean.FIELD_QUEUEID);
@@ -32,7 +34,11 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		request.append("='");
 		request.append(consumerId);
 		request.append("'");
-		manager.load(consumer,request.toString());
+		try {
+            manager.load(consumer,request.toString());
+        } catch (UtilsException e) {
+            throw new RuntimeException(e);
+        }
 		return(consumer);
 	}
 	
@@ -45,7 +51,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		try {
 			b=loadConsumer(consumerId);
 		}
-		catch(UtilsException e) {
+		catch(NoResultException e) {
 			b=new MessageQueueConsumersBean();
 			b.setQueueId(queue.getQueueName());
 			b.setConsumerId(consumerId);
@@ -64,7 +70,7 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 		try {
 			b=loadConsumer(consumerId);
 		}
-		catch(UtilsException e) {
+		catch(NoResultException e) {
 			logger.warn("consumer "+consumerId+" does not exist");
 			return;
 		}
@@ -142,4 +148,9 @@ public class MessageQueueSessionImpl implements MessageQueueSession {
 	private DataBaseAccessor           accessor                ;
 	
 	private final Logger logger = Logger.getLogger(MessageQueueSession.class);
+
+    @Override
+    public Boolean deleteConsumerIfNoMessageIsPending(String consumerId) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -13,7 +13,7 @@ import org.beynet.utils.sqltools.interfaces.RequestFactory;
  * @author beynet
  *
  */
-@SqlTable("MessageQueue")
+@SqlTable(MessageQueueBean.TABLE_NAME)
 public class MessageQueueBean {
 	public MessageQueueBean() {
 		this.messageId = Long.valueOf(0L) ;
@@ -65,6 +65,8 @@ public class MessageQueueBean {
 	public static final String FIELD_QUEUEID    = "queuename";
 	public static final String FIELD_CONSUMERID = "consumerid";
 	public static final String FIELD_MESSAGE    = "message";
+	
+	public static final String TABLE_NAME       = "MessageQueue";
 	
 	protected static RequestFactory<MessageQueueBean> requestFactory =new RequestFactoryAdmin<MessageQueueBean>(new RequestFactoryImpl<MessageQueueBean>(MessageQueueBean.class));
 }

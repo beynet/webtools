@@ -1,14 +1,15 @@
 package org.beynet.utils.messages.scale;
 
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.Constructor;
 import org.beynet.utils.framework.UtilsClassUJBProxy;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
+import org.beynet.utils.messages.api.MessageQueueConsumersBean;
 import org.beynet.utils.messages.api.MessageQueueProducer;
 import org.beynet.utils.messages.api.MessageQueueSession;
-import org.beynet.utils.messages.impl.MessageQueueConsumersBean;
 import org.beynet.utils.sqltools.DataBaseAccessor;
 import org.beynet.utils.sqltools.Transaction;
 import org.beynet.utils.sqltools.interfaces.RequestManager;
@@ -57,7 +58,7 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
      * @return
      * @throws UtilsException
      */
-    protected MessageQueueConsumersBean loadConsumer(String consumerId) throws UtilsException {
+    protected MessageQueueConsumersBean loadConsumer(String consumerId) throws NoResultException {
         MessageQueueConsumersBean consumer = new MessageQueueConsumersBean();
         StringBuffer request = new StringBuffer("select * from MessageQueueConsumers where ");
         request.append(MessageQueueConsumersBean.FIELD_QUEUEID);
@@ -68,7 +69,11 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
         request.append("='");
         request.append(consumerId);
         request.append("'");
-        manager.load(consumer, request.toString());
+        try {
+            manager.load(consumer, request.toString());
+        } catch (UtilsException e) {
+            throw new RuntimeException(e);
+        }
         return (consumer);
     }
 
@@ -81,7 +86,7 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
         MessageQueueConsumersBean b;
         try {
             b = loadConsumer(consumerId);
-        } catch (UtilsException e) {
+        } catch (NoResultException e) {
             b = new MessageQueueConsumersBean();
             b.setQueueId(queue.getQueueName());
             b.setConsumerId(consumerId);
@@ -112,12 +117,13 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
     }
 
     @Override
+    @Transaction
     public void deleteConsumer(String consumerId) {
         MessageQueueConsumersBean b ;
         try {
             b=loadConsumer(consumerId);
         }
-        catch(UtilsException e) {
+        catch(NoResultException e) {
             logger.warn("consumer "+consumerId+" does not exist");
             return;
         }
@@ -126,6 +132,29 @@ public class MessageQueueSessionScaleImpl implements MessageQueueSession {
         } catch (UtilsException e) {
             throw new RuntimeException(e);
         }
+    }
+    @Override
+    @Transaction
+    public Boolean deleteConsumerIfNoMessageIsPending(String consumerId) throws UtilsException {
+        try {
+            loadConsumer(consumerId);
+        }
+        catch(NoResultException e) {
+            logger.warn("consumer "+consumerId+" does not exist");
+            return null;
+        }
+        StringBuilder query = new StringBuilder("delete from ");
+        query.append(MessageQueueConsumersBean.TABLE_NAME);
+        query.append(" where consumerid='");
+        query.append(consumerId);
+        query.append("'  and consumerid not in (select distinct consumerid from messagequeue );");
+        manager.delete(MessageQueueConsumersBean.class, query.toString());
+        try {
+            loadConsumer(consumerId);
+        } catch (NoResultException e) {
+            return(Boolean.TRUE);            
+        }
+        return(Boolean.FALSE);
     }
 
     @Override

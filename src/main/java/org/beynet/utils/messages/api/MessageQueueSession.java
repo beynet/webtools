@@ -1,5 +1,6 @@
 package org.beynet.utils.messages.api;
 
+import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.Ressource;
 
 /**
@@ -32,6 +33,14 @@ public interface MessageQueueSession extends Ressource {
 	 * @param consumerId
 	 */
 	public void deleteConsumer(String consumerId);
+	
+	/**
+	 * delete a consumer only if no message is pending
+	 * @param consumerId
+	 * @return Boolean.true if the consumer is deleted , Boolean.false if not and null if the
+	 * consumer does not exist
+	 */
+	public Boolean deleteConsumerIfNoMessageIsPending(String consumerId) throws UtilsException;
 	
 	/**
 	 * notify current session that a new message has been added

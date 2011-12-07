@@ -14,6 +14,7 @@ import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueBean;
 import org.beynet.utils.messages.api.MessageQueueConsumer;
+import org.beynet.utils.messages.api.MessageQueueConsumersBean;
 import org.beynet.utils.messages.api.MessageQueueSession;
 import org.beynet.utils.sqltools.DataBaseAccessor;
 import org.beynet.utils.sqltools.Transaction;
