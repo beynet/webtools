@@ -72,7 +72,7 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     		return(m.invoke(obj, args));
     	} else {
     		InvocationContextImpl invocation = createInvocationContexts(obj,m,args);
-    		return(invocation.callMethod());
+    		return(invocation.callInterceptorMethod());
     	}
     }
     
@@ -154,11 +154,11 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     					current.commit();
     				}
     			}
-    			catch(RuntimeException e) {
-    				if (creator==true || transaction.create()) {
-    					if (logger.isDebugEnabled()) logger.debug("rollback session "+m2.getName()+" "+obj.getClass().getName());
-    					current.rollback();
-    				}
+    			catch(InvocationTargetException e) {
+    			    if (e.getCause() instanceof RuntimeException && ( creator==true || transaction.create() ) ) {
+    			            if (logger.isDebugEnabled()) logger.debug("rollback session "+m2.getName()+" "+obj.getClass().getName());
+    			            current.rollback();
+    			    }
     				throw e;
     			}
     			finally {
