@@ -34,6 +34,8 @@ public class FileUtils {
                 readed += cr;
                 bos.write(res, 0, cr);
             }
+            fis.close();
+            fis=null;
             return (bos.toByteArray());
         } finally {
             if (fis != null)
