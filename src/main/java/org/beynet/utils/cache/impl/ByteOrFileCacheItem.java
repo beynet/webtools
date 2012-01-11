@@ -34,7 +34,11 @@ public class ByteOrFileCacheItem implements CacheItem {
 	
 	
 	private byte[] loadBytesFromFile() throws UtilsException {
-		return(FileUtils.loadFile(destination));
+		try {
+            return(FileUtils.loadFile(destination));
+        } catch (IOException e) {
+            throw new UtilsException(UtilsExceptions.Error_Io,e);
+        }
 	}
 	
 	@Override
