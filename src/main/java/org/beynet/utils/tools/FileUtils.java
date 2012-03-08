@@ -43,7 +43,9 @@ public class FileUtils {
                 fis.close();
         }
     }
-    
+
+
+
     private static void tryManualMove(File original,File destination) throws IOException {
         FileInputStream fi = new FileInputStream(original);
         FileOutputStream fo = new FileOutputStream(destination);
@@ -71,12 +73,51 @@ public class FileUtils {
             }
         }
     }
-    
+
+    /**
+     * try to move original to destination
+     * @param original
+     * @param destination
+     * @throws IOException
+     */
     public static void moveFile(File original,File destination) throws IOException {
         boolean result = original.renameTo(destination);
         if (result==true) return;
         if (result==false) {
             tryManualMove(original, destination);
+        }
+    }
+
+    /**
+     * try to copy original to destination
+     * @param original
+     * @param destination
+     * @throws IOException
+     */
+    public static void copyFile(File original,File destination) throws IOException {
+        FileInputStream fi = new FileInputStream(original);
+        FileOutputStream fo = new FileOutputStream(destination);
+        try {
+            byte[] buffer = new byte[1024];
+            int read = 1; 
+            while(read>=0) {
+                read=fi.read(buffer);
+                if (read>0) {
+                    fo.write(buffer,0,read);
+                }
+            }
+            fo.getFD().sync();
+        } finally {
+            try {
+                if (fi!=null) fi.close();
+            }catch(Exception e) {
+
+            }
+            try {
+                if (fo!=null) fo.close();
+            }catch(Exception e) {
+
+            }
         }
     }
 }
