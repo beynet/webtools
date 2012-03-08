@@ -3,6 +3,7 @@ package org.beynet.utils.tools;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class FileUtils {
@@ -40,6 +41,42 @@ public class FileUtils {
         } finally {
             if (fis != null)
                 fis.close();
+        }
+    }
+    
+    private static void tryManualMove(File original,File destination) throws IOException {
+        FileInputStream fi = new FileInputStream(original);
+        FileOutputStream fo = new FileOutputStream(destination);
+        try {
+            byte[] buffer = new byte[1024];
+            int read = 1; 
+            while(read>=0) {
+                read=fi.read(buffer);
+                if (read>0) {
+                    fo.write(buffer,0,read);
+                }
+            }
+            fo.getFD().sync();
+            original.delete();
+        } finally {
+            try {
+                if (fi!=null) fi.close();
+            }catch(Exception e) {
+
+            }
+            try {
+                if (fo!=null) fo.close();
+            }catch(Exception e) {
+
+            }
+        }
+    }
+    
+    public static void moveFile(File original,File destination) throws IOException {
+        boolean result = original.renameTo(destination);
+        if (result==true) return;
+        if (result==false) {
+            tryManualMove(original, destination);
         }
     }
 }
