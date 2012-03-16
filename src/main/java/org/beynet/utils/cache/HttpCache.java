@@ -16,6 +16,7 @@ import java.net.URLConnection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
@@ -85,7 +86,7 @@ public class HttpCache {
      * @return the http status
      * @throws IOException
      */
-    private int doFetch(URL url,URI uri, int timeout, HttpCachedResource resourceInCache, Date operation) throws IOException {
+    private int doFetch(URL url,URI uri, int timeout, HttpCachedResource resourceInCache, Date operation,Map<String,String> headers) throws IOException {
         if (logger.isDebugEnabled()) logger.debug("fetching "+uri.toString());
         URLConnection connection = null;
         boolean chunked = false ;
@@ -114,6 +115,11 @@ public class HttpCache {
             else if (resourceInCache.date!=0) {
                 if (logger.isDebugEnabled()) logger.debug("Using If-Modified-Since");
                 httpCon.setIfModifiedSince(resourceInCache.date);
+            }
+            if (headers!=null) {
+                for (Entry<String,String> entry :headers.entrySet()) {
+                    httpCon.setRequestProperty(entry.getKey(), entry.getValue());
+                }
             }
         }
         connection.connect();
@@ -193,7 +199,7 @@ public class HttpCache {
      * @return 
      * @throws IOException
      */
-    public Map<String, Object> fetchResourceWithStat(URI uri,int timeout) throws IOException, MalformedURLException  {
+    public Map<String, Object> fetchResourceWithStat(URI uri,int timeout,Map<String,String> headers) throws IOException, MalformedURLException  {
         Map<String,Object> result = new HashMap<String, Object>();
         URL url = uri.toURL();
 
@@ -216,7 +222,7 @@ public class HttpCache {
             cachedResourceFound = new HttpCachedResource();
         }
 
-        int response = doFetch(url, uri, timeout, cachedResourceFound, operation);
+        int response = doFetch(url, uri, timeout, cachedResourceFound, operation,headers);
         if (response!=304 && response!=200) throw new IOException("unexpected response from server status code ="+response);
         if (response==304) result.put(HIT, Boolean.TRUE);
         result.put(RESOURCE, cachedResourceFound.resource);
