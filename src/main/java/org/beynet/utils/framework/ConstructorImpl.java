@@ -44,7 +44,8 @@ public class ConstructorImpl implements Constructor {
         ujbList = new HashMap<String, Object>();
         originalList = new HashMap<String, Object>();
         try {
-            localContext= InitialContext.doLookup("java:comp/env");
+//            localContext= InitialContext.doLookup("java:comp/env");
+            localContext = new InitialContext();
             if (logger.isInfoEnabled()) logger.info("Container context found");
 
         }
@@ -96,8 +97,9 @@ public class ConstructorImpl implements Constructor {
             originalList.put(name, ujb);
             try {
                 localContext.addToEnvironment(name, ujbProxy);
+                localContext.bind(name, ujbProxy);
             }catch(NamingException e) {
-
+                e.printStackTrace();
             }
             return(ujb);
 
