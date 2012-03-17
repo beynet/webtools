@@ -17,7 +17,7 @@ public class TestHttpCache {
     @Test
     public void fetchTest() throws MalformedURLException, IOException, URISyntaxException {
         HttpCache cache = new HttpCache("/tmp/yan.dat");
-        Map<String, Object> stats = cache.fetchResourceWithStat(new URI("http://blade.par.afp.com/test.yan"),10000);
+        Map<String, Object> stats = cache.fetchResourceWithStat(new URI("http://blade.par.afp.com/test.yan"),10000,null);
         byte[] res = (byte[]) stats.get(HttpCache.RESOURCE) ;
         String charset = (String) stats.get(HttpCache.CHARSET);
         System.out.println(new String(res));
