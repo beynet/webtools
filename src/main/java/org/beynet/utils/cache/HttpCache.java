@@ -22,6 +22,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -32,13 +33,18 @@ import org.apache.log4j.Logger;
 public class HttpCache {
 
 
-    public HttpCache(String cacheFile) {
+    public HttpCache(String cacheFile,int maxResourceSizeInMemory) {
         File cache = new File(cacheFile);
-        this.cacheFile = cacheFile ;
+        if (cache.exists() && !cache.isDirectory()) {
+            if (!cache.delete()) throw new RuntimeException("unable to delete ");
+        }
+        cache.mkdir();
+        this.cacheDir = cacheFile;
         uriToRessource = new HashMap<URI, HttpCachedResource>();
         if (cache.exists()) {
             readCacheFile();
         }
+        this.maxResourceSizeInMemory = maxResourceSizeInMemory;
     }
 
 
@@ -75,6 +81,21 @@ public class HttpCache {
     }
 
 
+    private long getMaxAge(HttpURLConnection httpCon) {
+        // retrieve charset
+        if (httpCon.getHeaderField("Cache-Control")!=null) {
+            Matcher matcher = CACHECONTROL_PATTERN.matcher(httpCon.getHeaderField("Cache-Control"));
+            if (matcher.matches()) {
+                try {
+                    return(Long.parseLong(matcher.group(1)));
+                }catch(NumberFormatException e) {
+
+                }
+            }
+        }
+        return(0);
+    }
+
     /**
      * the fetch is really done in this operation.
      * This operation should be long in case of network problem.
@@ -108,13 +129,19 @@ public class HttpCache {
         // if ressource is already in the cache we try to refresh it
         // ---------------------------------------------------------
         if (httpCon != null) {
-            if (resourceInCache.etag!=null) {
-                if (logger.isDebugEnabled()) logger.debug("Using If-None-Match");
-                httpCon.addRequestProperty("If-None-Match", resourceInCache.etag);
+
+            if (resourceInCache.getRevalidate()>System.currentTimeMillis()) {
+                logger.debug("max age ok - no need to send a query");
+                return(HttpURLConnection.HTTP_NOT_MODIFIED);
             }
-            else if (resourceInCache.date!=0) {
+
+            if (resourceInCache.getEtag()!=null) {
+                if (logger.isDebugEnabled()) logger.debug("Using If-None-Match");
+                httpCon.addRequestProperty("If-None-Match", resourceInCache.getEtag());
+            }
+            else if (resourceInCache.getDate()!=0) {
                 if (logger.isDebugEnabled()) logger.debug("Using If-Modified-Since");
-                httpCon.setIfModifiedSince(resourceInCache.date);
+                httpCon.setIfModifiedSince(resourceInCache.getDate());
             }
             if (headers!=null) {
                 for (Entry<String,String> entry :headers.entrySet()) {
@@ -127,6 +154,8 @@ public class HttpCache {
         // ---------------------------------------
         if (httpCon!=null && httpCon.getResponseCode()==HttpURLConnection.HTTP_NOT_MODIFIED) {
             if (logger.isDebugEnabled()) logger.debug("ressource "+uri.toString()+" not modified");
+            final long maxAge = getMaxAge(httpCon);
+            resourceInCache.setRevalidate(System.currentTimeMillis()+maxAge*1000);
             return(HttpURLConnection.HTTP_NOT_MODIFIED);
         }
         else if (httpCon!=null && httpCon.getResponseCode()!=HttpURLConnection.HTTP_OK) {
@@ -150,15 +179,17 @@ public class HttpCache {
             }
         }
         if (chunked==true) {
-            resourceInCache.resource = readChunkedStream(connection.getInputStream()) ;
+            resourceInCache.setResource(readChunkedStream(connection.getInputStream())) ;
         }
         else {
-            resourceInCache.resource = readStream(connection.getContentLength(),connection.getInputStream());
+            resourceInCache.setResource(readStream(connection.getContentLength(),connection.getInputStream()));
         }
-        resourceInCache.charset = charset;
-        resourceInCache.date = dateOfModif;
-        resourceInCache.etag = etag ;
-        if (logger.isTraceEnabled()) logger.trace("Etag found for resource "+uri+"="+resourceInCache.etag);
+        resourceInCache.setCharset(charset);
+        resourceInCache.setDate(dateOfModif);
+        resourceInCache.setEtag(etag);
+        final long maxAge = getMaxAge(httpCon);
+        resourceInCache.setRevalidate(System.currentTimeMillis()+maxAge*1000);
+        if (logger.isTraceEnabled()) logger.trace("Etag found for resource "+uri+"="+resourceInCache.getEtag());
         return(200);
     }
 
@@ -168,21 +199,26 @@ public class HttpCache {
      * @return
      */
     public Map<String,Object> getResourceInCache(URI uri) {
-        HttpCachedResource cachedResourceFound=null;
         // check if the resource is already into the cache
         // and not obsolete
         // ------------------------------------------------
+        HttpCachedResource cachedResourceFound=getCachedResource(uri);
+        if (cachedResourceFound!=null) {
+            Map<String,Object> result = new HashMap<String, Object>();
+            result.put(HIT, Boolean.TRUE);
+            result.put(RESOURCE, cachedResourceFound.getResource());
+            result.put(CHARSET, cachedResourceFound.getCharset());
+            return(result);
+        }
+        return(null);
+        
+    }
+    
+    
+    private HttpCachedResource getCachedResource(URI resource) {
         rwLock.readLock().lock();
         try {           
-            cachedResourceFound=uriToRessource.get(uri);
-            if (cachedResourceFound!=null) {
-                Map<String,Object> result = new HashMap<String, Object>();
-                result.put(HIT, Boolean.TRUE);
-                result.put(RESOURCE, cachedResourceFound.resource);
-                result.put(CHARSET, cachedResourceFound.charset);
-                return(result);
-            }
-            return(null);
+            return(uriToRessource.get(resource));
         } finally {
             rwLock.readLock().unlock();
         }
@@ -210,27 +246,21 @@ public class HttpCache {
         // check if the resource is already into the cache
         // and not obsolete
         // ------------------------------------------------
-        rwLock.readLock().lock();
-        try {           
-            cachedResourceFound=uriToRessource.get(uri);
-        } finally {
-            rwLock.readLock().unlock();
-        }
-
-
+        cachedResourceFound=getCachedResource(uri);
         if (cachedResourceFound == null) {
-            cachedResourceFound = new HttpCachedResource();
+            cachedResourceFound = new HttpCachedResourceInMemoryOrOnDisk(uri,this.maxResourceSizeInMemory,this.cacheDir);
         }
-
+        long previousRevalidate = cachedResourceFound.getRevalidate();
+        
         int response = doFetch(url, uri, timeout, cachedResourceFound, operation,headers);
         if (response!=304 && response!=200) throw new IOException("unexpected response from server status code ="+response);
         if (response==304) result.put(HIT, Boolean.TRUE);
-        result.put(RESOURCE, cachedResourceFound.resource);
-        result.put(CHARSET, cachedResourceFound.charset);
+        result.put(RESOURCE, cachedResourceFound.getResource());
+        result.put(CHARSET, cachedResourceFound.getCharset());
 
         // we update the cache if the response was fetched
         // -----------------------------------------------
-        if (response==200) {
+        if (response==HttpURLConnection.HTTP_OK || (previousRevalidate != cachedResourceFound.getRevalidate()) ) {
             // lock in write mode to add the resource
             // ---------------------------------------
             rwLock.writeLock().lock();
@@ -249,15 +279,15 @@ public class HttpCache {
      */
     public void setCacheFile(String filePath) {
         logger.info("Changing cache file to "+filePath);
-        cacheFile=filePath;
+        cacheDir=filePath;
         readCacheFile();
     }
 
     /**
      * 
      */
-    public String getCacheFile() {
-        return(cacheFile);
+    public String getCacheDir() {
+        return(cacheDir);
     }
 
     /**
@@ -271,30 +301,65 @@ public class HttpCache {
             uriToRessource.remove(uri);
         }
         uriToRessource.put(uri, newRes);
-        saveCache();
+        saveCacheEntry(newRes);
     }
     /**
      * save the map in the associated cache file
      */
-    private void saveCache() {
-        if (getCacheFile()!=null) {
-            FileOutputStream fo = null ;
-            try {
-                if (logger.isDebugEnabled()) logger.trace("Saving cache");
-                fo = new FileOutputStream(getCacheFile());
-                ObjectOutputStream os = new ObjectOutputStream(fo);
-                os.writeObject(uriToRessource);
-            }catch(IOException e) {
-                logger.error("could not save to cache file",e);
+    private void saveCacheEntry(HttpCachedResource newRes) {
+        byte[] data=DigestUtils.sha(newRes.getURI().toString());
+        StringBuilder path = new StringBuilder(getCacheDir());
+        StringBuilder name = new StringBuilder();
+        for (int i=0;i<data.length;i++) {
+            Byte b = new Byte(data[i]);
+            if (i<3) {
+                path.append("/");
+                path.append(String.format("%x", b));
             }
-            finally {
-                if (fo!=null)
-                    try {
-                        fo.close();
-                    } catch (IOException e) {
-                    }
-            }
+            name.append(String.format("%x", b));
         }
+        path.append("/");
+        File directory = new File(path.toString());
+        if (! directory.exists()) {
+            if (directory.mkdirs()==false) throw new RuntimeException("could not create dir "+directory.getPath());
+        }
+        path.append(name);
+        FileOutputStream fo = null;
+        try {
+            if (logger.isDebugEnabled()) logger.trace("Saving cache");
+            fo = new FileOutputStream(path.toString());
+            ObjectOutputStream os = new ObjectOutputStream(fo);
+            os.writeObject(newRes);
+        }catch(IOException e) {
+            logger.error("could not save to cache file",e);
+        }
+        finally {
+            if (fo!=null)
+                try {
+                    fo.close();
+                } catch (IOException e) {
+                }
+        }
+
+
+        //        if (getCacheFile()!=null) {
+        //            FileOutputStream fo = null ;
+        //            try {
+        //                if (logger.isDebugEnabled()) logger.trace("Saving cache");
+        //                fo = new FileOutputStream(getCacheFile());
+        //                ObjectOutputStream os = new ObjectOutputStream(fo);
+        //                os.writeObject(uriToRessource);
+        //            }catch(IOException e) {
+        //                logger.error("could not save to cache file",e);
+        //            }
+        //            finally {
+        //                if (fo!=null)
+        //                    try {
+        //                        fo.close();
+        //                    } catch (IOException e) {
+        //                    }
+        //            }
+        //        }
     }
 
     /**
@@ -304,20 +369,31 @@ public class HttpCache {
         rwLock.writeLock().lock();
         try {
             uriToRessource = new HashMap<URI, HttpCachedResource>();
-            saveCache();
+            //            saveCacheEntry();
         } finally {
             rwLock.writeLock().unlock();
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void readCacheFile() {
+    private void readCacheEntry(File fileEntry) {
         ObjectInputStream ois = null ;
         try {
-            ois = new ObjectInputStream(new FileInputStream(getCacheFile()));
-            uriToRessource = (Map<URI, HttpCachedResource>)ois.readObject();
+            ois = new ObjectInputStream(new FileInputStream(fileEntry));
+            HttpCachedResource res = (HttpCachedResource)ois.readObject();
+            if (res instanceof HttpCachedResourceInMemoryOrOnDisk) {
+                HttpCachedResourceInMemoryOrOnDisk cachedResource = (HttpCachedResourceInMemoryOrOnDisk) res;
+                if (cachedResource.check()==true){
+                    uriToRessource.put(res.getURI(),res);
+                }
+                else {
+                    fileEntry.delete();
+                }
+            }
+            else {
+                uriToRessource.put(res.getURI(),res);
+            }
         } catch(Exception e) {
-            uriToRessource = new HashMap<URI, HttpCachedResource>();
+            fileEntry.delete();
         } finally {
             if (ois!=null)
                 try {
@@ -327,17 +403,52 @@ public class HttpCache {
         }
     }
 
+    private void processDir(File dir) {
+        final File[] childs = dir.listFiles();
+        for (File curr : childs) {
+            if (curr.isDirectory()) processDir(curr);
+            else {
+                if (curr.getName().startsWith(HttpCachedResource.CACHE_PREFIX)) continue;
+                readCacheEntry(curr);
+            }
+        }
+    }
+
+    
+    private void readCacheFile() {
+        uriToRessource = new HashMap<URI, HttpCachedResource>();
+        File cacheDir = new File(this.cacheDir);
+        processDir(cacheDir);
+
+        //        ObjectInputStream ois = null ;
+        //        try {
+        //            ois = new ObjectInputStream(new FileInputStream(getCacheFile()));
+        //            uriToRessource = (Map<URI, HttpCachedResource>)ois.readObject();
+        //            checkCache();
+        //        } catch(Exception e) {
+        //            uriToRessource = new HashMap<URI, HttpCachedResource>();
+        //        } finally {
+        //            if (ois!=null)
+        //                try {
+        //                    ois.close();
+        //                } catch (IOException e) {
+        //                }
+        //        }
+    }
+
 
 
 
 
     private Map<URI, HttpCachedResource>   uriToRessource   = null ;
-    private String cacheFile = null ;
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private String cacheDir;
+    private int maxResourceSizeInMemory;
 
     public static final String RESOURCE = "resource";
     public static final String HIT = "hit";
     public static final String CHARSET = "charset";
     public static final Pattern CHARSET_PATTERN = Pattern.compile(".*charset=([^\\s;]*)([\\s]*;.*|$)",Pattern.CASE_INSENSITIVE);
+    public static final Pattern CACHECONTROL_PATTERN = Pattern.compile(".*max-age=([^\\s;]*)([\\s]*;.*|$)",Pattern.CASE_INSENSITIVE);
     private static final Logger logger = Logger.getLogger(HttpCache.class);
 }
