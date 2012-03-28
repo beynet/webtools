@@ -49,16 +49,20 @@ public class HttpCache {
 
 
     private byte[] readChunkedStream(InputStream is) throws IOException {
-        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        int size = 1; 
-        while(size>=0) {
-            size = is.read();
-            if (size>0) {
-                bo.write(size);
+        try {
+            ByteArrayOutputStream bo = new ByteArrayOutputStream();
+            int size = 1; 
+            while(size>=0) {
+                size = is.read();
+                if (size>0) {
+                    bo.write(size);
+                }
+                if (size==-1) break;
             }
-            if (size==-1) break;
+            return(bo.toByteArray());
+        }finally{
+            is.close();
         }
-        return(bo.toByteArray());
     }
 
     /**
@@ -69,15 +73,19 @@ public class HttpCache {
      * @throws IOException
      */
     private byte[] readStream(int toRead,InputStream is) throws IOException {
-        byte[] r = new byte[toRead];
-        int readed = 0;
-        while (readed!=toRead) {
-            int read = is.read(r, readed, toRead-readed);
-            if (read<0) break;
-            readed+=read;
+        try {
+            byte[] r = new byte[toRead];
+            int readed = 0;
+            while (readed!=toRead) {
+                int read = is.read(r, readed, toRead-readed);
+                if (read<0) break;
+                readed+=read;
+            }
+            if (readed!=toRead) throw new IOException("Not enough content read");
+            return(r);
+        }finally{
+            is.close();
         }
-        if (readed!=toRead) throw new IOException("Not enough content read");
-        return(r);
     }
 
 
@@ -156,11 +164,13 @@ public class HttpCache {
             if (logger.isDebugEnabled()) logger.debug("ressource "+uri.toString()+" not modified");
             final long maxAge = getMaxAge(httpCon);
             resourceInCache.setRevalidate(System.currentTimeMillis()+maxAge*1000);
+            httpCon.disconnect();
             return(HttpURLConnection.HTTP_NOT_MODIFIED);
         }
         else if (httpCon!=null && httpCon.getResponseCode()!=HttpURLConnection.HTTP_OK) {
             String message = "resource "+uri.toString()+" not fetchable http status code ="+httpCon.getResponseCode();
             if (logger.isDebugEnabled()) logger.debug(message);
+            httpCon.disconnect();
             return(httpCon.getResponseCode());
         }
         else {
@@ -184,6 +194,7 @@ public class HttpCache {
         else {
             resourceInCache.setResource(readStream(connection.getContentLength(),connection.getInputStream()));
         }
+        if (httpCon!=null) httpCon.disconnect();
         resourceInCache.setCharset(charset);
         resourceInCache.setDate(dateOfModif);
         resourceInCache.setEtag(etag);
@@ -211,10 +222,10 @@ public class HttpCache {
             return(result);
         }
         return(null);
-        
+
     }
-    
-    
+
+
     private HttpCachedResource getCachedResource(URI resource) {
         rwLock.readLock().lock();
         try {           
@@ -251,7 +262,7 @@ public class HttpCache {
             cachedResourceFound = new HttpCachedResourceInMemoryOrOnDisk(uri,this.maxResourceSizeInMemory,this.cacheDir);
         }
         long previousRevalidate = cachedResourceFound.getRevalidate();
-        
+
         int response = doFetch(url, uri, timeout, cachedResourceFound, operation,headers);
         if (response!=304 && response!=200) throw new IOException("unexpected response from server status code ="+response);
         if (response==304) result.put(HIT, Boolean.TRUE);
@@ -414,7 +425,7 @@ public class HttpCache {
         }
     }
 
-    
+
     private void readCacheFile() {
         uriToRessource = new HashMap<URI, HttpCachedResource>();
         File cacheDir = new File(this.cacheDir);
