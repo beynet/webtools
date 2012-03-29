@@ -164,13 +164,30 @@ public class HttpCache {
             if (logger.isDebugEnabled()) logger.debug("ressource "+uri.toString()+" not modified");
             final long maxAge = getMaxAge(httpCon);
             resourceInCache.setRevalidate(System.currentTimeMillis()+maxAge*1000);
-            httpCon.disconnect();
+            InputStream is = httpCon.getInputStream();
+            try {
+                is.close();
+            }catch(IOException e) {
+
+            }
             return(HttpURLConnection.HTTP_NOT_MODIFIED);
         }
         else if (httpCon!=null && httpCon.getResponseCode()!=HttpURLConnection.HTTP_OK) {
             String message = "resource "+uri.toString()+" not fetchable http status code ="+httpCon.getResponseCode();
             if (logger.isDebugEnabled()) logger.debug(message);
-            httpCon.disconnect();
+            final int responseCode = httpCon.getResponseCode();
+            InputStream is = null ;
+            if (responseCode>=400) {
+                is=httpCon.getErrorStream();
+            }
+            else {
+                is=httpCon.getInputStream();
+            }
+            try {
+                is.close();
+            }catch(IOException e) {
+                
+            }
             return(httpCon.getResponseCode());
         }
         else {

@@ -25,6 +25,21 @@ public class TestHttpCache {
         System.out.println(new String(res));
     }
     
+    @Test
+    public void fetchTestWithError() throws MalformedURLException, IOException, URISyntaxException, InterruptedException {
+        HttpCache cache = new HttpCache("/tmp/yan.dat",10000);
+        Map<String,String> headers = new HashMap<String, String>();
+        headers.put("X-AFP-TRANSACTION-ID", "XARCH-2.0-XARCH-22345323");
+        while(true) {
+            try {
+                Map<String, Object> stats = cache.fetchResourceWithStat(new URI("http://blade.par.afp.com/truc.xml"),10000,headers);
+            } catch(IOException e) {
+                
+            }
+            Thread.sleep(500);
+        }
+    }
+    
     static {
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.TRACE);
