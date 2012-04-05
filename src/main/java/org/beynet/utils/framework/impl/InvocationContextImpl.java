@@ -31,6 +31,10 @@ public class InvocationContextImpl implements InvocationContext {
 		return(toCallOnTarget);
 	}
 	
+	public Object[] getArguments() {
+	    return(args);
+	}
+	
 	/**
 	 * set next interceptorcontext
 	 * @param next

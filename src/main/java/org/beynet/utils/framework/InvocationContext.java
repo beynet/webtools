@@ -21,4 +21,9 @@ public interface InvocationContext {
 	 * @return
 	 */
 	public Method getMethod() ;
+	
+	/**
+	 * @return the arguments provided to the method intercepted
+	 */
+	public Object[] getArguments() ;
 }
