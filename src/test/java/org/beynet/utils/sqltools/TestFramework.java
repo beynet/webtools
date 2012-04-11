@@ -75,7 +75,7 @@ public class TestFramework {
 	        assertEquals(bean1.getName(), bean2.getName());
 	        assertThat(Boolean.valueOf(Arrays.equals(bean1.getBin()
                     , bean2.getBin())), is(Boolean.TRUE));
-	        bean2.setName("2TEST");
+	        bean2.setName("2TEST 'd");
 	        testUJB.save(bean2);
 	        testUJB.load(bean1);
 	        assertEquals(bean1.getName(), bean2.getName());
@@ -91,7 +91,7 @@ public class TestFramework {
 	    }
 	    finally {
 	        if (session!=null) {
-	            session.rollback();
+	            session.commit();
 	            session.close();
 	            SessionFactory.instance().removeSession();
 	        }
