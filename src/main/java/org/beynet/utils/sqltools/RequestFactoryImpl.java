@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.beynet.utils.exception.NoResultException;
 import org.beynet.utils.sqltools.interfaces.RequestFactory;
 import org.beynet.utils.sqltools.interfaces.RequestFactorySession;
+import org.beynet.utils.sqltools.interfaces.SQLHelper;
 
 /**
  * the aim of that class is to generate sql request
@@ -270,7 +271,11 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			SqlField f = field.getAnnotation(SqlField.class);
 			if (logger.isDebugEnabled()) logger.debug("loading field sqlname="+f.sqlFieldName()+" var name="+field.getName());
 			try {
-				set.invoke(sqlBean, rs.getObject(f.sqlFieldName()));
+			    Object fieldFound = rs.getObject(f.sqlFieldName());
+			    if (fieldFound!=null && fieldFound instanceof String) {
+			        fieldFound = SQLHelper.unQuoteTheQuotes((String) fieldFound);
+			    }
+				set.invoke(sqlBean, fieldFound);
 			}
 			catch (IllegalAccessException e) {
 				throw new SQLException(e);
@@ -478,7 +483,11 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			for ( int i=0;i<fields.size();i++) {
 				Method get  = getMethods.get(i);
 				try {
-					stmt.setObject(i+1, get.invoke(sqlBean,(Object[])null));
+				    Object fieldValue = get.invoke(sqlBean,(Object[])null) ;
+				    if (fieldValue!=null && fieldValue instanceof String) {
+				        fieldValue = SQLHelper.quoteTheQuotes((String)fieldValue);
+				    }
+					stmt.setObject(i+1, fieldValue);
 				}
 				catch (IllegalAccessException e) {
 					throw new SQLException(e);
@@ -558,7 +567,11 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 				request.append("'");
 			}
 			try {
-				request.append(get.invoke(sqlBean,(Object[])null));
+			    Object fieldValue = get.invoke(sqlBean,(Object[])null) ;
+			    if (fieldValue!=null && fieldValue instanceof String) {
+			        fieldValue = SQLHelper.quoteTheQuotes((String)fieldValue);
+			    }
+				request.append(fieldValue);
 			} catch (Exception e) {
 				throw new SQLException(e);
 			}
@@ -646,7 +659,11 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			if (field!=uniqIdField) {
 				k++;
 				try {
-					stmt.setObject(k, get.invoke(sqlBean,(Object[])null));
+				    Object fieldValue = get.invoke(sqlBean,(Object[])null);
+				    if (fieldValue!=null && fieldValue instanceof String) {
+				        fieldValue = SQLHelper.quoteTheQuotes((String)fieldValue);
+				    }
+					stmt.setObject(k, fieldValue);
 				}
 				catch (IllegalAccessException e) {
 					throw new SQLException(e);
@@ -734,7 +751,11 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 			}
 			else {
 				try {
-					stmt.setObject(k, get.invoke(sqlBean,(Object[])null));
+				    Object fieldValue = get.invoke(sqlBean,(Object[])null) ;
+				    if (fieldValue!=null && fieldValue instanceof String) {
+				        fieldValue = SQLHelper.quoteTheQuotes((String) fieldValue);
+				    }
+					stmt.setObject(k, fieldValue);
 				}
 				catch (IllegalAccessException e) {
 					throw new SQLException(e);
