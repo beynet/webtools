@@ -366,7 +366,7 @@ public class ConstructorImpl implements Constructor {
         DataBaseAccessor accessor =(DataBaseAccessor)createUJB(DataBaseAccessorImpl.class, name);
         if (dataSource!=null && !"".equals(dataSource) ) {
             try {
-                accessor.setDataSource((DataSource)localContext.lookup(dataSource));
+                accessor.setDataSource((DataSource)((Context)InitialContext.doLookup("java:comp/env")).lookup(dataSource));
             }catch(NamingException e) {
                 if (url==null || "".equals(url) || "".equals(cl) || cl==null) {
                     throw new RuntimeException(e);
