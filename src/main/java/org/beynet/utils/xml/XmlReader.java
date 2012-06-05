@@ -70,6 +70,14 @@ public class XmlReader {
 		return( ((x) > (y) ? (y) : (x)) );
 	}
 
+	protected String removeEntities(String from) {
+	    from = from.replaceAll("&amp;", "&");
+	    from = from.replaceAll("&quot;", "\"");
+	    from = from.replaceAll("&apos;", "'");
+	    from = from.replaceAll("&lt;", "<");
+	    from = from.replaceAll("&gt;", ">");
+	    return(from);
+	}
 	
 	
 	private void UPDATE_OFFSET_PARSING(int a) {
@@ -193,6 +201,7 @@ public class XmlReader {
 				}
 				System.out.println("");
 			}
+			attributValue = removeEntities(attributValue);
 			if (logger.isDebugEnabled()) logger.debug("new attribut:"+attributName+" val="+attributValue);
 			attributes.put(attributName, attributValue);
 		}
