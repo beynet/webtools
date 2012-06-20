@@ -8,11 +8,11 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
-import org.apache.tomcat.util.http.fileupload.DefaultFileItem;
-import org.apache.tomcat.util.http.fileupload.DiskFileUpload;
 import org.apache.tomcat.util.http.fileupload.FileItem;
+import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.apache.tomcat.util.http.fileupload.FileUploadBase;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletRequestContext;
 
 /**
  * FormRequest class
@@ -34,7 +34,7 @@ public class FormRequest {
 		_request = request ;
 		
 		// Check that we have a file upload request
-    	_isMultipart = FileUploadBase.isMultipartContent(_request);
+    	_isMultipart = FileUploadBase.isMultipartContent(new ServletRequestContext(request));
     	if (_isMultipart) {
     		if (logger.isDebugEnabled()) logger.debug("this is a multipart form");
     		parseRequest();
@@ -46,18 +46,17 @@ public class FormRequest {
      * @param erreur
      * @return
      */
-    @SuppressWarnings("unchecked")
 	private void parseRequest() {
-    	DiskFileUpload diskFiles = new DiskFileUpload();
+    	FileUpload diskFiles = new FileUpload();
     	try {
-    		List<FileItem> listItem = diskFiles.parseRequest(_request);
+    		List<FileItem> listItem = diskFiles.parseRequest(new ServletRequestContext(_request));
     		Iterator<FileItem> iter = listItem.iterator();
     		
     		while (iter.hasNext()) {
     			Object elem  = iter.next();
     			if (logger.isDebugEnabled()) logger.debug(elem.getClass().getName());
-    			if (elem instanceof DefaultFileItem) {
-    				DefaultFileItem f = (DefaultFileItem) elem;
+    			if (elem instanceof FileItem) {
+    				FileItem f = (FileItem) elem;
     				if (f.isFormField()) {
     					if (logger.isDebugEnabled()) logger.debug("Field "+f.getFieldName()+" found");
     					put(f.getFieldName(), f.getString());
