@@ -18,6 +18,7 @@ import java.sql.Struct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 import org.beynet.utils.sqltools.interfaces.RequestFactorySession;
 
@@ -293,6 +294,34 @@ public class SqlToolsConnection implements Connection,RequestFactorySession {
 		return(connection.unwrap(iface));
 	}
 	
+	
+	@Override
+    public void setSchema(String schema) throws SQLException {
+        connection.setSchema(schema);
+    }
+
+    @Override
+    public String getSchema() throws SQLException {
+        return(connection.getSchema());
+    }
+
+    @Override
+    public void abort(Executor executor) throws SQLException {
+        connection.abort(executor);
+    }
+
+    @Override
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        connection.setNetworkTimeout(executor, milliseconds);
+    }
+
+    @Override
+    public int getNetworkTimeout() throws SQLException {
+        return(connection.getNetworkTimeout());
+    }
+    
+	
+	
 	@Override
 	public <B> PreparedStatement getSaveBeanPreparedStatement(Class<B> beanClass) {
 		return(saveStatements.get(beanClass));
@@ -323,9 +352,12 @@ public class SqlToolsConnection implements Connection,RequestFactorySession {
 		deleteStatements.put(beanClass, statement);
 	}
 	
+	
+	
+	
 	private Connection connection;
 	private HashMap<Class<?>, PreparedStatement> saveStatements;
 	private HashMap<Class<?>, PreparedStatement> updateStatements;
 	private HashMap<Class<?>, PreparedStatement> deleteStatements;
-	
+    
 }

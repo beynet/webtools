@@ -37,13 +37,6 @@
 		<scope>provided</scope>
 	</dependency>
   	<dependency>
-  		<groupId>org.apache.tomcat</groupId>
-  		<artifactId>coyote</artifactId>
-  		<version>6.0.32</version>
-  		<type>jar</type>
-  		<scope>provided</scope>
-  	</dependency>
-  	<dependency>
   		<groupId>postgresql</groupId>
   		<artifactId>postgresql</artifactId>
   		<version>9.0-801.jdbc4</version>
@@ -54,6 +47,11 @@
   		<groupId>apache-codec</groupId>
   		<artifactId>commons-codec</artifactId>
   		<version>1.2</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.apache.tomcat</groupId>
+  		<artifactId>tomcat-coyote</artifactId>
+  		<version>7.0.21</version>
   	</dependency>
   </dependencies>
   
@@ -83,8 +81,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
       
