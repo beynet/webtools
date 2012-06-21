@@ -35,6 +35,11 @@ public class RequestFactoryAdmin<T>  implements RequestFactoryAdminMBean, Reques
 	}
 	
 	@Override
+	public void execute(String request, Connection connection) throws SQLException {
+	    factory.execute(request, connection);
+	}
+	
+	@Override
 	public Integer count(Connection connection) throws SQLException {
 		return(factory.count(connection));
 	}

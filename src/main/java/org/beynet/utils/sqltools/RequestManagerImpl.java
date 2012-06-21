@@ -55,6 +55,17 @@ public class RequestManagerImpl implements RequestManager {
 		}
 	}
 	
+	@Override
+	public <T> void execute(Class<T> cl, String query) throws UtilsException {
+	    @SuppressWarnings("unchecked")
+        RequestFactory<T> requestFactorie =(RequestFactory<T>)getAssociatedFactory(cl);
+        try {
+            requestFactorie.execute(query, accessor.getConnection());
+        } catch(SQLException e) {
+            throw new UtilsException(UtilsExceptions.Error_Sql,e);
+        }
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> void delete(Class<T> cl,String query) throws UtilsException {

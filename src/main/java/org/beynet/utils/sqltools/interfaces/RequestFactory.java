@@ -36,6 +36,15 @@ public interface RequestFactory<T> {
 	
 	
 	/**
+	 * @param request
+	 * @param connection
+	 * @throws SQLException
+	 */
+	public void execute(String request,Connection connection) throws SQLException ;
+    
+	
+	
+	/**
 	 * load a bean from database with request = param request
 	 * @param sqlBean
 	 * @param connection

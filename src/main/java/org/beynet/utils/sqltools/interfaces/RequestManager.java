@@ -32,6 +32,13 @@ public interface RequestManager {
 	public <T> void delete(Class<T> cl,String query) throws UtilsException  ;
 	
 	/**
+	 * @param cl
+	 * @param query
+	 * @throws UtilsException
+	 */
+	public <T> void execute(Class<T> cl,String query) throws UtilsException  ;
+	
+	/**
 	 * load obj
 	 * @param <T>
 	 * @param obj

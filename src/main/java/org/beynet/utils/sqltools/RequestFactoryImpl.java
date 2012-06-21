@@ -785,6 +785,14 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 		return(res);
 	}
 	
+	@Override
+	public void execute(String request, Connection connection) throws SQLException {
+        if (logger.isDebugEnabled()) logger.debug(request);
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(request);
+        }
+	}
+	
 	
 	/**
 	 * check if class T has annotation SqlTable
