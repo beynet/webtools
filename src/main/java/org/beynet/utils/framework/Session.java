@@ -4,7 +4,7 @@ import java.sql.Connection;
 
 import org.beynet.utils.sqltools.DataBaseAccessor;
 
-public interface Session {
+public interface Session extends AutoCloseable{
 	/**
 	 * register a connection associated with databaseaccessor
 	 * @param a
