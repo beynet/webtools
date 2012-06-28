@@ -52,7 +52,7 @@ public class SessionFactory {
 	
 	public synchronized void removeSession() {
 		if (logger.isDebugEnabled()) logger.debug("Delete old session");
-		sessionList.remove(Thread.currentThread());
+		if (sessionList.get(Thread.currentThread())!=null) sessionList.remove(Thread.currentThread());
 	}
 	
 
