@@ -1,14 +1,16 @@
 package org.beynet.utils.cache;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.beynet.utils.tools.FileUtils;
+import org.apache.log4j.Logger;
 
 public class HttpCachedResourceInMemoryOrOnDisk implements HttpCachedResource {
-    public HttpCachedResourceInMemoryOrOnDisk(URI uri,long maxSizeInMemory,String rootTmpPath) {
+
+	public HttpCachedResourceInMemoryOrOnDisk(URI uri,long maxSizeInMemory,String rootTmpPath) {
         this.date     = 0 ; 
         this.resource = null ;
         this.etag     = null;
@@ -16,8 +18,9 @@ public class HttpCachedResourceInMemoryOrOnDisk implements HttpCachedResource {
         this.resourceFile = null;
         this.uri = uri;
         this.maxSizeInMemory = maxSizeInMemory;
-        this.rootTmpPath=new File(rootTmpPath);
-        if (!this.rootTmpPath.exists() || !this.rootTmpPath.isDirectory()) {
+        this.rootTmpPathString = rootTmpPath;
+        this.rootTmpPath=Paths.get(this.rootTmpPathString);
+        if (!Files.exists(this.rootTmpPath) || !Files.isDirectory(this.rootTmpPath)) {
             throw new RuntimeException(rootTmpPath+" does not exist or is not a directory");
         }
     }
@@ -50,7 +53,7 @@ public class HttpCachedResourceInMemoryOrOnDisk implements HttpCachedResource {
     public byte[] getResource() {
         if (resourceFile!=null) {
             try {
-                return(FileUtils.loadFile(resourceFile));
+                return(Files.readAllBytes(resourceFile));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -60,24 +63,21 @@ public class HttpCachedResourceInMemoryOrOnDisk implements HttpCachedResource {
     }
 
     private void saveResourceOnDisk(byte[] resource) {
-        FileOutputStream fo = null ;
+    	if (resourceFile!=null) {
+    		try {
+				Files.delete(resourceFile);
+			} catch (IOException e) {
+				logger.error("unable to delete file "+resourceFile,e);
+			}
+    		resourceFile=null;
+    	}
         try {
-            resourceFile = File.createTempFile(HttpCachedResource.CACHE_PREFIX, ".dat",rootTmpPath);
-            fo = new FileOutputStream(resourceFile);
-            fo.write(resource);
-            fo.getFD().sync();
-            fo.close();
-            fo = null ;
+        	resourceFile = Files.createTempFile(rootTmpPath, HttpCachedResource.CACHE_PREFIX, ".dat");
+        	resourceFileString = resourceFile.toString();
+        	Files.write(resourceFile, resource);
+            
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
-            if (fo!=null) {
-                try {
-                    fo.close();
-                } catch (IOException e) {
-                    
-                }
-            }
         }
     }
     
@@ -105,7 +105,7 @@ public class HttpCachedResourceInMemoryOrOnDisk implements HttpCachedResource {
      * @return true if current cache resource is ok - ie underlying file not deleted
      */
     protected boolean check() {
-        if (resourceFile!=null && !resourceFile.exists()) return false;
+        if (resourceFile!=null && !Files.exists(resourceFile)) return false;
         return true;
     }
     
@@ -119,19 +119,33 @@ public class HttpCachedResourceInMemoryOrOnDisk implements HttpCachedResource {
         this.revalidate = revalidate;
     }
     
+    private void readObject(java.io.ObjectInputStream in)
+    	     throws IOException, ClassNotFoundException {
+    	in.defaultReadObject();
+    	if (resourceFileString!=null) {
+    		resourceFile = Paths.get(resourceFileString);
+    	}
+    	rootTmpPath = Paths.get(rootTmpPathString);
+    }
+    
     private String charset ;
     private String etag    ;
     private long   date    ;    
     private byte[] resource ;
-    private File   rootTmpPath;
+    private transient Path   rootTmpPath;
+    private String   rootTmpPathString;
     private long   maxSizeInMemory;
-    private File   resourceFile ;
+    private transient Path   resourceFile ;
+    private String   resourceFileString ;
     private long   revalidate;
     private URI    uri ;
     
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1720187522927381726L;
+    
+    
+    private final static Logger logger = Logger.getLogger(HttpCachedResourceInMemoryOrOnDisk.class);
 
+    /**
+   	 * 
+   	 */
+   	private static final long serialVersionUID = 1L;
 }
