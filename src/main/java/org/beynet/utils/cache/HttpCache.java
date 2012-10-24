@@ -117,6 +117,12 @@ public class HttpCache {
      */
     private int doFetch(URL url,URI uri, int timeout, HttpCachedResource resourceInCache, Date operation,Map<String,String> headers) throws IOException {
         if (logger.isDebugEnabled()) logger.debug("fetching "+uri.toString());
+        
+        if (resourceInCache.getRevalidate()>System.currentTimeMillis()) {
+            logger.debug("max age ok - no need to send a query");
+            return(HttpURLConnection.HTTP_NOT_MODIFIED);
+        }
+        
         URLConnection connection = null;
         boolean chunked = false ;
         String charset = null;
@@ -137,12 +143,7 @@ public class HttpCache {
         // if ressource is already in the cache we try to refresh it
         // ---------------------------------------------------------
         if (httpCon != null) {
-
-            if (resourceInCache.getRevalidate()>System.currentTimeMillis()) {
-                logger.debug("max age ok - no need to send a query");
-                return(HttpURLConnection.HTTP_NOT_MODIFIED);
-            }
-
+        	
             if (resourceInCache.getEtag()!=null) {
                 if (logger.isDebugEnabled()) logger.debug("Using If-None-Match");
                 httpCon.addRequestProperty("If-None-Match", resourceInCache.getEtag());
@@ -352,19 +353,18 @@ public class HttpCache {
             if (directory.mkdirs()==false) throw new RuntimeException("could not create dir "+directory.getPath());
         }
         path.append(name);
-        FileOutputStream fo = null;
+        ObjectOutputStream os = null;
         try {
             if (logger.isDebugEnabled()) logger.trace("Saving cache");
-            fo = new FileOutputStream(path.toString());
-            ObjectOutputStream os = new ObjectOutputStream(fo);
+            os = new ObjectOutputStream(new FileOutputStream(path.toString()));
             os.writeObject(newRes);
         }catch(IOException e) {
             logger.error("could not save to cache file",e);
         }
         finally {
-            if (fo!=null)
+            if (os!=null)
                 try {
-                    fo.close();
+                    os.close();
                 } catch (IOException e) {
                 }
         }
@@ -410,7 +410,7 @@ public class HttpCache {
             HttpCachedResource res = (HttpCachedResource)ois.readObject();
             if (res instanceof HttpCachedResourceInMemoryOrOnDisk) {
                 HttpCachedResourceInMemoryOrOnDisk cachedResource = (HttpCachedResourceInMemoryOrOnDisk) res;
-                if (cachedResource.check()==true){
+                if (cachedResource.check()==true) {
                     uriToRessource.put(res.getURI(),res);
                 }
                 else {
@@ -421,6 +421,7 @@ public class HttpCache {
                 uriToRessource.put(res.getURI(),res);
             }
         } catch(Exception e) {
+        	logger.error("failed to read cache entry",e);
             fileEntry.delete();
         } finally {
             if (ois!=null)
