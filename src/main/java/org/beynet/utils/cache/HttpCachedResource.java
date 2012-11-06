@@ -24,6 +24,11 @@ public interface HttpCachedResource extends Serializable {
     public long getRevalidate();
     public void setRevalidate(long revalidate);
     
+    /**
+     * release resources - means that this object will not be used any more
+     */
+    public void release();
+    
     public final static String CACHE_PREFIX = "cache_";
     
 }

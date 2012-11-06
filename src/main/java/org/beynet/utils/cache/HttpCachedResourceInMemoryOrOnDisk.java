@@ -119,6 +119,19 @@ public class HttpCachedResourceInMemoryOrOnDisk implements HttpCachedResource {
         this.revalidate = revalidate;
     }
     
+    @Override
+    public void release() {
+    	if (resourceFile!=null) {
+    		try {
+				Files.deleteIfExists(resourceFile);
+			} catch (IOException e) {
+				logger.error("unable to delete file "+resourceFile,e);
+			}
+    		resourceFile = null ;
+    		resourceFileString = null;
+    	}
+    }
+    
     private void readObject(java.io.ObjectInputStream in)
     	     throws IOException, ClassNotFoundException {
     	in.defaultReadObject();
