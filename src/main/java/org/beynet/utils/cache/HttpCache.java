@@ -247,29 +247,30 @@ public class HttpCache {
 
 
 	private HttpCachedResource getCachedResource(URI resource) {
+		HttpCachedResource cachedRessource = null ;
 		rwLock.readLock().lock();
 		try {
-			HttpCachedResource cachedRessource = uriToRessource.get(resource);
+			cachedRessource = uriToRessource.get(resource);
+			if (cachedRessource!=null) return cachedRessource;
+		} finally {
+			rwLock.readLock().unlock();
+		}
+		
+		// check if the resource exist on disk
+		// ------------------------------------
+		rwLock.writeLock().lock();
+		try {
+			cachedRessource = uriToRessource.get(resource);
 			if (cachedRessource==null) {
-				rwLock.readLock().unlock();
-				rwLock.writeLock().lock();
-				try {
+				Path entryPath = getCacheEntryPathFromURI(resource);
+				if (Files.exists(entryPath)) {
+					readCacheEntry(entryPath.toFile());
 					cachedRessource = uriToRessource.get(resource);
-					if (cachedRessource==null) {
-						Path entryPath = getCacheEntryPathFromURI(resource);
-						if (Files.exists(entryPath)) {
-							readCacheEntry(entryPath.toFile());
-							cachedRessource = uriToRessource.get(resource);
-						}
-					}
-				} finally {
-					rwLock.writeLock().unlock();
-					rwLock.readLock().lock();
 				}
 			}
 			return cachedRessource;
 		} finally {
-			rwLock.readLock().unlock();
+			rwLock.writeLock().unlock();
 		}
 	}
 
