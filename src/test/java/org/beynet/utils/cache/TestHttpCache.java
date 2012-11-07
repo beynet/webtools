@@ -16,7 +16,7 @@ import org.junit.Test;
 public class TestHttpCache {
     @Test
     public void fetchTest() throws MalformedURLException, IOException, URISyntaxException {
-        HttpCache cache = new HttpCache("/tmp/yan.dat",10000);
+        HttpCache cache = new HttpCache("/tmp/yan.dat");
         Map<String,String> headers = new HashMap<String, String>();
         headers.put("X-AFP-TRANSACTION-ID", "XARCH-2.0-XARCH-22345323");
         Map<String, Object> stats = cache.fetchResourceWithStat(new URI("http://ref-dev.afp.com:8080/mediatopics?rsts[]=V&rsts[]=M&rsts[]=C&rsts[]=D&rsts[]=X"),10000,headers);
@@ -27,7 +27,7 @@ public class TestHttpCache {
     
     @Test
     public void fetchTestWithError() throws MalformedURLException, IOException, URISyntaxException, InterruptedException {
-        HttpCache cache = new HttpCache("/tmp/yan.dat",10000);
+        HttpCache cache = new HttpCache("/tmp/yan.dat");
         Map<String,String> headers = new HashMap<String, String>();
         headers.put("X-AFP-TRANSACTION-ID", "XARCH-2.0-XARCH-22345323");
         while(true) {

@@ -35,18 +35,16 @@ import org.apache.log4j.Logger;
 public class HttpCache {
 
 
-	public HttpCache(String cacheFile,int maxResourceSizeInMemory) {
+	public HttpCache(String cacheFile) {
 		File cache = new File(cacheFile);
 		if (cache.exists() && !cache.isDirectory()) {
 			if (!cache.delete()) throw new RuntimeException("unable to delete ");
 		}
 		cache.mkdir();
 		this.cacheDir = cacheFile;
-		uriToRessource = new HashMap<URI, HttpCachedResource>();
 		if (cache.exists()) {
 			readCacheFile();
 		}
-		this.maxResourceSizeInMemory = maxResourceSizeInMemory;
 	}
 
 
@@ -250,28 +248,15 @@ public class HttpCache {
 		HttpCachedResource cachedRessource = null ;
 		rwLock.readLock().lock();
 		try {
-			cachedRessource = uriToRessource.get(resource);
-			if (cachedRessource!=null) return cachedRessource;
+			Path entryPath = getCacheEntryPathFromURI(resource);
+			if (Files.exists(entryPath)) {
+				cachedRessource = readCacheEntry(entryPath.toFile());
+			}
+			
 		} finally {
 			rwLock.readLock().unlock();
 		}
-		
-		// check if the resource exist on disk
-		// ------------------------------------
-		rwLock.writeLock().lock();
-		try {
-			cachedRessource = uriToRessource.get(resource);
-			if (cachedRessource==null) {
-				Path entryPath = getCacheEntryPathFromURI(resource);
-				if (Files.exists(entryPath)) {
-					readCacheEntry(entryPath.toFile());
-					cachedRessource = uriToRessource.get(resource);
-				}
-			}
-			return cachedRessource;
-		} finally {
-			rwLock.writeLock().unlock();
-		}
+		return cachedRessource;
 	}
 
 	/**
@@ -298,7 +283,7 @@ public class HttpCache {
 		// ------------------------------------------------
 		cachedResourceFound=getCachedResource(uri);
 		if (cachedResourceFound == null) {
-			cachedResourceFound = new HttpCachedResourceInMemoryOrOnDisk(uri,this.maxResourceSizeInMemory,this.cacheDir);
+			cachedResourceFound = new HttpCachedResourceInMemory(uri);
 		}
 		long previousRevalidate = cachedResourceFound.getRevalidate();
 
@@ -346,12 +331,6 @@ public class HttpCache {
 	 * @param newRes
 	 */
 	private void addToCache(URI uri,HttpCachedResource newRes) {
-		HttpCachedResource c = uriToRessource.get(uri);
-		if (c!=null && c!=newRes) {
-			uriToRessource.remove(uri);
-			c.release();
-		}
-		uriToRessource.put(uri, newRes);
 		saveCacheEntry(newRes);
 	}
 
@@ -428,16 +407,10 @@ public class HttpCache {
 	 * clear the cache : 
 	 */
 	public void clearCache() {
-		rwLock.writeLock().lock();
-		try {
-			uriToRessource = new HashMap<URI, HttpCachedResource>();
-			//            saveCacheEntry();
-		} finally {
-			rwLock.writeLock().unlock();
-		}
+		//FIXME : clear the cache
 	}
 
-	private void readCacheEntry(File fileEntry) {
+	private HttpCachedResource readCacheEntry(File fileEntry) {
 		ObjectInputStream ois = null ;
 		try {
 			ois = new ObjectInputStream(new FileInputStream(fileEntry));
@@ -445,14 +418,14 @@ public class HttpCache {
 			if (res instanceof HttpCachedResourceInMemoryOrOnDisk) {
 				HttpCachedResourceInMemoryOrOnDisk cachedResource = (HttpCachedResourceInMemoryOrOnDisk) res;
 				if (cachedResource.check()==true) {
-					uriToRessource.put(res.getURI(),res);
+					return cachedResource;
 				}
 				else {
 					fileEntry.delete();
 				}
 			}
 			else {
-				uriToRessource.put(res.getURI(),res);
+				return res;
 			}
 		} catch(Exception e) {
 			logger.error("failed to read cache entry",e);
@@ -464,21 +437,15 @@ public class HttpCache {
 				} catch (IOException e) {
 				}
 		}
+		return null;
 	}
 
 	private void readCacheFile() {
-		uriToRessource = new HashMap<URI, HttpCachedResource>();
 		// no need to read all cached resources : will be read when necessary
 	}
 
-
-
-
-
-	private Map<URI, HttpCachedResource>   uriToRessource   = null ;
 	private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	private String cacheDir;
-	private int maxResourceSizeInMemory;
 
 	public static final String RESOURCE = "resource";
 	public static final String HIT = "hit";
