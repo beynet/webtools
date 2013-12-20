@@ -264,6 +264,8 @@ public class HttpCache {
 	 *  <ul>
 	 *  <li>"RESOURCE" -> byte[]  : the cached resource</li>
 	 *  <li>"HIT"      -> Boolean : true if the resource was in cache</li>
+     *  <li>"CHARSET" -> le charset de la ressouce</li>
+     *  <li>"etag"    -> l'etag recu</li>
 	 *  </ul> 
 	 * @param uri
 	 * @param timeout
@@ -292,6 +294,7 @@ public class HttpCache {
 		if (response==304) result.put(HIT, Boolean.TRUE);
 		result.put(RESOURCE, cachedResourceFound.getResource());
 		result.put(CHARSET, cachedResourceFound.getCharset());
+        result.put(ETAG,cachedResourceFound.getEtag());
 
 		// we update the cache if the response was fetched
 		// -----------------------------------------------
@@ -448,8 +451,9 @@ public class HttpCache {
 	private String cacheDir;
 
 	public static final String RESOURCE = "resource";
-	public static final String HIT = "hit";
-	public static final String CHARSET = "charset";
+	public static final String HIT      = "hit";
+	public static final String CHARSET  = "charset";
+    public static final String ETAG     = "etag";
 	public static final Pattern CHARSET_PATTERN = Pattern.compile(".*charset=([^\\s;]*)([\\s]*;.*|$)",Pattern.CASE_INSENSITIVE);
 	public static final Pattern CACHECONTROL_PATTERN = Pattern.compile(".*max-age=([^\\s;]*)([\\s]*;.*|$)",Pattern.CASE_INSENSITIVE);
 	private static final Logger logger = Logger.getLogger(HttpCache.class);
