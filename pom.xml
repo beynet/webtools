@@ -4,7 +4,7 @@
   <groupId>org.beynet.utils</groupId>
   <artifactId>webtools</artifactId>
   <packaging>jar</packaging>
-  <version>1.23-SNAPSHOT</version>
+  <version>1.23</version>
   <name>webtools</name>
   <url>http://maven.apache.org</url>
   <dependencies>
