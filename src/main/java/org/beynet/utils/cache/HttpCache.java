@@ -254,9 +254,13 @@ public class HttpCache {
             if (Files.exists(path)) {
                 try {
                     Files.delete(path);
+                    logger.info("resource "+uri+" found an removed from cache");
                 }catch(IOException e) {
                     logger.error("unable to remove ressource path="+path+" uri="+uri+" from cache",e);
                 }
+            }
+            else {
+                logger.info("resource "+uri+" not in cache");
             }
         } finally {
             rwLock.writeLock().unlock();
