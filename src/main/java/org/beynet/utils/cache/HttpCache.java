@@ -240,8 +240,28 @@ public class HttpCache {
 			return(result);
 		}
 		return(null);
-
 	}
+
+    /**
+     * remove a ressource from the cache
+     * @param uri : MUST NOT BE NULL or an {@link IllegalArgumentException} will be thrown
+     */
+    public void removeResourceFromCache(URI uri) {
+        if (uri==null) throw new IllegalArgumentException("uri must not be null");
+        rwLock.writeLock().lock();
+        try {
+            Path path = getCacheEntryPathFromURI(uri);
+            if (Files.exists(path)) {
+                try {
+                    Files.delete(path);
+                }catch(IOException e) {
+                    logger.error("unable to remove ressource path="+path+" uri="+uri+" from cache",e);
+                }
+            }
+        } finally {
+            rwLock.writeLock().unlock();
+        }
+    }
 
 
 	private HttpCachedResource getCachedResource(URI resource) {
