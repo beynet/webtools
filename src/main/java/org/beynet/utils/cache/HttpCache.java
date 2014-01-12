@@ -49,7 +49,7 @@ public class HttpCache {
 
 
 	private byte[] readChunkedStream(InputStream is) throws IOException {
-        byte[] r = new byte[1024];
+        byte[] r = new byte[1024*100];
 		try {
 			ByteArrayOutputStream bo = new ByteArrayOutputStream();
 			int size = 1; 
