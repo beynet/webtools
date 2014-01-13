@@ -118,8 +118,9 @@ public class HttpCache {
 	 */
 	private int doFetch(URL url,URI uri, int timeout, HttpCachedResource resourceInCache, Date operation,Map<String,String> headers) throws IOException {
 		if (logger.isDebugEnabled()) logger.debug("fetching "+uri.toString());
-
-		if (resourceInCache.getRevalidate()>System.currentTimeMillis()) {
+        String cacheControl = headers.get("Cache-Control");
+        if (cacheControl==null) cacheControl="";
+        if (resourceInCache.getRevalidate()>System.currentTimeMillis() && !cacheControl.contains("no-cache")) {
 			logger.debug("max age ok - no need to send a query");
 			return(HttpURLConnection.HTTP_NOT_MODIFIED);
 		}
