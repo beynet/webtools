@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.HttpException;
 
 /**
  * a simple http cache you would like to control yourself. 
@@ -316,7 +317,7 @@ public class HttpCache {
 		long previousRevalidate = cachedResourceFound.getRevalidate();
 
 		int response = doFetch(url, uri, timeout, cachedResourceFound, operation,headers);
-		if (response!=304 && response!=200) throw new IOException("unexpected response from server status code ="+response);
+		if (response!=304 && response!=200) throw new HttpException("unexpected response from server status code ="+response,response);
 		if (response==304) result.put(HIT, Boolean.TRUE);
 		result.put(RESOURCE, cachedResourceFound.getResource());
 		result.put(CHARSET, cachedResourceFound.getCharset());
