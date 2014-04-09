@@ -9,7 +9,7 @@ import org.beynet.utils.sqltools.interfaces.RequestManager;
 
 
 @UJB(name="testujb")
-@Interceptors(InterceptorTest.class)
+@Interceptors({InterceptorTest.class,InterceptorTest2.class})
 public class UJBTestImpl implements UJBTest {
 	public UJBTestImpl() {
 		

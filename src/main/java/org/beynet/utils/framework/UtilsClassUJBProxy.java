@@ -84,8 +84,9 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     			first=invok;
     		}
     		if (previous!=null) {
-    			invok.setNextInterceptorContext(previous);
+    			previous.setNextInterceptorContext(invok);
     		}
+            previous=invok;
     	}
     	return(first);
     }

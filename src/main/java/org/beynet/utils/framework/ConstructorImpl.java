@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -89,7 +86,7 @@ public class ConstructorImpl implements Constructor {
             Interceptors interceptorsAnnotation = classFound.getAnnotation(Interceptors.class);
             if (interceptorsAnnotation!=null) {
                 interceptors = new ArrayList<Class<? extends Object>>() ;
-                interceptors.add(interceptorsAnnotation.value());
+                interceptors.addAll(Arrays.asList(interceptorsAnnotation.value()));
             }
             Object ujbProxy = UtilsClassUJBProxy.newInstance(ujb,interceptors);
             if (logger.isDebugEnabled()) logger.debug("!!!!!!!!!!!!!! Adding new UJB "+name+" to list");
