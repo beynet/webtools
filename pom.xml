@@ -4,7 +4,7 @@
   <groupId>org.beynet.utils</groupId>
   <artifactId>webtools</artifactId>
   <packaging>jar</packaging>
-  <version>1.28-SNAPSHOT</version>
+  <version>1.28</version>
   <name>webtools</name>
   <url>http://maven.apache.org</url>
   <dependencies>
@@ -39,7 +39,7 @@
   	<dependency>
   		<groupId>postgresql</groupId>
   		<artifactId>postgresql</artifactId>
-  		<version>9.0-801.jdbc4</version>
+  		<version>9.3-1101.jdbc41</version>
   		<type>jar</type>
   		<scope>provided</scope>
   	</dependency>
@@ -81,8 +81,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       
