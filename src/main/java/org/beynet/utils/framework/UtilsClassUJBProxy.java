@@ -156,7 +156,7 @@ public class UtilsClassUJBProxy implements java.lang.reflect.InvocationHandler {
     				}
     			}
     			catch(InvocationTargetException e) {
-    			    if (e.getCause() instanceof RuntimeException && ( creator==true || transaction.create() ) ) {
+    			    if ( creator==true || transaction.create() ) {
     			            if (logger.isDebugEnabled()) logger.debug("rollback session "+m2.getName()+" "+obj.getClass().getName());
     			            current.rollback();
     			    }
