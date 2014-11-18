@@ -156,7 +156,7 @@ public class ConstructorImpl implements Constructor {
 
             //configure manager to be sure that it is ready to create the
             // tables
-            configure(name);
+            configure(originalList.get(name));
             
             // injecting UJB instance of this manager
             // ---------------------------------------
