@@ -153,6 +153,10 @@ public class ConstructorImpl implements Constructor {
             f.setAccessible(true);
             name = (String)f.get(result);
             f.setAccessible(false);
+
+            //configure manager to be sure that it is ready to create the
+            // tables
+            configure(name);
             
             // injecting UJB instance of this manager
             // ---------------------------------------
