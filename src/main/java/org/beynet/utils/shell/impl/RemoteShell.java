@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
+import org.beynet.utils.admin.commandline.CommandLineOptionsAnalyzer;
 import org.beynet.utils.shell.Shell;
 import org.beynet.utils.shell.ShellCommand;
 import org.beynet.utils.shell.ShellCommandResult;
@@ -89,26 +90,7 @@ public class RemoteShell implements Shell {
 	 * @return
 	 */
 	private List<String> parseCommandLine(String commandLine) {
-		List<String> result = new ArrayList<String>();
-		StringTokenizer tokeniser = new StringTokenizer(commandLine," \t");
-		while (tokeniser.hasMoreElements()) {
-			result.add(tokeniser.nextToken());
-		}
-
-		// group command contained inside "..."
-		for (int i=result.size();i>=0;i--) {
-			String arg = result.get(i);
-			if (arg.endsWith("\"") && (! arg.startsWith("\"")) && (i>=1) ) {
-				String prev = result.get(i--);
-				if (prev.startsWith("\"") && (!prev.endsWith("\""))) {
-					prev=prev.concat(arg);
-					result.add(i - 1, prev);
-					result.remove(i);
-					result.remove(i);
-				}
-			}
-		}
-
+		List<String> result = CommandLineOptionsAnalyzer.parseCommandLine(commandLine);
 		return(result);
 	}
 	
