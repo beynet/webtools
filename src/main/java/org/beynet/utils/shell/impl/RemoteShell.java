@@ -94,6 +94,21 @@ public class RemoteShell implements Shell {
 		while (tokeniser.hasMoreElements()) {
 			result.add(tokeniser.nextToken());
 		}
+
+		// group command contained inside "..."
+		for (int i=result.size();i>=0;i--) {
+			String arg = result.get(i);
+			if (arg.endsWith("\"") && (! arg.startsWith("\"")) && (i>=1) ) {
+				String prev = result.get(i--);
+				if (prev.startsWith("\"") && (!prev.endsWith("\""))) {
+					prev=prev.concat(arg);
+					result.add(i - 1, prev);
+					result.remove(i);
+					result.remove(i);
+				}
+			}
+		}
+
 		return(result);
 	}
 	
