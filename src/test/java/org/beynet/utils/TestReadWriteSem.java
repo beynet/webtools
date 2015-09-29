@@ -66,6 +66,7 @@ public class TestReadWriteSem extends TestCase {
 					logger.info(name+" Interruption stopping");
 					break;
 				}
+				if (isInterrupted()) break;
 			}
 		}
 		
@@ -86,10 +87,11 @@ public class TestReadWriteSem extends TestCase {
 		try {
 			Thread.sleep(1000*5);
 		}catch(Exception e) {
-			writer.interrupt();
-			reader1.interrupt();
-			reader2.interrupt();
+
 		}
+        writer.interrupt();
+        reader1.interrupt();
+        reader2.interrupt();
 	}
 	
 	

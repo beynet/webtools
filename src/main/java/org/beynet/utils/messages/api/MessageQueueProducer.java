@@ -13,6 +13,14 @@ public interface MessageQueueProducer {
 	 * @param message
 	 * @throws UtilsException
 	 */
-	public void addMessage(Message message) throws UtilsException;
+	void addMessage(Message message) throws UtilsException;
+
+    /**
+     *
+     * @param message
+     * @param consumerId
+     * @throws UtilsException
+     */
+    void addMessageForConsumer(Message message,String consumerId) throws UtilsException;
 	
 }

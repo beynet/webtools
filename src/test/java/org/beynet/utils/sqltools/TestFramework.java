@@ -35,6 +35,7 @@ public class TestFramework {
 			TestSqlBean bean2 = new TestSqlBean();
 			bean1.setId(Long.valueOf(0));
 			bean1.setName("TEST");
+			bean1.setBin("test".getBytes());
 			testUJB.save(bean1);
 			bean2.setId(bean1.getId());
 			testUJB.load(bean2);

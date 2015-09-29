@@ -13,10 +13,10 @@ import org.beynet.utils.sqltools.Transaction;
 
 @UJB(name="testscalablequeuebean")
 public class TestScalableQueueBeanImpl implements TestScalableQueueBean {
-	
+
 	@Override
 	@Transaction
-	public void readMessage(String consumerId,boolean withoutError) throws InterruptedException {
+	public void readMessage(String consumerId) throws UtilsException {
 		logger.debug("reading message "+consumerId);
 		MessageQueueSession session = queue.createSession(true);
 		MessageQueueConsumer consumer = session.createConsumer(consumerId);
@@ -25,46 +25,83 @@ public class TestScalableQueueBeanImpl implements TestScalableQueueBean {
 			Message message = consumer.readMessage();
 			String strMessage = (String) message.getObject();
 			logger.debug(strMessage+ " read into queue");
-			System.err.println(Thread.currentThread().getName()+" "+consumerId+" Message ("+strMessage+") readed into queue commit="+withoutError);
+			System.err.println(consumerId+" Message ("+strMessage+") readed into queue");
 		}
-		catch (UtilsException e) {
+		catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		if (withoutError==false) {
-			logger.debug("no commit");
-			throw new RuntimeException("no commit");
-		}
+
 		logger.debug("message read");
 	}
 
 	@Override
 	@Transaction
-	public void writeMessage(String strMessage, boolean withoutError) {
+	public void readMessageWithError(String consumerId) throws UtilsException {
+		readMessage(consumerId);
+		throw new RuntimeException("force an error");
+	}
+
+
+
+	@Override
+	@Transaction
+	public void writeMessage(String strMessage) throws UtilsException{
 		logger.debug("writing message");
 		MessageQueueSession session = queue.createSession(true);
 		MessageQueueProducer producer = session.createProducer();
 		System.out.println("Adding message ("+strMessage+")to queue");
 		Message message = queue.createEmptyMessage();
-		try {
-			message.setStringProperty("url", "test2");
-			message.setStringProperty("test", "machin");
-		} catch (UtilsException e1) {
-			e1.printStackTrace();
-		}
-		
-		try {
-			message.setObjet(strMessage);
-			producer.addMessage(message);
-		} catch (UtilsException e) {
-			throw new UtilsRuntimeException(e.getError(),e);
-		}
-		if (withoutError==false) throw new RuntimeException("no commit");
+		message.setStringProperty("url", "test2");
+		message.setStringProperty("test", "machin");
+
+		message.setObjet(strMessage);
+		producer.addMessage(message);
+
 		logger.debug("message writed");
 	}
-	
+
+	@Override
+	@Transaction
+	public void writeMessage1Consumer(String strMessage, String consumer) throws UtilsException {
+		logger.debug("writing message");
+		MessageQueueSession session = queue.createSession(true);
+		MessageQueueProducer producer = session.createProducer();
+		System.out.println("Adding message ("+strMessage+")to queue");
+		Message message = queue.createEmptyMessage();
+		message.setStringProperty("url", "test2");
+		message.setStringProperty("test", "machin");
+
+		message.setObjet(strMessage);
+		producer.addMessageForConsumer(message,consumer);
+
+		logger.debug("message writed");
+	}
+
+	@Override
+	@Transaction
+	public void deleteConsumers(String[] consumerIds) throws UtilsException {
+		logger.debug("writing message");
+		MessageQueueSession session = queue.createSession(true);
+		for (String consumerId : consumerIds) {
+			session.deleteConsumer(consumerId);
+		}
+	}
+
+	@Override
+	@Transaction
+	public void deleteAll() throws UtilsException {
+		queue.deleteAllMessages();
+	}
+
+	@Override
+	@Transaction
+	public int count() throws UtilsException {
+		return queue.getPendingMessage();
+	}
+
 	private static Logger logger = Logger.getLogger(TestScalableQueueBeanImpl.class);
-	
-	
+
+
 	@UJB(name="queuescale")
 	MessageQueue queue ;
 }

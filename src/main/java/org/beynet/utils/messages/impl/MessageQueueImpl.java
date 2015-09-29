@@ -83,6 +83,16 @@ public class MessageQueueImpl implements MessageQueue {
 		request.append("'");
 		return(manager.count(MessageQueueBean.class,request.toString()).intValue());
 	}
+
+	@Override
+	public void deleteAllMessages() throws UtilsException {
+		StringBuffer request = new StringBuffer("delete  from MessageQueue where ");
+		request.append(MessageQueueBean.FIELD_QUEUEID);
+		request.append("='");
+		request.append(queueName);
+		request.append("'");
+		manager.execute(MessageQueueBean.class,request.toString());
+	}
 	
 	@Override
 	public synchronized void onMessage() {

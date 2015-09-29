@@ -2,6 +2,8 @@ package org.beynet.utils.messages.api;
 
 import org.beynet.utils.exception.UtilsException;
 
+import javax.rmi.CORBA.Util;
+
 /**
  * Message queue interface
  * @author beynet
@@ -51,4 +53,10 @@ public interface MessageQueue {
 	 * @return
 	 */
 	public int getPendingMessage() throws UtilsException;
+
+    /**
+     * delete all message from current messagequeue
+     * @throws UtilsException
+     */
+	void deleteAllMessages() throws UtilsException;
 }

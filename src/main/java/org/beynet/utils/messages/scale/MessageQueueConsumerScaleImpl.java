@@ -75,7 +75,7 @@ public class MessageQueueConsumerScaleImpl implements MessageQueueConsumer {
     @Transaction
     public Message readMessage() throws UtilsException,InterruptedException {
         MessageQueueBean mqBean =new MessageQueueBean();
-        
+
         Message message = null ;
         while (mqBean.getMessageId().equals(new Long(0))) {
             Long from = Long.valueOf(0L);

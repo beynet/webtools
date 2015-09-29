@@ -1,4 +1,4 @@
 <queues>
- <queue name="queuetest" manager="managertest" datasource="datatest"/>
+ <queue name="queuetest" manager="managertest" datasource="datatest" />
  <queue name="queuescale" manager="managertest" datasource="datatest" scalable="true" />
 </queues>

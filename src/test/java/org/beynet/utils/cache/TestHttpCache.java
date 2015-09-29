@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Test;
 
 
@@ -26,6 +27,7 @@ public class TestHttpCache {
     }
     
     @Test
+    @Ignore
     public void fetchTestWithError() throws MalformedURLException, IOException, URISyntaxException, InterruptedException {
         HttpCache cache = new HttpCache("/tmp/yan.dat");
         Map<String,String> headers = new HashMap<String, String>();

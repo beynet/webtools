@@ -3,141 +3,161 @@ package org.beynet.utils.messages.scale;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.framework.ConstructorFactory;
-import org.beynet.utils.framework.SessionFactory;
 import org.beynet.utils.framework.UJB;
 import org.junit.Test;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
+
 
 public class QueueTesting {
-    
-    
+
+
     public QueueTesting() {
         BasicConfigurator.configure();
         Logger.getRootLogger().setLevel(Level.DEBUG);
-//        Logger.getLogger("org.beynet.utils.messages").setLevel(Level.DEBUG);
+        Logger.getLogger("org.beynet").setLevel(Level.DEBUG);
         ConstructorFactory.instance(".").configure(this);
     }
-    
-    private class ThreadConsumer implements Runnable {
 
-        public ThreadConsumer(String id,String properties) {
-            //          this.queue= queue ;
-            //          this.properties = properties;
-            this.id = id ;
-        }
-        @Override
-        public void run() {
-            System.err.println(id+" Starting consummer");
-            logger.debug(id+" Starting consummer");
-            try {
-
+    @Test
+    public void testMessageForConsumers() throws UtilsException, InterruptedException {
+        try {
+            assertThat(Integer.valueOf(testQueue.count()),is(Integer.valueOf(0)));
+            cl1OK = Boolean.FALSE;
+            cl2OK = Boolean.FALSE;
+            Runnable waitForMessageCl1 = () -> {
                 try {
-                    Thread.sleep((int)(400*Math.random()));
-                } catch (InterruptedException e1) {
+                    testQueue.readMessage("cl1");
+                    cl1OK = Boolean.TRUE;
+                } catch (UtilsException e) {
+                    e.printStackTrace();
                 }
-                int totalReaded = 0 ;
-                /**
-                 * each producer will send MAX_ITER -1 messages
-                 * but we will skipp two messages
-                 */
-                int j=0;
-                while(true) {
-                    j++;
-                    try {
-                        System.err.println("------------"+id+" sleeping - iteration "+j+"total readed="+totalReaded);
-                        Thread.sleep((int)(100*Math.random()));
-                        System.err.println(id+" awake");
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    boolean commit = ((j%5)==0)?false:true;
-                    if (commit==false) {
-                        logger.debug("false !!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    }
-                    
-                    try {
-                        testQueue.readMessage(id, commit);
-                    } catch(InterruptedException e) {
-                        break;
-                    } catch(RuntimeException e) {
-                    }
+            };
+            Runnable waitForMessageCl2 = () -> {
+                try {
+                    testQueue.readMessage("cl2");
+                    cl2OK = Boolean.TRUE;
+                } catch (UtilsException e) {
+                    e.printStackTrace();
                 }
-                System.err.println(id+" End of consummer");
-            } finally {
-                SessionFactory.instance().removeSession();
-            }
+            };
+            Thread t1 = new Thread(waitForMessageCl1);
+            Thread t2 = new Thread(waitForMessageCl2);
+            t1.start();
+            t2.start();
+            Thread.sleep(1000);
+            testQueue.writeMessage("test");
+
+            t1.join();
+            t2.join();
+
+            assertThat(cl1OK, is(Boolean.TRUE));
+            assertThat(cl2OK, is(Boolean.TRUE));
+
+            testQueue.writeMessage("test");
+            assertThat(Integer.valueOf(testQueue.count()),is(Integer.valueOf(2)));
+
+
+
+        }finally {
+            testQueue.deleteConsumers("cl1","cl2");
+            testQueue.deleteAll();
         }
-        String id;
+
     }
 
-    private class ThreadProducer implements Runnable { 
-        ThreadProducer() {
-            //          this.queue = queue ;
-
-        }
-        @Override
-        public void run() {
-            try {
+    /**
+     * verify in this test that when an exception is thrown message is not consumed
+     */
+    @Test
+    public void checkRollBack() throws InterruptedException, UtilsException {
+        try {
+            assertThat(Integer.valueOf(testQueue.count()),is(Integer.valueOf(0)));
+            cl1OK = Boolean.FALSE;
+            Runnable waitForMessageCl1 = () -> {
                 try {
-                    Thread.sleep(1000*1);
-                } catch (InterruptedException e1) {
+                    testQueue.readMessageWithError("cl1");
+                    cl1OK = Boolean.TRUE;
+                } catch (Exception e) {
+                    // e.printStackTrace();
                 }
-                for (int i=0; i< MAX_ITER+1; i++) {
+            };
 
-                    try {
-                        Thread.sleep((int)(400*Math.random()));
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    String strMessage= "This is message number "+i;
-                    boolean commit = ((i%10)==0)?false:true;
-                    try {
-                        testQueue.writeMessage(strMessage, commit);
-                    } catch(RuntimeException e) {
+            Thread t1 = new Thread(waitForMessageCl1);
+            t1.start();
+            Thread.sleep(1000);
+            testQueue.writeMessage("test");
 
-                    }
-                }
-            } finally {
-                SessionFactory.instance().removeSession();
-            }
+            t1.join();
+            assertThat(cl1OK, is(Boolean.FALSE));
+            assertThat(Integer.valueOf(testQueue.count()),is(Integer.valueOf(1)));
+
+
+
+        }finally {
+            testQueue.deleteConsumers("cl1","cl2");
+            testQueue.deleteAll();
         }
     }
 
     @Test
-    public void widthThread() {
-
-        Thread t0,t1,t2,t3;
-        t0=new Thread(new ThreadProducer());
-        t1= new Thread(new ThreadConsumer("cs1","url=test ,  test=machin"));
-        t2= new Thread(new ThreadConsumer("cs1","url=test ,  test=machin"));
-        t3= new Thread(new ThreadConsumer("cs2","url=test ,  test=machin"));
+    public void testMessageFor1Consumers() throws UtilsException, InterruptedException {
         try {
+            assertThat(Integer.valueOf(testQueue.count()),is(Integer.valueOf(0)));
+            cl1OK = Boolean.FALSE;
+            cl2OK = Boolean.FALSE;
+            Runnable waitForMessageCl1 = () -> {
+                try {
+                    testQueue.readMessage("cl1");
+                    System.err.println("cl1 message read");
+                    cl1OK = Boolean.TRUE;
+                } catch (UtilsException e) {
+                    e.printStackTrace();
+                }
+            };
+            Runnable waitForMessageCl2 = () -> {
+                try {
+                    testQueue.readMessage("cl2");
+                    System.err.println("cl2 message read");
+                    cl2OK = Boolean.TRUE;
+                } catch (UtilsException e) {
+                    e.printStackTrace();
+                }
+            };
+            Thread t1 = new Thread(waitForMessageCl1);
+            Thread t2 = new Thread(waitForMessageCl2);
             t1.start();
             t2.start();
-            t3.start();
-            t0.start();
-            t0.join();
-            Thread.sleep(3000);
-            t1.interrupt();
-            t2.interrupt();
-            t3.interrupt();
+            Thread.sleep(1000);
+            testQueue.writeMessage("test");
+
             t1.join();
             t2.join();
-            t3.join();
-            
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+            assertThat(cl1OK,is(Boolean.TRUE));
+            assertThat(cl2OK,is(Boolean.TRUE));
+
+            testQueue.writeMessage1Consumer("test", "cl1");
+            assertThat(Integer.valueOf(testQueue.count()),is(Integer.valueOf(1)));
+
+
+
+        }finally {
+            testQueue.deleteConsumers("cl1", "cl2");
+            testQueue.deleteAll();
         }
+
     }
 
-    
-    
-    private final static int MAX_ITER = 30 ;
-//    @UJB(name="queuetest")
+    private final static int MAX_ITER = 15 ;
+    //    @UJB(name="queuetest")
 //    private MessageQueue queue;
     @UJB(name="testscalablequeuebean")
     TestScalableQueueBean testQueue ;
+    Boolean cl1OK,cl2OK;
 
     private final static Logger logger = Logger.getLogger(QueueTesting.class);
 }

@@ -22,8 +22,17 @@ public class MessageQueueAdmin extends AdminMBean implements MessageQueueAdminMB
 		}
 		return(res);
 	}
-	
-	
+
+	@Override
+	public void deleteAllMessages() throws UtilsException {
+		try {
+			_queue.deleteAllMessages();
+		}
+		catch(UtilsException e) {
+
+		}
+	}
+
 	protected synchronized void waitWhileSuspended() {
 		while (_suspended==true) {
 			try {
