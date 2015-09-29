@@ -37,6 +37,8 @@ public interface Message extends Serializable {
 	 * @throws UtilsException
 	 */
 	public void setStringProperty(String propertyName,String propertyValue) throws UtilsException;
+
+	void rewriteStringProperty(String propertyName,String propertyValue) throws UtilsException;
 	
 	/**
 	 * return value of property propertyName

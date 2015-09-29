@@ -43,6 +43,10 @@ public class MessageScaleImpl implements Message {
 		if (properties.containsKey(propertyName)) throw new UtilsException(UtilsExceptions.Error_Param,"Property already exist");
 		properties.put(propertyName, propertyValue);
 	}
+	@Override
+	public void rewriteStringProperty(String propertyName, String propertyValue) throws UtilsException {
+		properties.put(propertyName, propertyValue);
+	}
 	
 	@Override
 	public String getStringProperty(String propertyName) {
