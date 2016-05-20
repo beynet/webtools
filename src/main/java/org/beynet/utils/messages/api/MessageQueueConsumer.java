@@ -14,7 +14,14 @@ public interface MessageQueueConsumer {
 	 * @throws UtilsException
 	 */
 	public Message readMessage() throws UtilsException,InterruptedException;
-	
+
+	/**
+	 * try to read a message and return immediatly if the queue is empty
+	 * @return
+	 * @throws UtilsException
+	 * @throws InterruptedException
+     */
+	Message readMessageNotBlocking() throws UtilsException,InterruptedException;
 	/**
 	 * called when a message is added to queue
 	 * @throws UtilsException

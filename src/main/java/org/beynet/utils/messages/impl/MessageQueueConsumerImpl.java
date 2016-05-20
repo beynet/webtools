@@ -12,6 +12,7 @@ import org.beynet.utils.exception.UtilsException;
 import org.beynet.utils.exception.UtilsExceptions;
 import org.beynet.utils.framework.SessionFactory;
 import org.beynet.utils.io.CustomObjectInputStream;
+import org.beynet.utils.messages.AbstractMessageQueueConsumer;
 import org.beynet.utils.messages.api.Message;
 import org.beynet.utils.messages.api.MessageQueue;
 import org.beynet.utils.messages.api.MessageQueueBean;
@@ -21,14 +22,14 @@ import org.beynet.utils.sqltools.Transaction;
 import org.beynet.utils.sqltools.interfaces.RequestManager;
 import org.beynet.utils.tools.Semaphore;
 
-public class MessageQueueConsumerImpl implements MessageQueueConsumer {
+public class MessageQueueConsumerImpl extends AbstractMessageQueueConsumer implements MessageQueueConsumer {
 	
 	public MessageQueueConsumerImpl(DataBaseAccessor accessor,RequestManager manager,MessageQueue queue,String consumerId) {
-		init(accessor,manager,queue,consumerId);
+		super(accessor,manager,queue,consumerId);
 	}
 	
 	public MessageQueueConsumerImpl(DataBaseAccessor accessor,RequestManager manager,MessageQueue queue,String consumerId,String properties) {
-		init(accessor,manager,queue,consumerId);
+		super(accessor,manager,queue,consumerId);
 		StringTokenizer tokeni = new StringTokenizer(properties,",");
 		while (tokeni.hasMoreTokens()) {
 			StringTokenizer tokeni2 = new StringTokenizer(tokeni.nextToken(),"=");
@@ -41,22 +42,9 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 			}
 		}
 	}
-	
-	private Message readMessageFromBean(MessageQueueBean mqBean) throws UtilsException{
-		ByteArrayInputStream is = new ByteArrayInputStream(mqBean.getMessage());
-		try {
-			CustomObjectInputStream ois = new CustomObjectInputStream(is,Thread.currentThread().getContextClassLoader());
-			return((Message)ois.readObject());
-		}
-		catch (IOException e) {
-			throw new UtilsException(UtilsExceptions.Error_Io,e);
-		}
-		catch (ClassNotFoundException e) {
-			throw new UtilsException(UtilsExceptions.Error_Param,e);
-		}
-	}
-	
-	private MessageQueueBean loadBean(Long from) throws UtilsException,NoResultException {
+
+	@Override
+	protected MessageQueueBean loadBean(Long from) throws UtilsException,NoResultException {
 		MessageQueueBean result = new MessageQueueBean();
 		StringBuffer query = new StringBuffer("select * from MessageQueue where ");
 		query.append(MessageQueueBean.FIELD_CONSUMERID);
@@ -76,34 +64,27 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		manager.load(result,query.toString());
 		return(result);
 	}
-	
-	@Override
+
+    @Override
+    @Transaction
+    public Message readMessageNotBlocking() throws UtilsException, InterruptedException {
+        return super._readMessageNotBlocking();
+    }
+
+    @Override
 	@Transaction
 	public Message readMessage() throws UtilsException,InterruptedException {
 		MessageQueueBean mqBean =new MessageQueueBean();
-		
 		Message message = null ;
 		while (mqBean.getMessageId().equals(new Long(0))) {
-			Long from = Long.valueOf(0L);
 			try {
-				while (true) {
-					mqBean = loadBean(from);
-					message = readMessageFromBean(mqBean);
-					if (message.matchFilter(properties)) {
-						if (logger.isDebugEnabled()) logger.debug("Message matches properties");
-						break;
-					}
-					else {
-						from = mqBean.getMessageId();
-						if (logger.isDebugEnabled()) logger.debug("Message does not match properties");
-						manager.delete(mqBean);
-						mqBean.setMessageId(Long.valueOf(0L));
-					}
-				}
+                Map<String, Object> result = readNextMessage();
+                message = (Message) result.get("message");
+                mqBean  = (MessageQueueBean) result.get("bean");
 			} catch(NoResultException e) {
 			    
 			}
-			if (!mqBean.getMessageId().equals(new Long(0))) {
+			if (message!=null) {
 				break;
 			}
 			if (logger.isDebugEnabled()) logger.debug("waiting for new message");
@@ -122,47 +103,13 @@ public class MessageQueueConsumerImpl implements MessageQueueConsumer {
 		pending.V();
 	}
 	
-	/**
-	 * initialization function
-	 * @param queue
-	 * @param session
-	 * @param connection
-	 */
-	private void init(DataBaseAccessor accessor,RequestManager manager,MessageQueue queue,String consumerId) {
-		this.accessor = accessor ;
-		this.manager = manager ;
-		this.queue = queue;
-		this.consumerId = consumerId ;
-		pending = new Semaphore(0);
-		this.properties = new HashMap<String, String>();
-	}
+
 	
 	@Override
 	public String getId() {
 		return(consumerId);
 	}
-	
-	private String unblank(String input) {
-		String result =null ;
-		int    offset = 0;
-		while (input.charAt(offset)==(char)' ') {
-			offset++;
-		}
-		result = input.substring(offset);
-		input = result ;
-		offset = result.length()-1;
-		while (input.charAt(offset)==(char)' ') {
-			offset--;
-		}
-		result = input.substring(0,offset+1);
-		return(result);
-	}
-	
-	private MessageQueue           queue      ;
-	private DataBaseAccessor       accessor   ;
-	private RequestManager         manager    ;
-	private Semaphore              pending    ;
-	private String                 consumerId ;
-	private Logger                 logger = Logger.getLogger(MessageQueueConsumerImpl.class);
-	private Map<String,String>     properties  ;
+
+	private final static Logger logger = Logger.getLogger(MessageQueueConsumerImpl.class);
+	private Semaphore           pending    ;
 }
