@@ -293,6 +293,7 @@ public class HttpCache {
 	 *  <li>"HIT"      -> Boolean : true if the resource was in cache</li>
      *  <li>"CHARSET" -> le charset de la ressouce</li>
      *  <li>"etag"    -> l'etag recu</li>
+	 *  <li>"STATUS"  -> HttpStatus code</li>
 	 *  </ul> 
 	 * @param uri
 	 * @param timeout
@@ -317,11 +318,15 @@ public class HttpCache {
 		long previousRevalidate = cachedResourceFound.getRevalidate();
 
 		int response = doFetch(url, uri, timeout, cachedResourceFound, operation,headers);
-		if (response!=304 && response!=200) throw new HttpException("unexpected response from server status code ="+response,response);
+
 		if (response==304) result.put(HIT, Boolean.TRUE);
-		result.put(RESOURCE, cachedResourceFound.getResource());
-		result.put(CHARSET, cachedResourceFound.getCharset());
-        result.put(ETAG,cachedResourceFound.getEtag());
+        result.put(STATUS,Integer.valueOf(response));
+        // response found or result in cache
+        if (response==200||response==304) {
+            result.put(RESOURCE, cachedResourceFound.getResource());
+            result.put(CHARSET, cachedResourceFound.getCharset());
+            result.put(ETAG, cachedResourceFound.getEtag());
+        }
 
 		// we update the cache if the response was fetched
 		// -----------------------------------------------
@@ -481,6 +486,7 @@ public class HttpCache {
 	public static final String HIT      = "hit";
 	public static final String CHARSET  = "charset";
     public static final String ETAG     = "etag";
+	public static final String STATUS   = "status";
 	public static final Pattern CHARSET_PATTERN = Pattern.compile(".*charset=([^\\s;]*)([\\s]*;.*|$)",Pattern.CASE_INSENSITIVE);
 	public static final Pattern CACHECONTROL_PATTERN = Pattern.compile(".*max-age=([^\\s;]*)([\\s]*;.*|$)",Pattern.CASE_INSENSITIVE);
 	private static final Logger logger = Logger.getLogger(HttpCache.class);
