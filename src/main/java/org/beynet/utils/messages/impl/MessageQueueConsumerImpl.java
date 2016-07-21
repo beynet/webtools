@@ -20,6 +20,7 @@ import org.beynet.utils.messages.api.MessageQueueConsumer;
 import org.beynet.utils.sqltools.DataBaseAccessor;
 import org.beynet.utils.sqltools.Transaction;
 import org.beynet.utils.sqltools.interfaces.RequestManager;
+import org.beynet.utils.sqltools.interfaces.SQLHelper;
 import org.beynet.utils.tools.Semaphore;
 
 public class MessageQueueConsumerImpl extends AbstractMessageQueueConsumer implements MessageQueueConsumer {
@@ -63,6 +64,21 @@ public class MessageQueueConsumerImpl extends AbstractMessageQueueConsumer imple
 		query.append(" limit 1");
 		manager.load(result,query.toString());
 		return(result);
+	}
+
+	@Override
+	@Transaction
+	public Integer countPendingMessages() throws UtilsException {
+		StringBuilder query = new StringBuilder("select count(1) from MessageQueue where ");
+		query.append(MessageQueueBean.FIELD_CONSUMERID);
+		query.append(" = '");
+		query.append(consumerId);
+		query.append("' and ");
+		query.append(MessageQueueBean.FIELD_QUEUEID) ;
+		query.append(" = '");
+		query.append(SQLHelper.quoteTheQuotes(queue.getQueueName()));
+		query.append("';");
+		return manager.count(MessageQueueBean.class,query.toString());
 	}
 
     @Override
