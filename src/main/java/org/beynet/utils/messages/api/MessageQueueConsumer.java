@@ -15,6 +15,8 @@ public interface MessageQueueConsumer {
 	 */
 	public Message readMessage() throws UtilsException,InterruptedException;
 
+	public Integer countPendingMessages() throws UtilsException;
+
 	/**
 	 * try to read a message and return immediatly if the queue is empty
 	 * @return
