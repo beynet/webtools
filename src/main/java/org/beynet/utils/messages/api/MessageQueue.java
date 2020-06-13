@@ -2,7 +2,6 @@ package org.beynet.utils.messages.api;
 
 import org.beynet.utils.exception.UtilsException;
 
-import javax.rmi.CORBA.Util;
 
 /**
  * Message queue interface
