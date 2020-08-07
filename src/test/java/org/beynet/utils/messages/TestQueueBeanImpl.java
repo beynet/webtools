@@ -15,6 +15,15 @@ public class TestQueueBeanImpl implements TestQueueBean {
 
 	@Override
 	@Transaction
+	public void createConsumer(String consumerId) throws UtilsException {
+		logger.debug("create consumer"+consumerId);
+		MessageQueueSession session = queue.createSession(true);
+		MessageQueueConsumer consumer = session.createConsumer(consumerId);
+	}
+
+
+	@Override
+	@Transaction
 	public void readMessage(String consumerId) throws UtilsException {
 		logger.debug("reading message "+consumerId);
 		MessageQueueSession session = queue.createSession(true);

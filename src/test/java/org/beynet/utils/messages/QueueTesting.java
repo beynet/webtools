@@ -27,6 +27,8 @@ public class QueueTesting {
     public void testMessageForConsumers() throws UtilsException, InterruptedException {
         try {
             assertThat(Integer.valueOf(testQueue.count()),is(Integer.valueOf(0)));
+            testQueue.createConsumer("cl1");
+            testQueue.createConsumer("cl2");
             cl1OK = Boolean.FALSE;
             cl2OK = Boolean.FALSE;
             Runnable waitForMessageCl1 = () -> {

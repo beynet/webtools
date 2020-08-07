@@ -127,5 +127,5 @@ public class MessageQueueConsumerImpl extends AbstractMessageQueueConsumer imple
 	}
 
 	private final static Logger logger = Logger.getLogger(MessageQueueConsumerImpl.class);
-	private Semaphore           pending    ;
+	private Semaphore           pending   = new Semaphore(0) ;
 }
