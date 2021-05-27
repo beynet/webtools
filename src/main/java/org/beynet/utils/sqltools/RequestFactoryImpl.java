@@ -124,7 +124,7 @@ public class RequestFactoryImpl<T> implements RequestFactory<T> {
 					/*if ("table_type".equals(nomColonne)) {
 						type = (String)valeurColonne;
 					}*/
-					if ("table_name".equals(nomColonne)) {
+					if ("table_name".equalsIgnoreCase(nomColonne)) {
 						String name = (String)valeurColonne;
 						if (name.compareToIgnoreCase(tableName)==0) {
 							tableFound = true;
