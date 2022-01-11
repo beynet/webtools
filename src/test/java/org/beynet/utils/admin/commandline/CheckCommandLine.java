@@ -23,6 +23,18 @@ public class CheckCommandLine {
         String [] line = {"--opt1","val1","--opt4","--opt2","val2"};
         cmd.analyseCommandLine(line);
     }
+
+    @Test
+    public void listOfStrings() {
+        ListOfStringOption opt1 = new ListOfStringOption("--str", "the expected list", true);
+        CommandLineOptionsAnalyzer cmd = new CommandLineOptionsAnalyzer(Arrays.asList(opt1));
+        String [] line = {"--str","val1","--str","val2","--str","val3"};
+        cmd.analyseCommandLine(line);
+        assertThat(opt1.getValue().size(),is(3));
+        assertThat(opt1.getValue().get(0),is("val1"));
+        assertThat(opt1.getValue().get(1),is("val2"));
+        assertThat(opt1.getValue().get(2),is("val3"));
+    }
     
     @Test
     public void ok1() {

@@ -33,7 +33,7 @@ public class ListOfStringOption extends AbstractOption implements Option {
     @Override
     public void reset() {
         super.reset();
-        value.clear();
+        if (value!=null) value.clear();
     }
     
     private List<String> value ;
