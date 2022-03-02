@@ -53,7 +53,7 @@ public class TarTests {
     public void archiveFileSystem() throws IOException {
         final Path rootPath = tmpDir.resolve("yan.tar");
         System.out.println(rootPath.toString());
-        TarEntry toCopy = new TarEntry(Paths.get("pom.xml"),"xml");
+        TarEntry toCopy = new TarEntry(Paths.get("pom.xml"),"xml","coucou.xml");
         TarEntry toCopy2 = new TarEntry(Paths.get("src/test/resources/Queues.xml"),"xml/bd");
         TarArchiver archiver = new TarArchiver(rootPath);
         archiver.addFile(toCopy);
