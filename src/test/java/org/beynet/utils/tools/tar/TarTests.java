@@ -12,26 +12,33 @@ import static org.junit.Assert.assertThat;
 
 public class TarTests {
 
+    Path tmpDir = Paths.get(System.getProperty("java.io.tmpdir"));
+
     @Test
     public void t1() {
-
-        Path t = Paths.get("/Users/beynet/Pictures/Fonds/IMG_0047.JPG");
-
+        Path t = tmpDir.resolve("Pictures").resolve("Fonds").resolve("IMG_0047.JPG");
+        Path rel = t.getRoot().relativize(t);
+        String expected =rel.getFileName().toString();
+        while (rel.getParent()!=null) {
+            expected = rel.getParent().getFileName().toString().concat("/").concat(expected);
+            rel = rel.getParent();
+        }
+        System.out.printf(expected);
         {
-            Path expected = Paths.get("Users/beynet/Pictures/Fonds/IMG_0047.JPG");
+
             TarEntry entry = new TarEntry(t);
             assertThat(entry.getPathInTar(), is(expected));
         }
 
         {
-            Path expected = Paths.get("Pictures/Fonds/IMG_0047.JPG");
-            TarEntry entry = new TarEntry(t, Paths.get("Pictures/Fonds"));
+            expected = "Pictures/Fonds/IMG_0047.JPG";
+            TarEntry entry = new TarEntry(t, "Pictures/Fonds");
             assertThat(entry.getPathInTar(), is(expected));
         }
 
         {
-            Path expected = Paths.get("result/t2.jpg");
-            TarEntry entry = new TarEntry(t, Paths.get("result"),Paths.get("t2.jpg"));
+            expected = "result/t2.jpg";
+            TarEntry entry = new TarEntry(t, "result","t2.jpg");
             assertThat(entry.getPathInTar(), is(expected));
         }
 
@@ -39,16 +46,15 @@ public class TarTests {
 
     @Test
     public void scratch() {
-        Path t = Paths.get("pic.jpg");
-        System.out.println(t.getParent());
+        
     }
 
     @Test
     public void archiveFileSystem() throws IOException {
-        final Path rootPath = Paths.get("/tmp/yan.tar");
-
-        TarEntry toCopy = new TarEntry(Paths.get("pom.xml"),Paths.get("xml"));
-        TarEntry toCopy2 = new TarEntry(Paths.get("src/test/resources/Queues.xml"),Paths.get("xml/bd"));
+        final Path rootPath = tmpDir.resolve("yan.tar");
+        System.out.println(rootPath.toString());
+        TarEntry toCopy = new TarEntry(Paths.get("pom.xml"),"xml");
+        TarEntry toCopy2 = new TarEntry(Paths.get("src/test/resources/Queues.xml"),"xml/bd");
         TarArchiver archiver = new TarArchiver(rootPath);
         archiver.addFile(toCopy);
         archiver.addFile(toCopy2);
@@ -56,10 +62,10 @@ public class TarTests {
 
     @Test
     public void archiveFileSystemStream() throws IOException {
-        final Path rootPath = Paths.get("/tmp/yan.tar");
+        final Path rootPath = tmpDir.resolve("yan.tar");
 
-        TarEntry toCopy = new TarEntry(Paths.get("pom.xml"),Paths.get("xml"));
-        TarEntry toCopy2 = new TarEntry(Paths.get("src/test/resources/Queues.xml"),Paths.get("xml/bd"));
+        TarEntry toCopy = new TarEntry(Paths.get("pom.xml"),"xml");
+        TarEntry toCopy2 = new TarEntry(Paths.get("src/test/resources/Queues.xml"),"xml/bd");
         TarArchiver archiver = new TarArchiver(rootPath,true);
         archiver.addFiles(Arrays.asList(toCopy,toCopy2).stream());
 

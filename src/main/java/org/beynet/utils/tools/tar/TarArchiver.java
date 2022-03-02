@@ -8,9 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.FileTime;
-import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.*;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.stream.Stream;
 
 
@@ -112,16 +112,33 @@ public class TarArchiver {
         writeNumberWithLeadingZeroPadding(100,8,"644 ".getBytes("UTF-8"),header);
 
         //uid
-        int uid = (Integer)Files.getAttribute(entry.getSourceFilePath(), "unix:uid");
+        int uid = 1;
+        try {
+            uid = (Integer)Files.getAttribute(entry.getSourceFilePath(), "unix:uid");
+        }catch(Exception e ){
+
+        }
         writeNumberWithLeadingZeroPadding(108,8,Integer.toString(uid).concat(" ").getBytes("UTF-8"),header);
 
         // user name
-        PosixFileAttributes attrs = Files.readAttributes(entry.getSourceFilePath(), PosixFileAttributes.class);
-        writeAt(265,attrs.owner().getName().getBytes("UTF-8"),header);
-        writeAt(297,attrs.group().getName().getBytes("UTF-8"),header);
+        UserPrincipal owner = Files.getOwner(entry.getSourceFilePath());
+        writeAt(265, owner.getName().getBytes("UTF-8"),header);
+        String group = "nobody";
+        try {
+            PosixFileAttributes attrs = Files.readAttributes(entry.getSourceFilePath(), PosixFileAttributes.class);
+            group =attrs.group().getName();
+        }catch (Exception e) {
+
+        }
+        writeAt(297,group.getBytes("UTF-8"),header);
 
         //gid
-        int gid = (Integer)Files.getAttribute(entry.getSourceFilePath(), "unix:gid");
+        int gid = 1;
+        try {
+            gid=(Integer)Files.getAttribute(entry.getSourceFilePath(), "unix:gid");
+        }catch(Exception e) {
+
+        }
         writeNumberWithLeadingZeroPadding(116,8,Integer.toString(gid).concat(" ").getBytes("UTF-8"),header);
 
 
