@@ -18,22 +18,22 @@ public class TarEntry {
         this(file,directoryInTAR,file!=null?file.getFileName():null);
     }
 
-    public TarEntry(Path file,Path directoryInTAR,Path fileNameInJar) {
+    public TarEntry(Path file,Path directoryInTAR,Path fileNameInTar) {
         if (file==null) throw new IllegalArgumentException("file must not be null");
-        if (fileNameInJar==null) throw new IllegalArgumentException("file must not be null");
-        if (fileNameInJar.getParent()!=null) throw new IllegalArgumentException("filename in jar must be a name without path ");
+        if (fileNameInTar==null) throw new IllegalArgumentException("file must not be null");
+        if (fileNameInTar.getParent()!=null) throw new IllegalArgumentException("filename in jar must be a name without path ");
         this.file = file;
         if (directoryInTAR!=null && directoryInTAR.isAbsolute()) {
-            this.filePathInTar = this.root.relativize(directoryInTAR).resolve(fileNameInJar);
+            this.filePathInTar = this.root.relativize(directoryInTAR).resolve(fileNameInTar);
         }
         else if (directoryInTAR!=null) {
-            this.filePathInTar=directoryInTAR.resolve(fileNameInJar);
+            this.filePathInTar=directoryInTAR.resolve(fileNameInTar);
         } else {
-            this.filePathInTar = fileNameInJar;
+            this.filePathInTar = fileNameInTar;
         }
     }
 
-    public Path getPathInJar() {
+    public Path getPathInTar() {
         return this.filePathInTar;
     }
 

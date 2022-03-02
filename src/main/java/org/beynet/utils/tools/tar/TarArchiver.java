@@ -78,7 +78,7 @@ public class TarArchiver {
     private void writeEntry(TarEntry entry, OutputStream os) throws IOException {
         final byte[] header  = new byte[512];
         for (int i=0;i<512;i++) header[i]='\0';
-        byte[] test = entry.getPathInJar().toString().getBytes("UTF-8");
+        byte[] test = entry.getPathInTar().toString().getBytes("UTF-8");
 
         // write file name
         // ---------------

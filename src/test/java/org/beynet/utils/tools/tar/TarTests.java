@@ -20,19 +20,19 @@ public class TarTests {
         {
             Path expected = Paths.get("Users/beynet/Pictures/Fonds/IMG_0047.JPG");
             TarEntry entry = new TarEntry(t);
-            assertThat(entry.getPathInJar(), is(expected));
+            assertThat(entry.getPathInTar(), is(expected));
         }
 
         {
             Path expected = Paths.get("Pictures/Fonds/IMG_0047.JPG");
             TarEntry entry = new TarEntry(t, Paths.get("Pictures/Fonds"));
-            assertThat(entry.getPathInJar(), is(expected));
+            assertThat(entry.getPathInTar(), is(expected));
         }
 
         {
             Path expected = Paths.get("result/t2.jpg");
             TarEntry entry = new TarEntry(t, Paths.get("result"),Paths.get("t2.jpg"));
-            assertThat(entry.getPathInJar(), is(expected));
+            assertThat(entry.getPathInTar(), is(expected));
         }
 
     }
