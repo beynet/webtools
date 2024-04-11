@@ -3,6 +3,7 @@ package org.beynet.utils.tools.tar;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -55,9 +56,11 @@ public class TarTests {
         System.out.println(rootPath.toString());
         TarEntry toCopy = new TarEntry(Paths.get("pom.xml"),"xml","coucou.xml");
         TarEntry toCopy2 = new TarEntry(Paths.get("src/test/resources/Queues.xml"),"xml/bd");
+        TarEntry toCopy3 = new TarEntry(Paths.get("src/test/resources/DataBaseAccessors.xml"),"xml/bd","<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><coucou>étoile\n<test>message</test><test/><test/><test/><test/><test/><test/><test/><test/><test/></coucou>".getBytes(StandardCharsets.UTF_8));
         TarArchiver archiver = new TarArchiver(rootPath);
         archiver.addFile(toCopy);
         archiver.addFile(toCopy2);
+        archiver.addFile(toCopy3);
     }
 
     @Test

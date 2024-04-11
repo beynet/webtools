@@ -1,6 +1,7 @@
 package org.beynet.utils.tools.tar;
 
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -89,6 +90,9 @@ public class TarArchiver {
         // size header
         // ------------
         long size = Files.size(entry.getSourceFilePath());
+        if (entry.getFileContent()!=null) {
+            size = entry.getFileContent().length;
+        }
         byte[] l = Long.toOctalString(size).concat(" ").getBytes("UTF-8");
         writeNumberWithLeadingZeroPadding(124,12,l,header,false);
 
@@ -158,7 +162,14 @@ public class TarArchiver {
 
         os.write(header,0,512);
         final byte[] buffer = new byte[512];
-        try (InputStream is = Files.newInputStream(entry.getSourceFilePath())) {
+        InputStream computed;
+        if (entry.getFileContent()!=null) {
+            computed=new ByteArrayInputStream(entry.getFileContent());
+        }
+        else {
+            computed=Files.newInputStream(entry.getSourceFilePath());
+        }
+        try (InputStream is = computed) {
             Arrays.fill(buffer,(byte)0);
             int read = 1;
             while(read>=0) {

@@ -1,9 +1,7 @@
 package org.beynet.utils.tools.tar;
 
 import java.io.File;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class TarEntry {
     /**
@@ -13,7 +11,12 @@ public class TarEntry {
      */
     public TarEntry(Path file) throws IllegalArgumentException {
 
-        this(file,file!=null?file.getRoot().relativize(file).getParent().toString().replace(File.separator,"/"):null);
+        this(file,(byte[])null);
+    }
+
+    public TarEntry(Path file,byte[] fileContent) throws IllegalArgumentException {
+
+        this(file,file!=null?file.getRoot().relativize(file).getParent().toString().replace(File.separator,"/"):null,fileContent);
     }
 
 
@@ -23,7 +26,17 @@ public class TarEntry {
      * @param directoryInTAR the path in the tar as a/b/c - unix like
      */
     public TarEntry(Path file,String directoryInTAR) {
-        this(file,directoryInTAR,file!=null?file.getFileName().toString():null);
+        this(file,directoryInTAR,(byte[])null);
+    }
+
+    /**
+     * create a new tar entry providing the directory where the entry will be stored
+     * @param file
+     * @param directoryInTAR the path in the tar as a/b/c - unix like
+     * @param fileContent override file content
+     */
+    public TarEntry(Path file,String directoryInTAR,byte[] fileContent) {
+        this(file,directoryInTAR,file!=null?file.getFileName().toString():null,fileContent);
     }
 
     protected String removeTrailingSlash(String input) {
@@ -36,6 +49,7 @@ public class TarEntry {
         return input;
     }
 
+
     /**
      * create a new tar entry providing the directory where the entry will be stored and the expected filename
      * @param file
@@ -43,10 +57,22 @@ public class TarEntry {
      * @param fileNameInTar the expected filename in the tar
      */
     public TarEntry(Path file,String directoryInTAR,String fileNameInTar) {
+        this(file,directoryInTAR,fileNameInTar,null);
+    }
+
+    /**
+     * create a new tar entry providing the directory where the entry will be stored and the expected filename
+     * @param file
+     * @param directoryInTAR the path in the tar as a/b/c - unix like
+     * @param fileNameInTar the expected filename in the tar
+     * @param fileContent override file content
+     */
+    public TarEntry(Path file,String directoryInTAR,String fileNameInTar,byte[] fileContent) {
         if (file==null) throw new IllegalArgumentException("file must not be null");
         if (fileNameInTar==null) throw new IllegalArgumentException("file must not be null");
         if (fileNameInTar.contains("/")|| fileNameInTar.contains(File.separator)) throw new IllegalArgumentException("filename in tar must be a name without path ");
         this.file = file;
+        this.fileContent = fileContent ;
         if (directoryInTAR!=null && (
             directoryInTAR.startsWith("/") ||
             directoryInTAR.endsWith("/")
@@ -66,12 +92,18 @@ public class TarEntry {
         return this.filePathInTar;
     }
 
+    public byte[] getFileContent() {
+        return this.fileContent;
+    }
+
 
     public Path getSourceFilePath() {
         return file;
     }
 
     private final Path   file      ;
+
+    private final byte[] fileContent ;
     private final String filePathInTar;
     //private final Path root = Paths.get("/");
 
